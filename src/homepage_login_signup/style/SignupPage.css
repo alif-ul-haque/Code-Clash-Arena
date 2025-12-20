@@ -1,0 +1,117 @@
+form,
+.signupPage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.signupPage {
+    min-height: 100vh;
+}
+
+#mainlogo {
+    margin: 0 auto;
+    height: 156px;
+    width: 156px;
+    z-index: +1;
+}
+
+.input-group {
+    position: relative;
+    width: 500px;
+}
+
+.input-group input {
+    height: 50px;
+    width: 500px;
+    background-color: #F1CA76;
+    border: black 4px solid;
+    border-radius: 15px;
+    padding: 10px;
+    font-size: 30px;
+    color: black;
+}
+
+.input-group label {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 30px;
+    color: black;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    background-color: #F1CA76;
+    padding: 0 5px;
+}
+
+.input-group input:focus+label,
+.input-group input:not(:placeholder-shown)+label {
+    top: -10px;
+    font-size: 20px;
+    transform: translateY(0);
+    background-color: transparent;
+    color: white;
+    text-shadow:
+        0 0 3px black,
+        2px 0 3px black,
+        -2px 0 3px black,
+        0 2px 3px black,
+        0 -2px 3px black,
+        2px 2px 3px black,
+        -2px 2px 3px black,
+        2px -2px 3px black,
+        -2px -2px 3px black,
+        3px 0 3px black,
+        -3px 0 3px black,
+        0 3px 3px black,
+        0 -3px 3px black;
+}
+
+form p {
+    font-size: 30px;
+    margin-top: -10px;
+    margin-bottom: 0;
+    text-shadow:
+        0 0 3px black,
+        2px 0 3px black,
+        -2px 0 3px black,
+        0 2px 3px black,
+        0 -2px 3px black,
+        2px 2px 3px black,
+        -2px 2px 3px black,
+        2px -2px 3px black,
+        -2px -2px 3px black,
+        3px 0 3px black,
+        -3px 0 3px black,
+        0 3px 3px black,
+        0 -3px 3px black;
+}
+
+.input-group input:focus {
+    border: black 4px solid;
+    outline: none;
+    box-shadow: none;
+}
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    filter: invert(1);
+}
+
+.formDiv {
+    height: 700px;
+    width: 600px;
+    background-color: #1761615c;
+    border: black 4px solid;
+    border-radius: 45px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 25px;
+    backdrop-filter: blur(10px);
+}

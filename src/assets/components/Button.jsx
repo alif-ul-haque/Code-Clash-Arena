@@ -8,6 +8,7 @@ export default function Button({
     height = "103px",
     width = "409px",
     icon = play,
+    color = "black",
     showIcon = false,
     onClick
 }) {
@@ -15,7 +16,9 @@ export default function Button({
         backgroundColor: backgroundColor,
         fontSize: fontSize,
         height: height,
-        width: width
+        width: width,
+        color: color,
+        justifyContent: showIcon ? "space-between" : "center"
     }
 
     return (

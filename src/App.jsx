@@ -2,6 +2,7 @@ import './App.css'
 import { useState } from 'react'
 import HomePage from './homepage_login_signup/pages/HomePage.jsx'
 import LoginPage from './homepage_login_signup/pages/LoginPage.jsx'
+import SignupPage from './homepage_login_signup/pages/SignupPage.jsx'
 
 
 function App() {
