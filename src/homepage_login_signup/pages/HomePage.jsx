@@ -6,7 +6,7 @@ import { useCallback } from "react"
 import Particles from "@tsparticles/react"
 import { loadSlim } from "@tsparticles/slim"
 
-export default function HomePage() {
+export default function HomePage({ onGetStarted }) {
     const particlesInit = useCallback(async (engine) => {
         await loadSlim(engine);
     }, []);
@@ -112,7 +112,8 @@ export default function HomePage() {
                     text='GET STARTED' 
                     backgroundColor='#F1CA76' 
                     icon={Play} 
-                    showIcon={true} 
+                    showIcon={true}
+                    onClick={onGetStarted}
                 />
             </div>
         </div>

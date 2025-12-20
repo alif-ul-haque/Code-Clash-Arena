@@ -8,7 +8,8 @@ export default function Button({
     height = "103px",
     width = "409px",
     icon = play,
-    showIcon = false
+    showIcon = false,
+    onClick
 }) {
     const buttonStyle = {
         backgroundColor: backgroundColor,
@@ -18,7 +19,7 @@ export default function Button({
     }
 
     return (
-        <button className="glow-btn" style={buttonStyle}>
+        <button className="glow-btn" style={buttonStyle} onClick={onClick}>
             <span>{text}</span>
             {showIcon && <span><img id="logo" src={icon} /></span>}
         </button>
