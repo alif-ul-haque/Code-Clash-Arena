@@ -4,7 +4,7 @@ import '../style/SignupPage.css'
 import Button from '../../assets/components/Button'
 import bg from '../../assets/images/wallpaperflare.com_wallpaper.jpg'
 
-export default function SignupPage() {
+export default function SignupPage({ onSignupSuccess, onBack, onLoginClick }) {
 
     let [error, detectError] = useState({
         username: false,
@@ -65,6 +65,10 @@ export default function SignupPage() {
                 cfhandle: false,
                 password: false
             });
+            // Navigate to main page on successful signup
+            if (onSignupSuccess) {
+                onSignupSuccess();
+            }
         }
     }
 
@@ -128,7 +132,9 @@ export default function SignupPage() {
                         <label htmlFor="password" style={error.password ? { color: 'red' } : {}}>Password</label>
                     </div>
                     <Button backgroundColor='#176161' text='SignUp' height='80px' width='300px' color='black' fontSize='30px' />
-                    <p>Have an account?Log in</p>
+                    <p style={{ textAlign: 'center', marginTop: '20px', color: '#ffffff' }}>
+                        Have an account? <span onClick={onLoginClick} style={{ color: '#FFD700', cursor: 'pointer', fontWeight: 'bold' }}>Log in</span>
+                    </p>
                 </form>
             </div>
         </div>

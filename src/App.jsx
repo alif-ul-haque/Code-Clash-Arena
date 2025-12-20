@@ -14,13 +14,25 @@ function App() {
 
   const handleLoginSuccess = () => {
     setCurrentPage('main')
-    // You can add your main page logic here later
+  }
+
+  const handleSignupClick = () => {
+    setCurrentPage('signup')
+  }
+
+  const handleSignupSuccess = () => {
+    setCurrentPage('main')
+  }
+
+  const handleBackToLogin = () => {
+    setCurrentPage('login')
   }
 
   return (
     <>
       {currentPage === 'home' && <HomePage onGetStarted={handleGetStarted} />}
-      {currentPage === 'login' && <LoginPage onLoginSuccess={handleLoginSuccess} onBack={() => setCurrentPage('home')} />}
+      {currentPage === 'login' && <LoginPage onLoginSuccess={handleLoginSuccess} onSignupClick={handleSignupClick} onBack={() => setCurrentPage('home')} />}
+      {currentPage === 'signup' && <SignupPage onSignupSuccess={handleSignupSuccess} onLoginClick={handleBackToLogin} onBack={() => setCurrentPage('login')} />}
       {currentPage === 'main' && (
         <div style={{ 
           minHeight: '100vh', 

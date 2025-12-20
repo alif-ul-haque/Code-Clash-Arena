@@ -6,10 +6,9 @@ import showIcon from '../../assets/icons/show.png'
 import loginIcon from '../../assets/icons/login__0.png';
 import bgImage from '../../assets/images/10002.jpg'
 
-export default function LoginPage({ onLoginSuccess, onBack }) {
+export default function LoginPage({ onLoginSuccess, onBack, onSignupClick }) {
     const [showPassword, setShowPassword] = useState(false)
     const [passwordFocused, setPasswordFocused] = useState(false)
-    const [usernameFocused, setUsernameFocused] = useState(false)
     const [formData, setFormData] = useState({
         username: '',
         password: ''
@@ -72,11 +71,10 @@ export default function LoginPage({ onLoginSuccess, onBack }) {
                             onChange={handleChange}
                             className="login-input"
                             id="username"
-                            onFocus={() => setUsernameFocused(true)}
-                            onBlur={() => setUsernameFocused(false)}
+                            placeholder=" "
                             required
                         />
-                        <label htmlFor="username" className={`floating-label ${(usernameFocused || formData.username) ? 'floated' : ''}`}>Username or Email</label>
+                        <label htmlFor="username" className="floating-label">Username or Email</label>
                         <svg className="input-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
@@ -92,11 +90,12 @@ export default function LoginPage({ onLoginSuccess, onBack }) {
                             onChange={handleChange}
                             className="login-input"
                             id="password"
+                            placeholder=" "
                             onFocus={() => setPasswordFocused(true)}
                             onBlur={() => setPasswordFocused(false)}
                             required
                         />
-                        <label htmlFor="password" className={`floating-label ${(passwordFocused || formData.password) ? 'floated' : ''}`}>Password</label>
+                        <label htmlFor="password" className="floating-label">Password</label>
                         {passwordFocused && (
                             <div 
                                 className="input-icon clickable eye-icon" 
@@ -135,7 +134,7 @@ export default function LoginPage({ onLoginSuccess, onBack }) {
                 {/* Sign Up Link */}
                 <div className="signup-section">
                     <p className="signup-text">Don't have an account?</p>
-                    <p className="signup-link">Sign Up</p>
+                    <p className="signup-link" onClick={onSignupClick}>Sign Up</p>
                 </div>
             </div>
         </div>
