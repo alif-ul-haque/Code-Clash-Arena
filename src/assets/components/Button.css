@@ -1,0 +1,40 @@
+.glow-btn {
+    padding: 1.5%;
+    font-size: 41px;
+    border: black 4px solid;
+    border-radius: 15px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    color: black;
+}
+
+.glow-btn::before {
+    content: "";
+    position: absolute;
+    border-radius: 8.88px;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 60%;
+    width: 96%;
+    background: linear-gradient(to bottom,
+            rgb(253, 253, 253),
+            rgba(255, 255, 255, 0.055));
+    pointer-events: none;
+    z-index: 0;
+}
+
+.glow-btn>* {
+    position: relative;
+    z-index: 1;
+}
+
+#logo {
+    width: 60%;
+    height: 60%;
+    max-width: 56px;
+    max-height: 56px;
+}

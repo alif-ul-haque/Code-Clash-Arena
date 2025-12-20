@@ -1,0 +1,64 @@
+#mainlogo {
+    height: 102px;
+    width: 102px;
+}
+
+#homePage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: top;
+    gap: 16px;
+}
+
+#titleBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    width: 100%;
+    max-width: 1100px;
+    margin-top: 40px;
+}
+
+#titleBar div {
+    display: flex;
+    align-items: center;
+    width: auto;
+}
+
+#titleBar p {
+    color: #f1ca76;
+    font-size: 20px;
+}
+
+#extraInfo {
+    gap: 20px;
+}
+
+hr {
+    background-color: #f1ca76;
+    border: none;
+    height: 2px;
+    width: 100%;
+    max-width: 1164px;
+    margin: 0;
+}
+
+#hello {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    width: 100%;
+    margin-top: 150px;
+}
+
+#hello p {
+    color: #F1CA76;
+    font-size: 96px;
+    line-height: .9;
+    margin: 0;
+    text-align: center;
+}
