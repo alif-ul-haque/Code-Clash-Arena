@@ -1,16 +1,48 @@
-# React + Vite
+# What is Code Clash Arena
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+- A coding platform designed for CSE students and coding enthusiasts to develop personal skills
+- Allows users to test their coding abilities in various situations
+- Combines the competitive gaming experience with professional coding contests
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Key Features
 
-## React Compiler
+- **Head-to-Head Coding Battles**: Challenge other coders in 1v1 competitive coding contests
+- **Clan-Based Battles**: Form groups (clans) and battle against other clans
+- **Personalized Practice Sessions**: Self-paced problem-solving in the practice gym
+- **PvP Competitions**: Real-time player-versus-player coding competitions
+- **Custom Contests**: Create personalized coding contests tailored to your needs
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Problems with Conventional Platforms
 
-## Expanding the ESLint configuration
+- Limited to self-development opportunities
+- No direct head-to-head competition with other coders
+- Only administrator-created contests available
+- No ability to create personalized, custom contests
+# Background and Motivation
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Inspiration
+
+This project draws inspiration from two popular platforms:
+
+1. **Clash Royale** (by Supercell)
+   - 1v1 player battles
+   - Real-time competitive gameplay
+
+2. **Clash of Clans** (by Supercell)
+   - Clan/group formation
+   - Team-based battles
+
+3. **Codeforces**
+   - Professional coding contests
+   - Rating and ranking system
+
+## Project Goals
+
+- Combine competitive gaming mechanics with professional coding platforms
+- Provide a game-like experience while maintaining coding contest features
+- Support both individual and team-based competitions
+- Implement a comprehensive rating and ranking system
+- Enable personalized contest creation and management
+
