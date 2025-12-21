@@ -124,7 +124,7 @@ export default function LoginPage({ onLoginSuccess, onBack, onSignupClick }) {
                             backgroundColor="#F1CA76"
                             fontSize="22px"
                             height="55px"
-                            width="200px"
+                            width="150px"
                             showIcon={true}
                             icon={loginIcon}
                         />
