@@ -78,26 +78,7 @@ function App() {
           >
             ← BACK
           </button>
-          <div>
-            <p>Main Page - Coming Soon!</p>
-            <button 
-              onClick={() => setCurrentPage('1v1')}
-              style={{
-                background: '#ffd700',
-                border: 'none',
-                color: '#1a1a2e',
-                fontFamily: 'PlayMeGame, sans-serif',
-                fontSize: '20px',
-                padding: '15px 40px',
-                borderRadius: '10px',
-                cursor: 'pointer',
-                marginTop: '30px',
-                boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)'
-              }}
-            >
-              🎮 Test 1v1 Page
-            </button>
-          </div>
+          Main Page - Coming Soon!
         </div>
       )}
     </>
