@@ -3,6 +3,7 @@ import { useState } from 'react'
 import HomePage from './homepage_login_signup/pages/HomePage.jsx'
 import LoginPage from './homepage_login_signup/pages/LoginPage.jsx'
 import SignupPage from './homepage_login_signup/pages/SignupPage.jsx'
+import FirstPage1v1 from './pvp_battle/pages/1v1_first_page.jsx'
 
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
       {currentPage === 'home' && <HomePage onGetStarted={handleGetStarted} />}
       {currentPage === 'login' && <LoginPage onLoginSuccess={handleLoginSuccess} onSignupClick={handleSignupClick} onBack={() => setCurrentPage('home')} />}
       {currentPage === 'signup' && <SignupPage onSignupSuccess={handleSignupSuccess} onLoginClick={handleBackToLogin} onBack={() => setCurrentPage('login')} />}
+      {currentPage === '1v1' && <FirstPage1v1 />}
       {currentPage === 'main' && (
         <div style={{ 
           minHeight: '100vh', 
@@ -76,7 +78,26 @@ function App() {
           >
             ← BACK
           </button>
-          Main Page - Coming Soon!
+          <div>
+            <p>Main Page - Coming Soon!</p>
+            <button 
+              onClick={() => setCurrentPage('1v1')}
+              style={{
+                background: '#ffd700',
+                border: 'none',
+                color: '#1a1a2e',
+                fontFamily: 'PlayMeGame, sans-serif',
+                fontSize: '20px',
+                padding: '15px 40px',
+                borderRadius: '10px',
+                cursor: 'pointer',
+                marginTop: '30px',
+                boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)'
+              }}
+            >
+              🎮 Test 1v1 Page
+            </button>
+          </div>
         </div>
       )}
     </>
