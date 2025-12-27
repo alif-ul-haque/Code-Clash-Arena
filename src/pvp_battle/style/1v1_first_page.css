@@ -1,9 +1,11 @@
 .page-container {
   background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-    url('../../assets/images/10002_1.jpg');
+  url('../../assets/images/10002.png');
   background-size: cover;
   background-position: center;
   min-height: 100vh;
+  /* max-height: 100vh; */
+  overflow: hidden;
   width: 100%;
 }
 
@@ -42,12 +44,25 @@
   text-align: center;
   color: #1a1a2e;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  ransition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(241, 202, 118, 0.5);
+  background-color: #ffd966;
+}
+
+.feature-card:hover h2 {
+  transform: scale(1.1);
+  color: #0a1628;
 }
 
 .feature-card h2 {
   font-size: 25px;
   margin-bottom: 15px;
   font-family: 'PlayMeGame';
+  transition: all 0.3s ease;
 }
 
 .glow-btn {

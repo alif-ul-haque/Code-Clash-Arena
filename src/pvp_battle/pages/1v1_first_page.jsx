@@ -1,8 +1,12 @@
 import React from 'react';
+import '../style/1v1_first_page.css';
 import logo from '../../assets/icons/cca.png';
 import '../../assets/components/Button.css';
 import userIcon from '../../assets/icons/user_1.png';
+import { useNavigate } from 'react-router-dom';
+
 function FirstPage1v1() {
+  const navigate = useNavigate();
   return (
     <div className="page-container">
         <img src={logo} alt="Code Clash Arena Logo" className="logo" />
@@ -29,7 +33,7 @@ function FirstPage1v1() {
             CodeForces problems head-to-head</h2>
           </div>
         </div>
-        <button className="glow-btn">
+        <button className="glow-btn"  onClick={() => navigate('/playmode')}>
               <span>▶</span>
               <span>GET STARTED</span>
        </button>

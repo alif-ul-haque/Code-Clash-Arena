@@ -69,6 +69,7 @@ export default function MainPage() {
                             icon={combat}
                             showIcon={true}
                             justifyContent='space-around'
+                            onClick={() => navigate('/1v1')}
                         />
                         <Button
                             text="Battle History"
