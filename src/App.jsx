@@ -4,10 +4,11 @@ import HomePage from './homepage_login_signup/pages/HomePage.jsx'
 import LoginPage from './homepage_login_signup/pages/LoginPage.jsx'
 import SignupPage from './homepage_login_signup/pages/SignupPage.jsx'
 import FirstPage1v1 from './pvp_battle/pages/1v1_first_page.jsx'
+import PracticeDashboard from './practice_gym/pages/PracticeDashboard.jsx'
 
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('home')
+  const [currentPage, setCurrentPage] = useState('home') // 'home', 'login', 'signup', '1v1', 'practice', 'main'
 
   const handleGetStarted = () => {
     setCurrentPage('login')
@@ -35,6 +36,7 @@ function App() {
       {currentPage === 'login' && <LoginPage onLoginSuccess={handleLoginSuccess} onSignupClick={handleSignupClick} onBack={() => setCurrentPage('home')} />}
       {currentPage === 'signup' && <SignupPage onSignupSuccess={handleSignupSuccess} onLoginClick={handleBackToLogin} onBack={() => setCurrentPage('login')} />}
       {currentPage === '1v1' && <FirstPage1v1 />}
+      {currentPage === 'practice' && <PracticeDashboard />}
       {currentPage === 'main' && (
         <div style={{ 
           minHeight: '100vh', 
