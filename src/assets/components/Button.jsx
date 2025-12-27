@@ -19,7 +19,8 @@ export default function Button({
         height: height,
         width: width,
         color: color,
-        justifyContent: showIcon ? "space-between" : "center"
+        justifyContent: showIcon ? "space-between" : "center",
+        margin: "0px"
     }
 
     const textStyle = {
