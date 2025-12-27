@@ -9,6 +9,14 @@
     justify-content: space-between;
     gap: 15px;
     color: black;
+    transition: all 0.3s ease;
+}
+
+.glow-btn:hover {
+    box-shadow: 0 0 20px rgba(113, 233, 213, 0.8),
+        0 0 40px rgba(113, 233, 213, 0.5),
+        inset 0 0 20px rgba(113, 233, 213, 0.2);
+    border-color: #71e9d5;
 }
 
 .glow-btn::before {
@@ -25,6 +33,14 @@
             rgba(255, 255, 255, 0.055));
     pointer-events: none;
     z-index: 0;
+    transition: all 0.3s ease;
+}
+
+.glow-btn:hover {
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0.2),
+            rgba(255, 255, 255, 0.1));
+    box-shadow: 0 0 15px rgba(113, 233, 213, 0.3);
 }
 
 .glow-btn>* {
@@ -33,8 +49,8 @@
 }
 
 #logo {
-    width: 60%;
-    height: 60%;
+    width: 70%;
+    height: 70%;
     max-width: 56px;
     max-height: 56px;
 }

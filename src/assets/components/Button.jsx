@@ -10,6 +10,7 @@ export default function Button({
     icon = play,
     color = "black",
     showIcon = false,
+    justifyContent = "center",
     onClick
 }) {
     const buttonStyle = {
@@ -18,13 +19,22 @@ export default function Button({
         height: height,
         width: width,
         color: color,
-        justifyContent: "center"
+        justifyContent: showIcon ? "space-between" : "center"
+    }
+
+    const textStyle = {
+        flex: 1,
+        textAlign: showIcon ? "left" : "center"
+    }
+
+    const iconStyle = {
+        marginLeft: "10px"
     }
 
     return (
         <button className="glow-btn" style={buttonStyle} onClick={onClick}>
-            <span>{text}</span>
-            {showIcon && <span><img id="logo" src={icon} /></span>}
+            <span style={textStyle}>{text}</span>
+            {showIcon && <span style={iconStyle}><img id="logo" src={icon} /></span>}
         </button>
     )
 }

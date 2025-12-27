@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import mainLogo from '../../assets/icons/cca.png'
 import '../style/SignupPage.css'
 import Button from '../../assets/components/Button'
 import bg from '../../assets/images/wallpaperflare.com_wallpaper.jpg'
 
-export default function SignupPage({ onSignupSuccess, onBack, onLoginClick }) {
+export default function SignupPage() {
+    const navigate = useNavigate()
 
     let [error, detectError] = useState({
         username: false,
@@ -66,9 +68,7 @@ export default function SignupPage({ onSignupSuccess, onBack, onLoginClick }) {
                 password: false
             });
             // Navigate to main page on successful signup
-            if (onSignupSuccess) {
-                onSignupSuccess();
-            }
+            navigate('/main')
         }
     }
 
@@ -133,7 +133,7 @@ export default function SignupPage({ onSignupSuccess, onBack, onLoginClick }) {
                     </div>
                     <Button backgroundColor='#176161' text='SignUp' height='80px' width='300px' color='black' fontSize='30px' />
                     <p style={{ textAlign: 'center', marginTop: '20px', color: '#ffffff' }}>
-                        Have an account? <span onClick={onLoginClick} style={{ color: '#FFD700', cursor: 'pointer', fontWeight: 'bold' }}>Log in</span>
+                        Have an account? <span onClick={() => navigate('/login')} style={{ color: '#FFD700', cursor: 'pointer', fontWeight: 'bold' }}>Log in</span>
                     </p>
                 </form>
             </div>

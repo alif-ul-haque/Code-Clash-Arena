@@ -1,12 +1,14 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '../style/LoginPage.css'
 import ccaLogo from '../../assets/icons/cca.png'
 import Button from '../../assets/components/Button.jsx'
 import showIcon from '../../assets/icons/show.png'
 import loginIcon from '../../assets/icons/login__0.png';
-import bgImage from '../../assets/images/10002.jpg'
+import bgImage from '../../assets/images/10002.png'
 
-export default function LoginPage({ onLoginSuccess, onBack, onSignupClick }) {
+export default function LoginPage() {
+    const navigate = useNavigate()
     const [showPassword, setShowPassword] = useState(false)
     const [passwordFocused, setPasswordFocused] = useState(false)
     const [formData, setFormData] = useState({
@@ -17,7 +19,7 @@ export default function LoginPage({ onLoginSuccess, onBack, onSignupClick }) {
     const handleSubmit = (e) => {
         e.preventDefault()
         if (formData.username && formData.password) {
-            onLoginSuccess()
+            navigate('/main')
         }
     }
 
@@ -32,9 +34,9 @@ export default function LoginPage({ onLoginSuccess, onBack, onSignupClick }) {
         <div className="login-page" style={{ backgroundImage: `url(${bgImage})` }}>
             {/* Background Overlay */}
             <div className="background-overlay"></div>
-            
+
             {/* Back Button - Top Left of Page */}
-            <button className="back-button-page" onClick={onBack}>
+            <button className="back-button-page" onClick={() => navigate('/')}>
                 ← Back
             </button>
             {/* Corner Decorations */}
@@ -97,8 +99,8 @@ export default function LoginPage({ onLoginSuccess, onBack, onSignupClick }) {
                         />
                         <label htmlFor="password" className="floating-label">Password</label>
                         {passwordFocused && (
-                            <div 
-                                className="input-icon clickable eye-icon" 
+                            <div
+                                className="input-icon clickable eye-icon"
                                 onClick={() => setShowPassword(!showPassword)}
                                 onMouseDown={(e) => e.preventDefault()}
                             >
@@ -134,7 +136,7 @@ export default function LoginPage({ onLoginSuccess, onBack, onSignupClick }) {
                 {/* Sign Up Link */}
                 <div className="signup-section">
                     <p className="signup-text">Don't have an account?</p>
-                    <p className="signup-link" onClick={onSignupClick}>Sign Up</p>
+                    <p className="signup-link" onClick={() => navigate('/signup')}>Sign Up</p>
                 </div>
             </div>
         </div>
