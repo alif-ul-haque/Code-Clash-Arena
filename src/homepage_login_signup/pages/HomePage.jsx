@@ -3,10 +3,13 @@ import '../style/HomePage.css'
 import Button from '../../assets/components/Button.jsx'
 import Play from '../../assets/icons/play-button-arrowhead.png'
 import { useCallback } from "react"
+import { useNavigate } from 'react-router-dom'
 import Particles from "@tsparticles/react"
 import { loadSlim } from "@tsparticles/slim"
 
-export default function HomePage({ onGetStarted }) {
+export default function HomePage() {
+    const navigate = useNavigate()
+
     const particlesInit = useCallback(async (engine) => {
         await loadSlim(engine);
     }, []);
@@ -106,14 +109,14 @@ export default function HomePage({ onGetStarted }) {
                         <span className="word-3">WELCOME!</span>
                     </p>
                 </div>
-                <Button 
-                    height='103px' 
-                    width='409px' 
-                    text='GET STARTED' 
-                    backgroundColor='#F1CA76' 
-                    icon={Play} 
+                <Button
+                    height='103px'
+                    width='409px'
+                    text='GET STARTED'
+                    backgroundColor='#F1CA76'
+                    icon={Play}
                     showIcon={true}
-                    onClick={onGetStarted}
+                    onClick={() => navigate('/login')}
                 />
             </div>
         </div>

@@ -1,0 +1,117 @@
+#maindiv {
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.menubar {
+    width: 413px;
+    height: 100vh;
+    border-right: 3px solid #71e9d5;
+    display: flex;
+    flex-direction: column;
+    background-color: #17616199;
+}
+
+.xpbar {
+    position: relative;
+    height: 20vh;
+    border-bottom: 3px solid #71E9D5;
+}
+
+.xp-image {
+    position: absolute;
+    top: 23px;
+    left: 65px;
+    width: 87px;
+    height: 118px;
+    z-index: 1;
+}
+
+.level {
+    position: absolute;
+    font-size: 40px;
+    left: 108px;
+    top: 35px;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-shadow:
+        -3px -3px 0 #000,
+        3px -3px 0 #000,
+        -3px 3px 0 #000,
+        3px 3px 0 #000,
+        -3px 0 0 #000,
+        3px 0 0 #000,
+        0 -3px 0 #000,
+        0 3px 0 #000;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.menubuttons {
+    padding-top: 23px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 23px;
+}
+
+.intropage {
+    position: relative;
+    width: calc(100vw - 413px);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.welcome-message {
+    height: 300px;
+    width: 700px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.welcome-text {
+    margin-top: 23px;
+    font-size: 75px;
+    color: white;
+    text-align: center;
+    text-shadow:
+        -4px -4px 0 #000,
+        4px -4px 0 #000,
+        -4px 2px 0 #000,
+        4px 4px 0 #000,
+        -4px 0 0 #000,
+        4px 0 0 #000,
+        0 -4px 0 #000,
+        0 4px 0 #000;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.welcome-subtext {
+    font-size: 28px;
+    color: rgb(255, 255, 255);
+    text-align: center;
+    text-shadow:
+        -4px -4px 0 #000,
+        4px -4px 0 #000,
+        -4px 2px 0 #000,
+        4px 4px 0 #000,
+        -4px 0 0 #000,
+        4px 0 0 #000,
+        0 -4px 0 #000,
+        0 4px 0 #000;
+    font-weight: bold;
+    margin-top: -60px;
+}
+.intro-card{
+    height: 100vh - 300px;
+    width: 800px;
+    margin-top: -15px;
+}
