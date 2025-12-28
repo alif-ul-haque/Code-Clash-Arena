@@ -6,10 +6,11 @@ import bgImage from '../../assets/images/10001.png'
 import Button from '../../assets/components/Button.jsx'
 import clanIcon from '../../assets/icons/clan.png'
 import combat from '../../assets/icons/sss.png'
-import mail from '../../assets/icons/mail.png'
+// import mail from '../../assets/icons/mail.png'
 import history from '../../assets/icons/history.png'
 import swords from '../../assets/icons/swords.png'
 import IntroCard from '../components/IntroCard.jsx'
+import gym from '../../assets/icons/dumbbell.png'
 
 export default function MainPage() {
     const navigate = useNavigate();
@@ -48,7 +49,7 @@ export default function MainPage() {
                             height="80px"
                             width="380px"
                             fontSize="36px"
-                            icon={mail}
+                            icon={gym}
                             showIcon={true}
                             justifyContent='space-around'
                             onClick={() => navigate('/practice')}

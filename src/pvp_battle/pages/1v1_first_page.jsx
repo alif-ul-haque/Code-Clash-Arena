@@ -12,7 +12,7 @@ function FirstPage1v1() {
       <img src={logo} alt="Code Clash Arena Logo" className="logo" />
       <div className="profile-section">
         <img src={userIcon} alt="User" className="user-icon" />
-        <span className="username">alif19</span>
+        <span className="username"><p>alif19</p></span>
       </div>
       <h1 className="main-heading">
         Battle programmers in 1v1 competitive coding challenges
