@@ -11,6 +11,7 @@ import history from '../../assets/icons/history.png'
 import swords from '../../assets/icons/swords.png'
 import IntroCard from '../components/IntroCard.jsx'
 import gym from '../../assets/icons/dumbbell.png'
+import HomePage from '../../homepage_login_signup/pages/HomePage.jsx'
 
 export default function MainPage() {
     const navigate = useNavigate();
@@ -88,6 +89,7 @@ export default function MainPage() {
                             width="230px"
                             fontSize="36px"
                             backgroundColor='#DC7922'
+                            onClick={() => navigate('/HomePage')}
                         />
 
                     </div>
