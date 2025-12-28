@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import '../style/ProblemPage.css'
 import ccaLogo from '../../assets/icons/cca.png'
 
-const ProblemPage = ({ problem, timeLeft, onBack, onSubmit, onHelp }) => {
+const ProblemPage = ({ problem, timeLeft, onBack, onSubmit, onHelp, code = '', onCodeChange }) => {
   const [selectedLanguage, setSelectedLanguage] = useState('Python');
   const fileInputRef = useRef(null);
 
@@ -26,9 +26,8 @@ const ProblemPage = ({ problem, timeLeft, onBack, onSubmit, onHelp }) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        const textarea = document.querySelector('.code-editor');
-        if (textarea) {
-          textarea.value = event.target.result;
+        if (onCodeChange) {
+          onCodeChange(event.target.result);
         }
       };
       reader.readAsText(file);
@@ -96,6 +95,8 @@ const ProblemPage = ({ problem, timeLeft, onBack, onSubmit, onHelp }) => {
           <textarea
             className="code-editor"
             placeholder="### WRITE YOUR CODE FROM HERE"
+            value={code}
+            onChange={(e) => onCodeChange && onCodeChange(e.target.value)}
           ></textarea>
 
           <div className="editor-footer">

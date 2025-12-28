@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [showTimerSetup, setShowTimerSetup] = useState(false);
   const [timeLeft, setTimeLeft] = useState(null);
   const [timerActive, setTimerActive] = useState(false);
+  const [userCode, setUserCode] = useState('');
 
   const problems = [
     { id: 1, title: "Theatre Square", tag: "math", rating: "1000", solved: "156.4k" },
@@ -104,6 +105,8 @@ const Dashboard = () => {
       onBack={() => setShowExitConfirm(true)}
       onSubmit={() => setShowSuccess(true)}
       onHelp={() => setShowAIHelp(true)}
+      code={userCode}
+      onCodeChange={setUserCode}
     />;
   }
 
