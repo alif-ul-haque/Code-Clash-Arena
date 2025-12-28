@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '../style/PracticeDashboard.css'
 import ccaLogo from '../../assets/icons/cca.png'
 import bg from '../../assets/images/bg.png'
@@ -9,6 +10,7 @@ import ExitConfirmationPage from './ExitConfirmationPage.jsx'
 import TimerSetupPage from './TimerSetupPage.jsx'
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [selectedProblem, setSelectedProblem] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showAIHelp, setShowAIHelp] = useState(false);
@@ -119,7 +121,7 @@ const Dashboard = () => {
 
         <div className="top-actions">
           <button className="btn practice">Let's Practice</button>
-          <button className="btn exit">EXIT</button>
+          <button className="btn exit" onClick={() => navigate('/main')}>EXIT</button>
         </div>
       </div>
 

@@ -44,13 +44,14 @@ export default function MainPage() {
                             justifyContent='space-around'
                         />
                         <Button
-                            text="Mail & Social"
+                            text="Practice"
                             height="80px"
                             width="380px"
                             fontSize="36px"
                             icon={mail}
                             showIcon={true}
                             justifyContent='space-around'
+                            onClick={() => navigate('/practice')}
                         />
                         <Button
                             text="Clan Battle"
