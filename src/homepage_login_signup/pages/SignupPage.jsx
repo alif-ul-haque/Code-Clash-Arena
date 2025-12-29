@@ -132,7 +132,7 @@ export default function SignupPage() {
                         <label htmlFor="password" style={error.password ? { color: 'red' } : {}}>Password</label>
                     </div>
                     <Button backgroundColor='#176161' text='SignUp' height='80px' width='300px' color='black' fontSize='30px' />
-                    <p style={{ textAlign: 'center', marginTop: '10px', color: '#ffffff' , marginBottom: '20px' }}>
+                    <p style={{ textAlign: 'center', marginTop: '5px', color: '#ffffff' , marginBottom: '20px' }}>
                         Have an account? <span onClick={() => navigate('/login')} style={{ color: '#FFD700', cursor: 'pointer', fontWeight: 'bold' }}>Log in</span>
                     </p>
                 </form>
