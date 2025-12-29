@@ -14,6 +14,7 @@ const OneVOneGlobalPage = () => {
                         <p className="animated-dots">••••••••••••••••••••••••</p>
                         <div className="search-icon">
                             <img src={magnifyingGlassIcon} alt="search" />
+                            <img src={swordsIcon} alt="swords" className="swords-overlay" />
                         </div>
                     </div>
                 </div>

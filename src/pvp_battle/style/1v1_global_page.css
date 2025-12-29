@@ -54,10 +54,25 @@
     animation: blink 1.5s infinite;
 }
 
+.search-icon {
+    position: relative;
+    display: inline-block;
+}
+
 .search-icon img {
     width: 400px;
     height: 300px;
     margin-top: 70px;
+}
+
+.swords-overlay {
+    position: absolute !important;
+    top: 50% !important;
+    left: 37% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 150px !important;
+    height: 130px !important;
+    margin-top: 0 !important;
 }
 
 @keyframes blink {
