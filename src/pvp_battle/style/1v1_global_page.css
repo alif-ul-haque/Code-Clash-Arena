@@ -57,12 +57,14 @@
 .search-icon {
     position: relative;
     display: inline-block;
+    animation: circularOrbit 3s linear infinite;
 }
 
 .search-icon img {
     width: 400px;
     height: 300px;
-    margin-top: 70px;
+    margin-top: 80px;
+    margin-left: 20px;
 }
 
 .swords-overlay {
@@ -78,4 +80,13 @@
 @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
+}
+
+@keyframes circularOrbit {
+    0% {
+        transform: rotate(0deg) translateX(70px) rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg) translateX(70px) rotate(-360deg);
+    }
 }
