@@ -2,6 +2,9 @@
     position: relative;
     display: flex;
     justify-content: flex-start;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
 }
 
 .menubar {
@@ -11,18 +14,21 @@
     display: flex;
     flex-direction: column;
     background-color: #17616199;
+    flex-shrink: 0;
 }
 
 .xpbar {
     position: relative;
     height: 20vh;
+    min-height: 140px;
     border-bottom: 3px solid #71E9D5;
+    flex-shrink: 0;
 }
 
 .xp-image {
     position: absolute;
     top: 23px;
-    left: 65px;
+    left: 25px;
     width: 87px;
     height: 118px;
     z-index: 1;
@@ -31,7 +37,7 @@
 .level {
     position: absolute;
     font-size: 40px;
-    left: 108px;
+    left: 68px;
     top: 35px;
     transform: translate(-50%, -50%);
     color: white;
@@ -55,30 +61,43 @@
     justify-content: space-evenly;
     align-items: center;
     gap: 23px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.menubuttons::-webkit-scrollbar {
+    width: 0px;
 }
 
 .intropage {
     position: relative;
-    width: calc(100vw - 413px);
+    flex: 1 1 auto;
     height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    padding: 15px;
+    box-sizing: border-box;
 }
 
 .welcome-message {
-    height: 300px;
-    width: 700px;
+    max-width: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    flex-shrink: 1;
+    padding: 0 15px;
+    box-sizing: border-box;
 }
 
 .welcome-text {
     margin-top: 23px;
-    font-size: 75px;
+    font-size: clamp(20px, 3vw, 75px);
     color: white;
     text-align: center;
     text-shadow:
@@ -91,11 +110,15 @@
         0 -4px 0 #000,
         0 4px 0 #000;
     font-weight: bold;
-    white-space: nowrap;
+    white-space: normal;
+    line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .welcome-subtext {
-    font-size: 28px;
+    font-size: clamp(12px, 1.2vw, 28px);
     color: rgb(255, 255, 255);
     text-align: center;
     text-shadow:
@@ -108,10 +131,299 @@
         0 -4px 0 #000,
         0 4px 0 #000;
     font-weight: bold;
-    margin-top: -60px;
+    margin-top: 15px;
+    padding: 0 20px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
-.intro-card{
-    height: 100vh - 300px;
-    width: 800px;
-    margin-top: -15px;
+
+.intro-card {
+    width: 100%;
+    max-width: 800px;
+    margin-top: 30px;
+    flex-shrink: 1;
+}
+
+/* Large screens - maintain original proportions */
+@media screen and (min-width: 1441px) {
+    .welcome-text {
+        font-size: 75px;
+    }
+
+    .welcome-subtext {
+        font-size: 28px;
+        margin-top: -60px;
+    }
+
+    .intro-card {
+        margin-top: -15px;
+    }
+
+    .welcome-message {
+        height: 300px;
+        width: 700px;
+    }
+}
+
+/* Medium-large screens */
+@media screen and (max-width: 1440px) {
+    .menubar {
+        width: 380px;
+        flex-shrink: 0;
+    }
+
+    .welcome-text {
+        font-size: clamp(28px, 3.5vw, 65px);
+    }
+
+    .welcome-subtext {
+        font-size: clamp(14px, 1.4vw, 25px);
+    }
+}
+
+/* Medium screens */
+@media screen and (max-width: 1200px) {
+    .menubar {
+        width: 350px;
+        flex-shrink: 0;
+    }
+
+    .xp-image {
+        left: 55px;
+        width: 78px;
+        height: 105px;
+    }
+
+    .level {
+        font-size: 36px;
+        left: 94px;
+    }
+
+    .menubuttons {
+        gap: 20px;
+    }
+
+    .welcome-text {
+        font-size: clamp(26px, 3.2vw, 55px);
+    }
+
+    .welcome-subtext {
+        font-size: clamp(13px, 1.3vw, 22px);
+    }
+}
+
+/* Small screens and tablets */
+@media screen and (max-width: 1024px) {
+    .menubar {
+        width: 320px;
+        flex-shrink: 0;
+    }
+
+    .xp-image {
+        left: 45px;
+        width: 70px;
+        height: 95px;
+    }
+
+    .level {
+        font-size: 32px;
+        left: 80px;
+    }
+
+    .menubuttons {
+        gap: 18px;
+    }
+
+    .welcome-text {
+        font-size: clamp(24px, 3vw, 48px);
+    }
+
+    .welcome-subtext {
+        font-size: clamp(12px, 1.2vw, 20px);
+    }
+}
+
+/* Tablets - layout changes to vertical */
+@media screen and (max-width: 900px) {
+    #maindiv {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .menubar {
+        width: 100vw;
+        height: auto;
+        border-right: none;
+        border-bottom: 3px solid #71e9d5;
+        flex-shrink: 0;
+    }
+
+    .xpbar {
+        height: auto;
+        min-height: 100px;
+        padding: 12px 0;
+    }
+
+    .xp-image {
+        left: 30px;
+        top: 12px;
+        width: 60px;
+        height: 80px;
+    }
+
+    .level {
+        font-size: 28px;
+        left: 62px;
+        top: 22px;
+    }
+
+    .menubuttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 20px 15px;
+        gap: 15px;
+        flex: 0 0 auto;
+    }
+
+    .intropage {
+        flex: 1 0 auto;
+        height: auto;
+        min-height: 60vh;
+        padding: 40px 20px;
+    }
+
+    .welcome-message {
+        max-width: 100%;
+    }
+
+    .welcome-text {
+        font-size: clamp(22px, 4vw, 42px);
+    }
+
+    .welcome-subtext {
+        font-size: clamp(12px, 1.8vw, 20px);
+        margin-top: 15px;
+    }
+
+    .intro-card {
+        margin-top: 25px;
+    }
+}
+
+/* Mobile landscape */
+@media screen and (max-width: 768px) {
+    .xpbar {
+        min-height: 90px;
+        padding: 10px 0;
+    }
+
+    .menubuttons {
+        gap: 12px;
+        padding: 16px 12px;
+    }
+
+    .intropage {
+        padding: 30px 15px;
+        min-height: 50vh;
+    }
+
+    .welcome-text {
+        font-size: clamp(20px, 3.8vw, 36px);
+        margin-top: 15px;
+    }
+
+    .welcome-subtext {
+        font-size: clamp(11px, 1.6vw, 18px);
+        padding: 0 15px;
+    }
+
+    .intro-card {
+        margin-top: 20px;
+    }
+}
+
+/* Mobile portrait */
+@media screen and (max-width: 480px) {
+    .xpbar {
+        min-height: 85px;
+        padding: 8px 0;
+    }
+
+    .xp-image {
+        left: 20px;
+        top: 8px;
+        width: 50px;
+        height: 65px;
+    }
+
+    .level {
+        font-size: 24px;
+        left: 47px;
+        top: 18px;
+    }
+
+    .menubuttons {
+        gap: 10px;
+        padding: 14px 10px;
+    }
+
+    .intropage {
+        padding: 25px 12px;
+    }
+
+    .welcome-text {
+        font-size: clamp(18px, 4.5vw, 32px);
+        margin-top: 10px;
+    }
+
+    .welcome-subtext {
+        font-size: clamp(11px, 2.5vw, 16px);
+        margin-top: 10px;
+        padding: 0 10px;
+    }
+
+    .intro-card {
+        margin-top: 18px;
+    }
+}
+
+/* Extra small devices */
+@media screen and (max-width: 375px) {
+    .xp-image {
+        left: 15px;
+        width: 45px;
+        height: 60px;
+    }
+
+    .level {
+        font-size: 22px;
+        left: 40px;
+        top: 16px;
+    }
+
+    .menubuttons {
+        gap: 8px;
+        padding: 12px 8px;
+    }
+
+    .intropage {
+        padding: 20px 10px;
+    }
+
+    .welcome-text {
+        font-size: clamp(16px, 5vw, 28px);
+    }
+
+    .welcome-subtext {
+        font-size: clamp(10px, 2.8vw, 14px);
+        padding: 0 8px;
+    }
+
+    .intro-card {
+        margin-top: 15px;
+    }
 }

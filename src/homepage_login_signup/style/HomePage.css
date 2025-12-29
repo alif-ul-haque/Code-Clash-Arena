@@ -164,7 +164,7 @@ hr {
     line-height: 1;
     margin: 0;
     text-shadow: 0 0 20px rgba(255, 200, 0, 0.5), 0 0 40px rgba(255, 150, 0, 0.3);
-    animation: title-glow 2s ease-in-out infinite;
+    animation: float 3s ease-in-out infinite, title-glow 3s ease-in-out infinite;
 }
 
 .title-line-2 {
@@ -202,12 +202,35 @@ hr {
     }
 }
 
-@keyframes title-glow {
+@keyframes float {
     0%, 100% {
-        filter: drop-shadow(0 0 20px rgba(255, 200, 0, 0.5));
+        transform: translateY(0px);
     }
     50% {
-        filter: drop-shadow(0 0 40px rgba(255, 200, 0, 0.8));
+        transform: translateY(-25px);
+    }
+}
+
+@keyframes title-glow {
+    0% {
+        filter: drop-shadow(0 0 15px rgba(255, 200, 0, 0.4)) drop-shadow(0 0 30px rgba(255, 150, 0, 0.2));
+        text-shadow: 0 0 20px rgba(255, 200, 0, 0.5), 0 0 40px rgba(255, 150, 0, 0.3);
+    }
+    25% {
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 40px rgba(255, 165, 0, 0.3));
+        text-shadow: 0 0 25px rgba(255, 215, 0, 0.6), 0 0 50px rgba(255, 165, 0, 0.4);
+    }
+    50% {
+        filter: drop-shadow(0 0 30px rgba(255, 200, 0, 0.8)) drop-shadow(0 0 60px rgba(255, 100, 0, 0.4));
+        text-shadow: 0 0 30px rgba(255, 200, 0, 0.8), 0 0 60px rgba(255, 100, 0, 0.5);
+    }
+    75% {
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 40px rgba(255, 165, 0, 0.3));
+        text-shadow: 0 0 25px rgba(255, 215, 0, 0.6), 0 0 50px rgba(255, 165, 0, 0.4);
+    }
+    100% {
+        filter: drop-shadow(0 0 15px rgba(255, 200, 0, 0.4)) drop-shadow(0 0 30px rgba(255, 150, 0, 0.2));
+        text-shadow: 0 0 20px rgba(255, 200, 0, 0.5), 0 0 40px rgba(255, 150, 0, 0.3);
     }
 }
 
@@ -262,5 +285,79 @@ hr {
     }
     100% {
         top: 100%;
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    #titleBar {
+        gap: 20px;
+        margin-top: 25px;
+    }
+
+    #imageName p,
+    #titleBar p {
+        font-size: 12px;
+    }
+
+    #mainlogo {
+        height: 70px;
+        width: 70px;
+    }
+
+    .title-line-1,
+    .title-line-2 {
+        font-size: 56px;
+    }
+
+    #hello {
+        gap: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    #titleBar {
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    #imageName,
+    #extraInfo {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #imageName p,
+    #titleBar p {
+        font-size: 11px;
+    }
+
+    #mainlogo {
+        height: 50px;
+        width: 50px;
+    }
+
+    .title-line-1,
+    .title-line-2 {
+        font-size: 36px;
+    }
+
+    .title-line-2 {
+        margin-top: 5px;
+    }
+
+    #hello {
+        gap: 25px;
+        padding: 0 15px;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-15px);
+        }
     }
 }
