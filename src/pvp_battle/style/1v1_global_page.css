@@ -26,3 +26,41 @@
   align-items: center;
   justify-content: center;
 }
+
+.search-card {
+    background-color: #F1CA76;
+    padding: 50px 60px;
+    border-radius: 20px;
+    text-align: center;
+    width: 1000px;
+    height: 700px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.search-heading {
+    color: #1a1a1a;
+    font-family: 'PlayMeGame', sans-serif;
+    font-size: 48px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.animated-dots {
+    color: #1a1a1a;
+    font-size: 24px;
+    margin: 20px 0;
+    letter-spacing: 3px;
+    animation: blink 1.5s infinite;
+}
+
+.search-icon img {
+    width: 400px;
+    height: 300px;
+    margin-top: 70px;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
