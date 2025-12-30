@@ -1,7 +1,7 @@
 import React from "react";
 import "../style/1v1_first_page.css";
 import logo from "../../assets/icons/cca.png";
-import "../../assets/components/Button.css";
+import Button from '../../assets/components/Button';
 import userIcon from "../../assets/icons/user_1.png";
 import { useNavigate } from "react-router-dom";
 
@@ -30,10 +30,16 @@ function FirstPage1v1() {
           <h2>Real Problems Solve CodeForces problems head-to-head</h2>
         </div>
       </div>
-      <button className="glow-btn" onClick={() => navigate("/playmode")}>
-        <span>▶</span>
-        <span>GET STARTED</span>
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+        <Button
+          height='103px'
+          width='409px'
+          text='GET STARTED'
+          backgroundColor='#F1CA76'
+          showIcon={true}
+          onClick={() => navigate('/playmode')}
+        />
+      </div>
     </div>
   );
 }

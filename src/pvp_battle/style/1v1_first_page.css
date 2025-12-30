@@ -71,6 +71,7 @@
   cursor: pointer;
   font-family: 'PlayMeGame';
   max-width: 400px;
+  border-radius: 15px;
 }
 
 .profile-section {

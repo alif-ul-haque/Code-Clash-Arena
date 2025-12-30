@@ -97,7 +97,7 @@
 
 .welcome-text {
     margin-top: 23px;
-    font-size: clamp(20px, 3vw, 75px);
+    font-size: clamp(50px, 6vw, 110px);
     color: white;
     text-align: center;
     text-shadow:

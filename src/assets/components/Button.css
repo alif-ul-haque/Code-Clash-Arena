@@ -2,7 +2,6 @@
     padding: 2%;
     font-size: 41px;
     border: black 4px solid;
-    border-radius: 15px;
     position: relative;
     display: flex;
     align-items: center;
@@ -16,7 +15,6 @@
     box-shadow: 0 0 20px rgb(113, 233, 213),
         0 0 40px rgba(113, 233, 213, 0.616),
         0 0 20px #F1CA76;
-    animation: animate 1s ease-in-out infinite;
 }
 
 .glow-btn:active {
@@ -30,7 +28,7 @@
 .glow-btn::before {
     content: "";
     position: absolute;
-    border-radius: 8.88px;
+    border-radius: calc(var(--main-border-radius) * 0.592);
     top: 10%;
     left: 50%;
     transform: translateX(-50%);
@@ -57,14 +55,3 @@
     max-height: 56px;
 }
 
-@keyframes animate {
-
-    0%,
-    100% {
-        transform: translateY(0px);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
-}
