@@ -1,0 +1,292 @@
+.local-battle-container {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+    url('../../assets/images/10003.png');
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+}
+
+.local-logo {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px;
+  height: auto;
+  z-index: 10;
+}
+
+.exit-btn-wrapper {
+  position: absolute !important;
+  top: 20px !important;
+  right: 30px !important;
+  z-index: 10;
+}
+
+.exit-btn {
+  position: relative;
+  background: linear-gradient(to bottom, #ff9933, #ff6600);
+  border: 4px solid #000000;
+  border-radius: 15px;
+  color: #000000ff;
+  font-family: 'PlayMeGame', sans-serif;
+  font-weight: bold;
+  font-size: 32px;
+  padding: 15px 60px;
+  min-width: 180px;
+  height: 65px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.exit-btn::before {
+  content: "";
+  position: absolute;
+  border-radius: 10px;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 45%;
+  width: 92%;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.exit-btn::after {
+  content: "";
+  position: absolute;
+  border-radius: 10px;
+  top: 2px;
+  left: 4px;
+  right: 4px;
+  height: 30%;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.user-info-banner {
+  position: absolute;
+  top: 190px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  max-width: 900px;
+  background-color: #F1CA76;
+  border: 4px solid #000000;
+  border-radius: 50px;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  animation: firePulse 2s ease-in-out infinite,
+             borderGlow 1.5s ease-in-out infinite;
+}
+
+.user-info-left {
+  text-align: left;
+}
+
+.username {
+  font-size: 45px;
+  font-family: 'PlayMeGame', sans-serif;
+  color: #000000;
+  margin: 0;
+  margin-bottom: 0px;
+}
+
+.tagline {
+  font-size: 22px;
+  font-family: 'PlayMeGame', sans-serif;
+  color: #000000;
+  margin: 0;
+  animation: blink 0.5s infinite;
+}
+
+.user-info-right {
+  text-align: right;
+}
+
+.rating-number {
+  font-size: 60px;
+  font-family: 'PlayMeGame', sans-serif;
+  color: #000000;
+  height: 72px;
+  margin: 0;
+  margin-bottom: 0px;
+}
+
+.rating-label {
+  font-size: 22px;
+  font-family: 'PlayMeGame', sans-serif;
+  color: #000000;
+  margin: 0;
+}
+
+@keyframes firePulse {
+  0%, 100% {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 5px 25px rgba(255, 140, 0, 0.3);
+  }
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    border-color: #000000;
+  }
+  50% {
+    border-color: #ff8c00;
+  }
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Tabs Section */
+.tabs-container {
+  position: absolute;
+  top: 320px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  max-width: 1300px;
+  margin-top: 80px;
+  display: flex;
+  gap: 20px;
+  z-index: 10;
+}
+
+.tab-btn {
+  flex: 1;
+  background-color: #F1CA76;
+  border: 3px solid #000000;
+  border-radius: 15px;
+  padding: 15px 30px;
+  font-family: 'PlayMeGame', sans-serif;
+  font-size: 26px;
+  font-weight: bold;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tab-btn.active {
+  background-color: #FFD700;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tab-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Friends List Section */
+.friends-list {
+  position: absolute;
+  top: 410px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  max-width: 1300px;
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.friend-card {
+  background-color: #F1CA76;
+  border: 3px solid #000000;
+  border-radius: 15px;
+  padding: 18px 25px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 80px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.friend-bullet {
+  font-size: 45px;
+  color: #000000;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.friend-name {
+  font-family: 'PlayMeGame';
+  font-size: 24px;
+  font-weight: bold;
+  color: #000000;
+  flex: 1;
+  min-width: 150px;
+}
+
+.view-details-btn {
+  background-color: transparent;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: 'PlayMeGame', sans-serif;
+  font-size: 16px;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.view-details-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.status-indicator {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #00FF00;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.status-text {
+  font-family: 'PlayMeGame', sans-serif;
+  font-size: 20px;
+  color: #000000;
+  min-width: 80px;
+}
+
+.challenge-btn {
+  background: linear-gradient(to bottom, #4da6ff, #0066cc);
+  border: 3px solid #000000;
+  border-radius: 20px;
+  padding: 12px 35px;
+  font-family: 'PlayMeGame', sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.challenge-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+

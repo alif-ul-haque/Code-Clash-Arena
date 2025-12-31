@@ -8,6 +8,7 @@ import PlayModePage1v1 from './pvp_battle/pages/1v1_playmode_page.jsx'
 import MainPage from './mainpage_clan_battle/pages/MainPage.jsx'
 import PracticeDashboard from './practice_gym/pages/PracticeDashboard.jsx'
 import OneVOneGlobalPage from './pvp_battle/pages/1v1_global_page.jsx';
+import OneVOneLocalPage from './pvp_battle/pages/1v1_local_page.jsx';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/1v1" element={<FirstPage1v1 />} />
         <Route path="/playmode1v1" element={<PlayModePage1v1 />} />
         <Route path="/1v1-global" element={<OneVOneGlobalPage />} />
+        <Route path="/1v1-local" element={<OneVOneLocalPage />} />
         <Route path="/practice" element={<PracticeDashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -24,7 +24,7 @@ function PlayModePage() {
                 </div>
             </div>
             <div className="battle-options-container">
-                <div className="battle-card">
+                <div className="battle-card" onClick={() => navigate('/1v1-local')} style={{cursor: 'pointer'}}>
                     <h2 className="battle-title">LOCAL BATTLE</h2>
                     <p className="battle-description">challenge a local opponent</p>
                 </div>
