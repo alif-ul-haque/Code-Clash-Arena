@@ -36,38 +36,46 @@ const OneVOneLocalPage = () => {
             <div className="friends-list">
                 <div className="friend-card">
                     <span className="friend-bullet">•</span>
-                    <span className="friend-name">mamn00B</span>
+                    <span className="friend-name">MATIN008</span>
                     <button className="view-details-btn">VIEW DETAILS</button>
+                    <div className="status-container">
                     <div className="status-indicator"></div>
                     <span className="status-text">active</span>
-                    <button className="challenge-btn">challenge</button>
+                    </div>
+                    <button className="challenge-btn">challenge!</button>
                 </div>
 
                 <div className="friend-card">
                     <span className="friend-bullet">•</span>
-                    <span className="friend-name">THAFL007</span>
+                    <span className="friend-name">THAN_00?</span>
                     <button className="view-details-btn">VIEW DETAILS</button>
+                    <div className="status-container">
                     <div className="status-indicator"></div>
                     <span className="status-text">active</span>
-                    <button className="challenge-btn">challenge</button>
+                    </div>
+                    <button className="challenge-btn">challenge!</button>
                 </div>
 
                 <div className="friend-card">
                     <span className="friend-bullet">•</span>
-                    <span className="friend-name">TekiL096</span>
+                    <span className="friend-name">TakiL096</span>
                     <button className="view-details-btn">VIEW DETAILS</button>
+                    <div className="status-container">
                     <div className="status-indicator"></div>
                     <span className="status-text">active</span>
-                    <button className="challenge-btn">challenge</button>
+                    </div>
+                    <button className="challenge-btn">challenge!</button>
                 </div>
 
                 <div className="friend-card">
                     <span className="friend-bullet">•</span>
                     <span className="friend-name">Usama_Jeager</span>
                     <button className="view-details-btn">VIEW DETAILS</button>
+                    <div className="status-container">
                     <div className="status-indicator"></div>
                     <span className="status-text">active</span>
-                    <button className="challenge-btn">challenge</button>
+                    </div>
+                    <button className="challenge-btn">challenge!</button>
                 </div>
             </div>
         </div>

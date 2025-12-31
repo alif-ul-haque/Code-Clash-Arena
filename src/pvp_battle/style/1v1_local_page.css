@@ -231,7 +231,7 @@
 
 .friend-name {
   font-family: 'PlayMeGame';
-  font-size: 24px;
+  font-size: 32px;
   font-weight: bold;
   color: #000000;
   flex: 1;
@@ -243,8 +243,9 @@
   border: 2px solid #000000;
   border-radius: 8px;
   padding: 10px 20px;
+  margin-right: 300px;
   font-family: 'PlayMeGame', sans-serif;
-  font-size: 16px;
+  font-size: 20px;
   color: #000000;
   cursor: pointer;
   transition: all 0.2s;
@@ -253,6 +254,13 @@
 
 .view-details-btn:hover {
   background-color: rgba(0, 0, 0, 0.1);
+}
+
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-right: 120px;
 }
 
 .status-indicator {
@@ -265,23 +273,55 @@
 
 .status-text {
   font-family: 'PlayMeGame', sans-serif;
-  font-size: 20px;
+  font-size: 32px;
   color: #000000;
   min-width: 80px;
 }
 
 .challenge-btn {
-  background: linear-gradient(to bottom, #4da6ff, #0066cc);
+  position: relative;
+  background: linear-gradient(to top, #00B0FF, #60bde9ff);
   border: 3px solid #000000;
-  border-radius: 20px;
+  border-radius: 15px;
   padding: 12px 35px;
   font-family: 'PlayMeGame', sans-serif;
-  font-size: 20px;
+  font-size: 32px;
   font-weight: bold;
   color: #000000;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.challenge-btn::before {
+  content: "";
+  position: absolute;
+  border-radius: 10px;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 45%;
+  width: 92%;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.challenge-btn::after {
+  content: "";
+  position: absolute;
+  border-radius: 10px;
+  top: 2px;
+  left: 4px;
+  right: 4px;
+  height: 30%;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 1;
 }
 
 .challenge-btn:hover {
