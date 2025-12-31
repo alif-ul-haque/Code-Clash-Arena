@@ -99,6 +99,81 @@
 /* Ensure all content is above background */
 .top-bar,
 .stats-panel,
+.filter-section,
+.problem-list {
+  position: relative;
+  z-index: 1;
+}
+
+/* Loading and Error States */
+.loading-container,
+.error-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 40px;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(11, 60, 93, 0.2);
+  border-top: 5px solid #1e90ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 20px;
+  font-size: 24px;
+  color: #0b3c5d;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.error-container {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 60px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border: 3px solid #ff6b6b;
+}
+
+.error-title {
+  font-size: 36px;
+  color: #ff6b6b;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.error-text {
+  font-size: 20px;
+  color: #0b3c5d;
+  margin-bottom: 15px;
+}
+
+.error-hint {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+  opacity: 0.8;
+}
+.stats-panel,
 .problem-list {
   position: relative;
   z-index: 1;
@@ -454,13 +529,20 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7ad957, #5cb83a);
+  background: linear-gradient(135deg, #d3d3d3, #a0a0a0);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   color: white;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  opacity: 0.4;
+  transition: all 0.3s ease;
+}
+
+.check.solved {
+  background: linear-gradient(135deg, #7ad957, #5cb83a);
+  opacity: 1;
 }
 
 /* Right side */
@@ -478,4 +560,223 @@
 .solved {
   font-size: 14px; /* Increase from 0.85rem */
   opacity: 0.7;
+}
+
+/* Filter Section */
+.filter-section {
+  margin: 20px auto;
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+.filter-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.filter-toggle {
+  padding: 12px 24px;
+  font-size: 16px;
+  background: linear-gradient(135deg, #f3d27d, #d4a34a);
+  border: 2px solid #b8892f;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: #1a1a1a;
+  font-weight: bold;
+}
+
+.filter-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #f5d68a, #e0b55c);
+}
+
+.search-box {
+  flex: 1;
+  min-width: 250px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 16px;
+  border: 3px solid #b8892f;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a1a;
+  font-family: 'PlayMeGame', sans-serif;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #1e90ff;
+  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.clear-filters {
+  padding: 12px 24px;
+  font-size: 16px;
+  background: linear-gradient(135deg, #ff6b6b, #ff5252);
+  border: 2px solid #e63946;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: white;
+  font-weight: bold;
+}
+
+.clear-filters:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #ff5252, #ff4444);
+}
+
+.filter-panel {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  border: 3px solid #b8892f;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-group {
+  margin-bottom: 25px;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-label {
+  display: block;
+  font-size: 18px;
+  font-weight: bold;
+  color: #0b3c5d;
+  margin-bottom: 12px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.rating-inputs {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.rating-input {
+  width: 120px;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 2px solid #b8892f;
+  border-radius: 8px;
+  background: white;
+  color: #1a1a1a;
+  font-family: 'PlayMeGame', sans-serif;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.rating-input:focus {
+  outline: none;
+  border-color: #1e90ff;
+  box-shadow: 0 0 8px rgba(30, 144, 255, 0.3);
+}
+
+.rating-separator {
+  font-size: 20px;
+  font-weight: bold;
+  color: #0b3c5d;
+}
+
+.filter-checkbox {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  cursor: pointer;
+  accent-color: #1e90ff;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tag-button {
+  padding: 8px 16px;
+  font-size: 14px;
+  background: linear-gradient(135deg, #e0e0e0, #c0c0c0);
+  border: 2px solid #999;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #1a1a1a;
+  font-family: 'PlayMeGame', sans-serif;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tag-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tag-button.active {
+  background: linear-gradient(135deg, #1e90ff, #0b7edb);
+  border-color: #0b3c5d;
+  color: white;
+  box-shadow: 0 4px 8px rgba(30, 144, 255, 0.4);
+}
+
+.selected-tags-info {
+  margin-top: 15px;
+  padding: 12px 20px;
+  background: rgba(30, 144, 255, 0.1);
+  border-radius: 8px;
+  border: 2px solid #1e90ff;
+  color: #0b3c5d;
+  font-size: 14px;
+}
+
+.no-problems {
+  text-align: center;
+  padding: 60px 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  border: 3px solid #b8892f;
+}
+
+.no-problems p {
+  font-size: 20px;
+  color: #0b3c5d;
+  margin-bottom: 20px;
+}
+
+.no-problems .btn {
+  margin-top: 10px;
 }

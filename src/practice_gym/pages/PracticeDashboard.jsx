@@ -8,6 +8,16 @@ import SuccessPage from './SuccessPage.jsx'
 import AIAssistancePage from './AIAssistancePage.jsx'
 import ExitConfirmationPage from './ExitConfirmationPage.jsx'
 import TimerSetupPage from './TimerSetupPage.jsx'
+import { 
+  codeforcesAPI, 
+  calculateUserStats, 
+  calculateDayStreak, 
+  getRecommendedProblems,
+  filterProblems,
+  getAllTags,
+  mergeLocalAndCFSolved,
+  addLocalSolvedProblem
+} from '../utilities/codeforcesAPI.js'
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -20,12 +30,104 @@ const Dashboard = () => {
   const [timerActive, setTimerActive] = useState(false);
   const [userCode, setUserCode] = useState('');
 
-  const problems = [
-    { id: 1, title: "Theatre Square", tag: "math", rating: "1000", solved: "156.4k" },
-    { id: 2, title: "Watermelon", tag: "Brute Force", rating: "800", solved: "100.1k" },
-    { id: 3, title: "Way Too Long Words", tag: "Implementation", rating: "1000", solved: "130k" },
-    { id: 4, title: "String Task", tag: "String", rating: "1100", solved: "80.5k" }
-  ];
+  // Codeforces data states
+  const [cfHandle] = useState('Scomrades'); // Hardcoded username for now
+  const [userStats, setUserStats] = useState({
+    rating: 0,
+    dayStreak: 0,
+    problemsSolved: 0,
+    accuracy: 0
+  });
+  const [problems, setProblems] = useState([]);
+  const [allProblemsData, setAllProblemsData] = useState(null);
+  const [solvedProblemsSet, setSolvedProblemsSet] = useState(new Set());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Filter states
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [minRating, setMinRating] = useState('');
+  const [maxRating, setMaxRating] = useState('');
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [hideSolved, setHideSolved] = useState(true);
+
+  // Fetch Codeforces data on component mount
+  useEffect(() => {
+    const fetchCodeforcesData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch user info
+        const userInfo = await codeforcesAPI.getUserInfo(cfHandle);
+        
+        // Fetch user submissions
+        const submissions = await codeforcesAPI.getUserStatus(cfHandle);
+        
+        // Fetch all problems
+        const allProblems = await codeforcesAPI.getProblems();
+        
+        // Calculate statistics
+        const stats = calculateUserStats(submissions);
+        const dayStreak = calculateDayStreak(submissions);
+        
+        // Get solved problems set (merge Codeforces + local)
+        const cfSolvedSet = stats.solvedSet;
+        const mergedSolvedSet = mergeLocalAndCFSolved(cfSolvedSet);
+        setSolvedProblemsSet(mergedSolvedSet);
+        
+        // Store all problems data for filtering
+        setAllProblemsData(allProblems);
+        
+        // Get available tags
+        const tags = getAllTags(allProblems);
+        setAvailableTags(tags);
+        
+        // Get recommended problems
+        const recommendedProblems = getRecommendedProblems(
+          allProblems, 
+          userInfo.rating, 
+          mergedSolvedSet, 
+          20
+        );
+        
+        setUserStats({
+          rating: userInfo.rating,
+          dayStreak: dayStreak,
+          problemsSolved: mergedSolvedSet.size,
+          accuracy: stats.accuracy
+        });
+        
+        setProblems(recommendedProblems);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching Codeforces data:', err);
+        setError(err.message || 'Failed to fetch data from Codeforces');
+        setLoading(false);
+      }
+    };
+
+    fetchCodeforcesData();
+  }, [cfHandle]);
+
+  // Apply filters when filter criteria changes
+  useEffect(() => {
+    if (!allProblemsData) return;
+
+    const filters = {
+      searchQuery,
+      minRating: minRating ? parseInt(minRating) : null,
+      maxRating: maxRating ? parseInt(maxRating) : null,
+      tags: selectedTags,
+      hideSolved,
+      limit: 20
+    };
+
+    const filteredProblems = filterProblems(allProblemsData, filters, solvedProblemsSet);
+    setProblems(filteredProblems);
+  }, [searchQuery, minRating, maxRating, selectedTags, hideSolved, allProblemsData, solvedProblemsSet]);
 
   // Timer countdown effect - runs in parent to persist across page changes
   useEffect(() => {
@@ -67,6 +169,72 @@ const Dashboard = () => {
     setTimerActive(false);
   };
 
+  const handleProblemSolved = () => {
+    if (selectedProblem) {
+      // Mark problem as solved locally
+      addLocalSolvedProblem(selectedProblem.id);
+      
+      // Update solved problems set
+      const newSolvedSet = new Set(solvedProblemsSet);
+      newSolvedSet.add(selectedProblem.id);
+      setSolvedProblemsSet(newSolvedSet);
+      
+      // Update stats
+      setUserStats(prev => ({
+        ...prev,
+        problemsSolved: newSolvedSet.size
+      }));
+    }
+    
+    setShowSuccess(true);
+  };
+
+  const toggleTag = (tag) => {
+    setSelectedTags(prev => {
+      if (prev.includes(tag)) {
+        return prev.filter(t => t !== tag);
+      } else {
+        return [...prev, tag];
+      }
+    });
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setMinRating('');
+    setMaxRating('');
+    setSelectedTags([]);
+    setHideSolved(true);
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="dashboard">
+        <div className="dashboard-bg"></div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Loading Codeforces data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="dashboard">
+        <div className="dashboard-bg"></div>
+        <div className="error-container">
+          <h2 className="error-title">⚠️ Error</h2>
+          <p className="error-text">{error}</p>
+          <p className="error-hint">Please check your internet connection or try again later.</p>
+          <button className="btn exit" onClick={() => navigate('/main')}>Go Back</button>
+        </div>
+      </div>
+    );
+  }
+
   if (showSuccess) {
     return <SuccessPage onBack={() => {
       setShowSuccess(false);
@@ -103,7 +271,7 @@ const Dashboard = () => {
       problem={selectedProblem}
       timeLeft={timeLeft}
       onBack={() => setShowExitConfirm(true)}
-      onSubmit={() => setShowSuccess(true)}
+      onSubmit={handleProblemSolved}
       onHelp={() => setShowAIHelp(true)}
       code={userCode}
       onCodeChange={setUserCode}
@@ -131,45 +299,144 @@ const Dashboard = () => {
       {/* Stats Panel */}
       <div className="stats-panel">
         <div className="stat">
-          <span className="label">YOUR RATING:</span>
-          <span className="value">1245</span>
+          <span className="label">CODEFORCES HANDLE:</span>
+          <span className="value">{cfHandle}</span>
         </div>
 
         <div className="stat">
-          <span className="label">DAY STREAK:</span>
-          <span className="value">2</span>
+          <span className="label">YOUR RATING:</span>
+          <span className="value">{userStats.rating}</span>
         </div>
 
         <div className="stat">
           <span className="label">PROBLEMS SOLVED:</span>
-          <span className="value">47</span>
+          <span className="value">{userStats.problemsSolved}</span>
         </div>
 
         <div className="stat">
-          <span className="label">ACCURACY:</span>
-          <span className="value">78%</span>
+          <span className="label">DAY STREAK:</span>
+          <span className="value">{userStats.dayStreak}</span>
         </div>
+      </div>
+
+      {/* Filter Section */}
+      <div className="filter-section">
+        <div className="filter-header">
+          <button 
+            className="btn filter-toggle" 
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            {showFilters ? '▲ Hide Filters' : '▼ Show Filters'}
+          </button>
+          
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="Search problems..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+          </div>
+
+          {(searchQuery || minRating || maxRating || selectedTags.length > 0) && (
+            <button className="btn clear-filters" onClick={clearFilters}>
+              Clear Filters
+            </button>
+          )}
+        </div>
+
+        {showFilters && (
+          <div className="filter-panel">
+            <div className="filter-group">
+              <label className="filter-label">Rating Range:</label>
+              <div className="rating-inputs">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={minRating}
+                  onChange={(e) => setMinRating(e.target.value)}
+                  className="rating-input"
+                  min="800"
+                  max="3500"
+                  step="100"
+                />
+                <span className="rating-separator">—</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={maxRating}
+                  onChange={(e) => setMaxRating(e.target.value)}
+                  className="rating-input"
+                  min="800"
+                  max="3500"
+                  step="100"
+                />
+              </div>
+            </div>
+
+            <div className="filter-group">
+              <label className="filter-label">
+                <input
+                  type="checkbox"
+                  checked={hideSolved}
+                  onChange={(e) => setHideSolved(e.target.checked)}
+                  className="filter-checkbox"
+                />
+                Hide solved problems
+              </label>
+            </div>
+
+            <div className="filter-group">
+              <label className="filter-label">Tags:</label>
+              <div className="tags-container">
+                {availableTags.slice(0, 20).map(tag => (
+                  <button
+                    key={tag}
+                    className={`tag-button ${selectedTags.includes(tag) ? 'active' : ''}`}
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+              {selectedTags.length > 0 && (
+                <div className="selected-tags-info">
+                  Selected: {selectedTags.join(', ')}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Problems List */}
       <div className="problem-list">
-        {problems.map(problem => (
-          <ProblemItem
-            key={problem.id}
-            problem={problem}
-            onClick={() => handleProblemClick(problem)}
-          />
-        ))}
+        {problems.length === 0 ? (
+          <div className="no-problems">
+            <p>No problems found matching your filters.</p>
+            <button className="btn" onClick={clearFilters}>Clear Filters</button>
+          </div>
+        ) : (
+          problems.map(problem => (
+            <ProblemItem
+              key={problem.id}
+              problem={problem}
+              onClick={() => handleProblemClick(problem)}
+              isSolved={solvedProblemsSet.has(problem.id)}
+            />
+          ))
+        )}
       </div>
     </div>
   );
 };
 
-const ProblemItem = ({ problem, onClick }) => {
+const ProblemItem = ({ problem, onClick, isSolved }) => {
   return (
     <div className="problem-item" onClick={onClick} style={{ cursor: 'pointer' }}>
       <div className="left">
-        <div className="check">✔</div>
+        <div className={`check ${isSolved ? 'solved' : ''}`}>✔</div>
         <div>
           <h3>{problem.title}</h3>
           <p>{problem.tag}</p>
