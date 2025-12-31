@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/1v1_local_page.css';
 import logo from '../../assets/icons/cca.png';
+import trophyIcon from '../../assets/icons/trophy.png';
 
 const OneVOneLocalPage = () => {
     const navigate = useNavigate();
@@ -105,7 +106,9 @@ const OneVOneLocalPage = () => {
                             <span className="history-username">{match.username}</span>
                             <span className="history-mode">{match.mode}</span>
                             <span className="history-status">{match.status}</span>
-                            <span className="history-trophy">{match.trophy} 🏆</span>
+                            <span className="history-trophy">
+                                {match.trophy} <img src={trophyIcon} alt="trophy" className="trophy-icon" />
+                            </span>
                         </div>
                     ))}
                 </div>

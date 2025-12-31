@@ -348,7 +348,7 @@
   position: relative;
   border: 3px solid #000000;
   border-radius: 15px;
-  padding: 25px 35px;
+  padding: 18px 35px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -417,9 +417,18 @@
 }
 
 .history-trophy {
-  font-size: 26px;
+  font-size: 28px;
   flex: 0.8;
   text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.trophy-icon {
+  width: 28px;
+  height: 28px;
 }
 
 
