@@ -1,0 +1,23 @@
+.my-clan-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 1000;
+}
+
+.my-clan-menu {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    min-width: 300px;
+    max-width: 90%;
+    position: relative;
+}

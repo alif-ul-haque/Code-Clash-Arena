@@ -1,0 +1,50 @@
+.no-clan-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 1000;
+}
+
+.no-clan-menu {
+    background: rgba(241, 202, 118, 0.705);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 4px solid #000;
+    width: 70vh;
+    height: 20vh;
+    position: relative;
+    color: black;
+    backdrop-filter: blur(10px);
+    box-shadow:inset 4px 4px 20px 22px  rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+}
+
+.no-clan-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border: none;
+    background: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.no-clan-menu div p{
+    font-size: 3rem;
+    text-align: center;
+    margin-top: -10px;
+}
+
+.button-div{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+}

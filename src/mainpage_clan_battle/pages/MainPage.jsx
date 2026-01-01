@@ -16,17 +16,29 @@ import HomePage from '../../homepage_login_signup/pages/HomePage.jsx'
 import OverlayMenu from '../components/OverlayMenu.jsx'
 import Particles from "react-tsparticles"
 import { loadSlim } from "tsparticles-slim"
+import NoClanMenu from '../components/NoClanMenu.jsx'
+import MyClan from '../components/MyClan.jsx'
 
 
 
 export default function MainPage() {
-    let [open, setOpen] = useState(false);
+    let [open, setOpen] = useState({
+        overlayMenu: false,
+        noclan: false,
+        myclan: false,
+    });
+
+    const handleMenuToggle = (menuName, value) => {
+        setOpen(prev => ({ ...prev, [menuName]: value }));
+    };
+
     const navigate = useNavigate();
     let user_detail = {
         username: "rizvee_113",
         xp: 50,
         maxXp: 100,
-        level: 10
+        level: 10,
+        haveClan: true,
     }
 
     const particlesInit = useCallback(async engine => {
@@ -94,7 +106,7 @@ export default function MainPage() {
                 type: "char",
                 options: {
                     char: {
-                        value: ["function", "const", "let", "=>", "{}", "[]", "if", "else", "for", "while", "class", "return", "===", "!=", "&&", "||", "++", "--", "async", "await" , "labiba" , "rizvee" , "alif" , "sabit"],
+                        value: ["function", "const", "let", "=>", "{}", "[]", "if", "else", "for", "while", "class", "return", "===", "!=", "&&", "||", "++", "--", "async", "await", "labiba", "rizvee", "alif", "sabit"],
                         font: "playMeGame",
                         style: "",
                         weight: "600",
@@ -148,6 +160,7 @@ export default function MainPage() {
                             icon={clanIcon}
                             showIcon={true}
                             justifyContent='space-around'
+                            onClick={() => handleMenuToggle(user_detail.haveClan ? 'myclan' : 'noclan', true)}
                         />
                         <Button
                             text="Practice"
@@ -176,7 +189,7 @@ export default function MainPage() {
                             icon={combat}
                             showIcon={true}
                             justifyContent='space-around'
-                            onClick={() => setOpen(true)}
+                            onClick={() => handleMenuToggle('overlayMenu', true)}
                         />
                         <Button
                             text="Battle History"
@@ -207,7 +220,9 @@ export default function MainPage() {
                         </div>
                     </div>
                 </div>
-                <OverlayMenu isOpen={open} onClose={() => { setOpen(false) }} />
+                <OverlayMenu isOpen={open.overlayMenu} onClose={() => handleMenuToggle('overlayMenu', false)} />
+                <NoClanMenu isOpen={open.noclan} onClose={() => handleMenuToggle('noclan', false)} />
+                <MyClan isOpen={open.myclan} onClose={() => handleMenuToggle('myclan', false)} />
             </div>
         </>
     )

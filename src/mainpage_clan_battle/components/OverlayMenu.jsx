@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './OverlayMenu.css';
+import '../style/OverlayMenu.css';
 import Button from '../../assets/components/Button';
 import closeIcon from '../../assets/icons/x-mark.png';
 import pvpImage from '../../assets/images/sword.png';
