@@ -19,7 +19,7 @@ const OneVOneLocalPage = () => {
     return (
         <div className="local-battle-container">
             <img src={logo} alt="Code Clash Arena Logo" className="local-logo" />
-            
+
             <div className="exit-btn-wrapper">
                 <button className="exit-btn" onClick={() => navigate('/playmode1v1')}>Exit</button>
             </div>
@@ -37,13 +37,13 @@ const OneVOneLocalPage = () => {
             </div>
 
             <div className="tabs-container">
-                <button 
+                <button
                     className={`tab-btn ${activeTab === 'friends' ? 'active' : ''}`}
                     onClick={() => setActiveTab('friends')}
                 >
                     Friends
                 </button>
-                <button 
+                <button
                     className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
                     onClick={() => setActiveTab('history')}
                 >
@@ -53,50 +53,79 @@ const OneVOneLocalPage = () => {
 
             {activeTab === 'friends' && (
                 <div className="friends-list">
-                <div className="friend-card">
-                    <span className="friend-bullet">•</span>
-                    <span className="friend-name">MATIN008</span>
-                    <button className="view-details-btn">VIEW DETAILS</button>
-                    <div className="status-container">
-                    <div className="status-indicator"></div>
-                    <span className="status-text">active</span>
-                    </div>
-                    <button className="challenge-btn">challenge!</button>
-                </div>
+                    <div className="friend-card">
+                        <span className="friend-bullet">•</span>
+                        <span className="friend-name">MATIN008</span>
+                        <button className="view-details-btn">VIEW DETAILS</button>
 
-                <div className="friend-card">
-                    <span className="friend-bullet">•</span>
-                    <span className="friend-name">THAN_007</span>
-                    <button className="view-details-btn">VIEW DETAILS</button>
-                    <div className="status-container">
-                    <div className="status-indicator"></div>
-                    <span className="status-text">active</span>
-                    </div>
-                    <button className="challenge-btn">challenge!</button>
-                </div>
+                        <div className="details-overlay"></div>
 
-                <div className="friend-card">
-                    <span className="friend-bullet">•</span>
-                    <span className="friend-name">TakiL096</span>
-                    <button className="view-details-btn">VIEW DETAILS</button>
-                    <div className="status-container">
-                    <div className="status-indicator"></div>
-                    <span className="status-text">active</span>
+                        <div className="details-popup">
+                            <p className="popup-text">Problems Solved:</p>
+                            <p className="popup-value">3500+</p>
+                            <p className="popup-text">Rating: 1800</p>
+                        </div>
+                        <div className="status-container">
+                            <div className="status-indicator"></div>
+                            <span className="status-text">active</span>
+                        </div>
+                        <button className="challenge-btn">challenge!</button>
                     </div>
-                    <button className="challenge-btn">challenge!</button>
-                </div>
 
-                <div className="friend-card">
-                    <span className="friend-bullet">•</span>
-                    <span className="friend-name">Usama_Jeager</span>
-                    <button className="view-details-btn">VIEW DETAILS</button>
-                    <div className="status-container">
-                    <div className="status-indicator"></div>
-                    <span className="status-text">active</span>
+                    <div className="friend-card">
+                        <span className="friend-bullet">•</span>
+                        <span className="friend-name">THAN_007</span>
+                        <button className="view-details-btn">VIEW DETAILS</button>
+                        <div className="details-overlay"></div>
+
+                        <div className="details-popup">
+                            <p className="popup-text">Problems Solved:</p>
+                            <p className="popup-value">3500+</p>
+                            <p className="popup-text">Rating: 1800</p>
+                        </div>
+                        <div className="status-container">
+                            <div className="status-indicator"></div>
+                            <span className="status-text">active</span>
+                        </div>
+                        <button className="challenge-btn">challenge!</button>
                     </div>
-                    <button className="challenge-btn">challenge!</button>
+
+                    <div className="friend-card">
+                        <span className="friend-bullet">•</span>
+                        <span className="friend-name">TakiL096</span>
+                        <button className="view-details-btn">VIEW DETAILS</button>
+                        <div className="details-overlay"></div>
+
+                        <div className="details-popup">
+                            <p className="popup-text">Problems Solved:</p>
+                            <p className="popup-value">3500+</p>
+                            <p className="popup-text">Rating: 1800</p>
+                        </div>
+                        <div className="status-container">
+                            <div className="status-indicator"></div>
+                            <span className="status-text">active</span>
+                        </div>
+                        <button className="challenge-btn">challenge!</button>
+                    </div>
+
+                    <div className="friend-card">
+                        <span className="friend-bullet">•</span>
+                        <span className="friend-name">Usama_Jeager</span>
+                        <button className="view-details-btn">VIEW DETAILS</button>
+                        <div className="details-overlay"></div>
+
+                        <div className="details-popup">
+                            <p className="popup-text">Problems Solved:</p>
+                            <p className="popup-value">3500+</p>
+                            <p className="popup-text">Rating: 1800</p>
+                        </div>
+                        <div className="status-container">
+                            <div className="status-indicator"></div>
+                            <span className="status-text">active</span>
+                        </div>
+                        <button className="challenge-btn">challenge!</button>
+                    </div>
                 </div>
-            </div>
             )}
 
             {activeTab === 'history' && (
@@ -113,6 +142,9 @@ const OneVOneLocalPage = () => {
                     ))}
                 </div>
             )}
+
+
+
         </div>
     );
 };
