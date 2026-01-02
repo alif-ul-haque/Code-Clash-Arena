@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../style/time_rush_problem_count.css';
 
 const TimeRushProblemCount = () => {
+    const navigate = useNavigate();
     const [problemCount, setProblemCount] = useState(1);
 
     const incrementCount = () => {
@@ -30,7 +32,7 @@ const TimeRushProblemCount = () => {
                         </div>
                     </div>
                     
-                    <button className="get-started-btn">
+                    <button className="get-started-btn" onClick={() => navigate('/waiting-page')}>
                         <span className="play-icon">▶</span> GET STARTED
                     </button>
                 </div>
