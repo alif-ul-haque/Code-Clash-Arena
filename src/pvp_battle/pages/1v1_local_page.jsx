@@ -69,7 +69,7 @@ const OneVOneLocalPage = () => {
                             <div className="status-indicator"></div>
                             <span className="status-text">active</span>
                         </div>
-                        <button className="challenge-btn">challenge!</button>
+                        <button className="challenge-btn" onClick={() => navigate('/battle-mode')}>challenge!</button>
                     </div>
 
                     <div className="friend-card">
@@ -87,7 +87,7 @@ const OneVOneLocalPage = () => {
                             <div className="status-indicator"></div>
                             <span className="status-text">active</span>
                         </div>
-                        <button className="challenge-btn">challenge!</button>
+                        <button className="challenge-btn" onClick={() => navigate('/battle-mode')}>challenge!</button>
                     </div>
 
                     <div className="friend-card">
@@ -105,7 +105,7 @@ const OneVOneLocalPage = () => {
                             <div className="status-indicator"></div>
                             <span className="status-text">active</span>
                         </div>
-                        <button className="challenge-btn">challenge!</button>
+                        <button className="challenge-btn" onClick={() => navigate('/battle-mode')}>challenge!</button>
                     </div>
 
                     <div className="friend-card">
@@ -123,7 +123,7 @@ const OneVOneLocalPage = () => {
                             <div className="status-indicator"></div>
                             <span className="status-text">active</span>
                         </div>
-                        <button className="challenge-btn">challenge!</button>
+                        <button className="challenge-btn" onClick={() => navigate('/battle-mode')}>challenge!</button>
                     </div>
                 </div>
             )}
