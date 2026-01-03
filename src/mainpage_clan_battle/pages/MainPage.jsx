@@ -7,10 +7,8 @@ import bgImage from '../../assets/images/10001.png'
 import Button from '../../assets/components/Button.jsx'
 import clanIcon from '../../assets/icons/clan.png'
 import combat from '../../assets/icons/sss.png'
-// import mail from '../../assets/icons/mail.png'
 import history from '../../assets/icons/history.png'
 import swords from '../../assets/icons/swords.png'
-import IntroCard from '../components/IntroCard.jsx'
 import gym from '../../assets/icons/dumbbell.png'
 import HomePage from '../../homepage_login_signup/pages/HomePage.jsx'
 import OverlayMenu from '../components/OverlayMenu.jsx'
@@ -18,6 +16,9 @@ import Particles from "react-tsparticles"
 import { loadSlim } from "tsparticles-slim"
 import NoClanMenu from '../components/NoClanMenu.jsx'
 import MyClan from '../components/MyClan.jsx'
+import CardCarousel from '../components/CardCarousel.jsx'
+import IntroCard from '../components/IntroCard.jsx'
+import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png'
 
 
 
@@ -28,8 +29,71 @@ export default function MainPage() {
         myclan: false,
     });
 
+    const [currentCardIndex, setCurrentCardIndex] = useState(0);
+    const [showCarousel, setShowCarousel] = useState(false);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+
+    const carouselCards = [
+        {
+            title: 'Your Clan',
+            description: 'Your clan is your team. Work together, practice attacks, and fight clan battles to climb the rankings.',
+            image: characterImage
+        },
+        {
+            title: 'Practice Gym',
+            description: 'Train on selected problems to improve your coding skills and prepare for battles.',
+            image: characterImage
+        },
+        {
+            title: 'Clan Battle',
+            description: 'Engage in epic clan battles! Coordinate with your team, execute strategies, and dominate the battlefield.',
+            image: characterImage
+        },
+        {
+            title: 'Attack',
+            description: 'Launch strategic attacks on enemy bases. Plan your approach, deploy your troops, and claim victory!',
+            image: characterImage
+        },
+        {
+            title: 'Battle History',
+            description: 'Review your past battles, analyze strategies, and learn from victories and defeats to improve your skills.',
+            image: characterImage
+        }
+    ];
+
     const handleMenuToggle = (menuName, value) => {
         setOpen(prev => ({ ...prev, [menuName]: value }));
+    };
+
+    const handleCardClick = (index) => {
+        setShowCarousel(true);
+        setCurrentCardIndex(index);
+        
+        // For Attack button (index 3), show overlay menu instead of navigating
+        if (index === 3) {
+            setTimeout(() => {
+                handleMenuToggle('overlayMenu', true);
+                setShowCarousel(false); // Hide carousel after animation
+            }, 700);
+            return;
+        }
+        
+        // Navigate after animation completes (700ms)
+        setTimeout(() => {
+            setIsTransitioning(true);
+            
+            // Additional fade out time (500ms) before navigation
+            setTimeout(() => {
+                const routes = [
+                    '/main',           // Your Clan (index 0)
+                    '/practice',       // Practice Gym (index 1)
+                    '/main',           // Clan Battle (index 2)
+                    '/1v1',            // Attack (index 3)
+                    '/main'            // Battle History (index 4)
+                ];
+                navigate(routes[index]);
+            }, 500);
+        }, 700);
     };
 
     const navigate = useNavigate();
@@ -128,6 +192,8 @@ export default function MainPage() {
     return (
         <>
             <div id="maindiv"
+                className={isTransitioning ? 'transitioning' : ''}
+                className={isTransitioning ? 'transitioning' : ''}
                 style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }}
             >
                 <Particles
@@ -160,7 +226,7 @@ export default function MainPage() {
                             icon={clanIcon}
                             showIcon={true}
                             justifyContent='space-around'
-                            onClick={() => handleMenuToggle(user_detail.haveClan ? 'myclan' : 'noclan', true)}
+                            onClick={() => handleCardClick(0)}
                         />
                         <Button
                             text="Practice"
@@ -170,7 +236,7 @@ export default function MainPage() {
                             icon={gym}
                             showIcon={true}
                             justifyContent='space-around'
-                            onClick={() => navigate('/practice')}
+                            onClick={() => handleCardClick(1)}
                         />
                         <Button
                             text="Clan Battle"
@@ -180,6 +246,7 @@ export default function MainPage() {
                             icon={swords}
                             showIcon={true}
                             justifyContent='space-around'
+                            onClick={() => handleCardClick(2)}
                         />
                         <Button
                             text="Attack"
@@ -189,7 +256,7 @@ export default function MainPage() {
                             icon={combat}
                             showIcon={true}
                             justifyContent='space-around'
-                            onClick={() => handleMenuToggle('overlayMenu', true)}
+                            onClick={() => handleCardClick(3)}
                         />
                         <Button
                             text="Battle History"
@@ -199,6 +266,7 @@ export default function MainPage() {
                             icon={history}
                             showIcon={true}
                             justifyContent='space-around'
+                            onClick={() => handleCardClick(4)}
                         />
                         <Button
                             text="Log Out"
@@ -215,9 +283,15 @@ export default function MainPage() {
                     <div className="welcome-message" >
                         <p className="welcome-text">Forge your legacy</p>
                         <p className="welcome-subtext">Experience competitive programming like never before. Every feature designed for the ultimate coding warfare experience.</p>
-                        <div className="intro-card">
+                        {!showCarousel ? (
                             <IntroCard />
-                        </div>
+                        ) : (
+                            <CardCarousel 
+                                cards={carouselCards}
+                                currentIndex={currentCardIndex}
+                                onCardChange={handleCardClick}
+                            />
+                        )}
                     </div>
                 </div>
                 <OverlayMenu isOpen={open.overlayMenu} onClose={() => handleMenuToggle('overlayMenu', false)} />
