@@ -149,7 +149,7 @@ const OneVOneCodingTimeRushMode = () => {
                             if (currentProblem < totalProblems) {
                                 setCurrentProblem(currentProblem + 1);
                             } else {
-                                navigate('/submit-page-real');
+                                navigate('/submit-page-time-mode');
                             }
                         }}>
                             SUBMIT

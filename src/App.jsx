@@ -15,6 +15,7 @@ import WaitingPage from './pvp_battle/pages/waiting_page.jsx'
 import OneVOneCodingBattle from './pvp_battle/pages/1v1_coding_battle_page.jsx';
 import SubmitPageReal from './pvp_battle/pages/submit_page_real.jsx'
 import OneVOneCodingTimeRushMode from './pvp_battle/pages/1v1_coding_timeRush_mode.jsx' 
+import SubmitPageTimeMode from './pvp_battle/pages/submit_page_time_mode.jsx'
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/1v1-coding-battle" element={<OneVOneCodingBattle />} />
         <Route path="/submit-page-real" element={<SubmitPageReal />} />
         <Route path="/1v1-coding-timeRush-mode" element={<OneVOneCodingTimeRushMode />} />
+        <Route path="/submit-page-time-mode" element={<SubmitPageTimeMode />} />
         <Route path="/practice" element={<PracticeDashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
