@@ -19,6 +19,8 @@ import MyClan from '../components/MyClan.jsx'
 import CardCarousel from '../components/CardCarousel.jsx'
 import IntroCard from '../components/IntroCard.jsx'
 import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png'
+import social from '../../assets/icons/social-network.png'
+import SocialPage from '../components/Social.jsx';
 
 
 
@@ -27,6 +29,7 @@ export default function MainPage() {
         overlayMenu: false,
         noclan: false,
         myclan: false,
+        social: false
     });
 
     const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -40,8 +43,8 @@ export default function MainPage() {
             image: characterImage
         },
         {
-            title: 'Practice Gym',
-            description: 'Train on selected problems to improve your coding skills and prepare for battles.',
+            title: 'ClshConnect',
+            description: 'Make friends, accept clan and friend invitations, and connect with fellow coders.',
             image: characterImage
         },
         {
@@ -51,7 +54,7 @@ export default function MainPage() {
         },
         {
             title: 'Attack',
-            description: 'Launch strategic attacks on enemy bases. Plan your approach, deploy your troops, and claim victory!',
+            description: 'Challenge friends in strategic battles or sharpen your coding skills through practice.',
             image: characterImage
         },
         {
@@ -111,7 +114,7 @@ export default function MainPage() {
         xp: 50,
         maxXp: 100,
         level: 10,
-        haveClan: false,
+        haveClan: true,
         clanDetails: {
             name: "The Code Warriors",
             totalPoints: 12500,
@@ -219,7 +222,6 @@ export default function MainPage() {
         <>
             <div id="maindiv"
                 className={isTransitioning ? 'transitioning' : ''}
-                className={isTransitioning ? 'transitioning' : ''}
                 style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }}
             >
                 <Particles
@@ -257,16 +259,16 @@ export default function MainPage() {
                             onClick={() => handleMenuToggle(user_detail.haveClan ? 'myclan' : 'noclan', true)}
                         />
                         <Button
-                            text="Practice"
+                            text="ClashConnect"
                             height="80px"
                             width="380px"
                             fontSize="36px"
-                            icon={gym}
+                            icon={social}
                             showIcon={true}
                             justifyContent='space-around'
                             onMouseEnter={() => handleCardHover(1)}
                             onMouseLeave={handleCardLeave}
-                            onClick={() => handleCardClick(1)}
+                            onClick={() => handleMenuToggle('social', true)}
                         />
                         <Button
                             text="Clan Battle"
@@ -333,6 +335,7 @@ export default function MainPage() {
                 <OverlayMenu isOpen={open.overlayMenu} onClose={() => handleMenuToggle('overlayMenu', false)} />
                 <NoClanMenu isOpen={open.noclan} onClose={() => handleMenuToggle('noclan', false)} />
                 <MyClan isOpen={open.myclan} onClose={() => handleMenuToggle('myclan', false)} clanDetails={user_detail.clanDetails} />
+                <SocialPage isOpen={open.social} onClose={() => handleMenuToggle('social', false)} />
             </div>
         </>
     )
