@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/1v1_global_page.css';
 import magnifyingGlassIcon from '../../assets/icons/magnifying_glass.png';
@@ -6,6 +6,14 @@ import swordsIcon from '../../assets/icons/swords.png';
 
 const OneVOneGlobalPage = () => {
     const navigate = useNavigate();
+    
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            navigate('/1v1-coding-battle');
+        }, 8000);
+        
+        return () => clearTimeout(timer);
+    }, [navigate]);
     
     return (
         <div className="one-v-one-global-page">

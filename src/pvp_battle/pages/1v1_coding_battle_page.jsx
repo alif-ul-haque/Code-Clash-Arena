@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/1v1_coding_battle_page.css';
 import logo from '../../assets/icons/cca.png';
@@ -7,11 +7,43 @@ const OneVOneCodingBattlePage = () => {
     const navigate = useNavigate();
     const [selectedLanguage, setSelectedLanguage] = useState('PYTHON');
     const [code, setCode] = useState('## WRITE YOUR PYTHON CODE\n##FROM HERE');
+    const fileInputRef = useRef(null);
 
     const handleLanguageChange = (e) => {
         const newLanguage = e.target.value;
         setSelectedLanguage(newLanguage);
         setCode(`## WRITE YOUR ${newLanguage} CODE\n##FROM HERE`);
+    };
+
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            
+            // Update language based on file extension
+            const languageMap = {
+                'py': 'PYTHON',
+                'js': 'JAVASCRIPT',
+                'java': 'JAVA',
+                'cpp': 'C++',
+                'c': 'C++'
+            };
+            
+            if (languageMap[fileExtension]) {
+                setSelectedLanguage(languageMap[fileExtension]);
+            }
+            
+            // Read file content
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setCode(event.target.result);
+            };
+            reader.readAsText(file);
+        }
     };
 
     return (
@@ -83,7 +115,14 @@ const OneVOneCodingBattlePage = () => {
                     ></textarea>
                     
                     <div className="editor-footer">
-                        <button className="upload-btn">UPLOAD</button>
+                        <input 
+                            type="file" 
+                            ref={fileInputRef}
+                            onChange={handleFileUpload}
+                            accept=".py,.js,.java,.cpp,.c"
+                            style={{ display: 'none' }}
+                        />
+                        <button className="upload-btn" onClick={handleUploadClick}>UPLOAD</button>
                         <span className="language-display">LANGUAGE : {selectedLanguage}</span>
                     </div>
                 </div>
