@@ -14,7 +14,7 @@ const BattleMode = () => {
                     <h1 className="mode-heading">SELECT BATTLE MODE</h1>
                     
                     <div className="modes-container">
-                        <div className="mode-card">
+                        <div className="mode-card" onClick={() => navigate('/1v1-coding-battle')}>
                             <h2 className="mode-title">REAL MODE</h2>
                             <p className="mode-description">No time limit. First to solve wins!</p>
                         </div>

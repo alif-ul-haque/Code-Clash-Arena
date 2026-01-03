@@ -12,6 +12,8 @@ import OneVOneLocalPage from './pvp_battle/pages/1v1_local_page.jsx';
 import BattleMode from './pvp_battle/pages/battle_mode.jsx'
 import TimeRushProblemCount from './pvp_battle/pages/time_rush_problem_count.jsx'
 import WaitingPage from './pvp_battle/pages/waiting_page.jsx'
+import OneVOneCodingBattle from './pvp_battle/pages/1v1_coding_battle_page.jsx';
+import SubmitPageReal from './pvp_battle/pages/submit_page_real.jsx' 
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
         <Route path="/battle-mode" element={<BattleMode />} />
         <Route path="/time-rush-problem-count" element={<TimeRushProblemCount />} />
         <Route path="/waiting-page" element={<WaitingPage />} />
+        <Route path="/1v1-coding-battle" element={<OneVOneCodingBattle />} />
+        <Route path="/submit-page-real" element={<SubmitPageReal />} />
         <Route path="/practice" element={<PracticeDashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
