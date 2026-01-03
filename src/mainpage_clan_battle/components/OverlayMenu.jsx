@@ -8,6 +8,7 @@ import practiceImage from '../../assets/images/brain-training.png';
 
 export default function OverlayMenu({ isOpen, onClose }) {
     const [isClosing, setIsClosing] = useState(false);
+    const [isTransitioning, setIsTransitioning] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,11 +31,18 @@ export default function OverlayMenu({ isOpen, onClose }) {
         }, 300);
     };
 
+    const handleNavigate = (path) => {
+        setIsTransitioning(true);
+        setTimeout(() => {
+            navigate(path);
+        }, 800);
+    };
+
     if (!isOpen) return null;
     return (
         <div className="overlay" onClick={handleClose}>
             <div
-                className={`menu ${isClosing ? 'slideOut' : ''}`}
+                className={`menu ${isClosing ? 'slideOut' : ''} ${isTransitioning ? 'transitioning' : ''}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="menu-header">
@@ -65,7 +73,7 @@ export default function OverlayMenu({ isOpen, onClose }) {
                             width='clamp(100px, 12vw, 180px)'
                             color='black'
                             fontSize='clamp(14px, 1.8vw, 22px)'
-                            onClick={() => navigate('/1v1')}
+                            onClick={() => handleNavigate('/1v1')}
                         />
                     </div>
                     <div className="pvp">
@@ -78,7 +86,7 @@ export default function OverlayMenu({ isOpen, onClose }) {
                             width='clamp(100px, 12vw, 180px)'
                             color='black'
                             fontSize='clamp(14px, 1.8vw, 22px)'
-                            onClick={() => navigate('/practice')}
+                            onClick={() => handleNavigate('/practice')}
                         />
                     </div>
                 </div>

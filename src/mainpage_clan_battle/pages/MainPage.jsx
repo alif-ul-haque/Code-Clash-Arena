@@ -74,15 +74,15 @@ export default function MainPage() {
             setTimeout(() => {
                 handleMenuToggle('overlayMenu', true);
                 setShowCarousel(false); // Hide carousel after animation
-            }, 700);
+            }, 800);
             return;
         }
         
-        // Navigate after animation completes (700ms)
+        // Navigate after animation completes (800ms)
         setTimeout(() => {
             setIsTransitioning(true);
             
-            // Additional fade out time (500ms) before navigation
+            // Additional fade out time (800ms) before navigation
             setTimeout(() => {
                 const routes = [
                     '/main',           // Your Clan (index 0)
@@ -92,8 +92,8 @@ export default function MainPage() {
                     '/main'            // Battle History (index 4)
                 ];
                 navigate(routes[index]);
-            }, 500);
-        }, 700);
+            }, 800);
+        }, 800);
     };
 
     const navigate = useNavigate();
