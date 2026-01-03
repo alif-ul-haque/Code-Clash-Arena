@@ -2,13 +2,17 @@ import ccaLogo from '../../assets/icons/cca.png'
 import '../style/HomePage.css'
 import Button from '../../assets/components/Button.jsx'
 import Play from '../../assets/icons/play-button-arrowhead.png'
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { useNavigate } from 'react-router-dom'
 import Particles from "@tsparticles/react"
 import { loadSlim } from "@tsparticles/slim"
+import AboutUsModal from '../components/AboutUsModal.jsx'
+import LearnMoreModal from '../components/LearnMoreModal.jsx'
 
 export default function HomePage() {
     const navigate = useNavigate()
+    const [showAboutUs, setShowAboutUs] = useState(false)
+    const [showLearnMore, setShowLearnMore] = useState(false)
 
     const particlesInit = useCallback(async (engine) => {
         await loadSlim(engine);
@@ -94,8 +98,8 @@ export default function HomePage() {
                     <p>CODE CLASH ARENA</p>
                 </div>
                 <div id="extraInfo">
-                    <p>About us</p>
-                    <p>Learn More</p>
+                    <p onClick={() => setShowAboutUs(true)} style={{ cursor: 'pointer' }}>About us</p>
+                    <p onClick={() => setShowLearnMore(true)} style={{ cursor: 'pointer' }}>Learn More</p>
                 </div>
             </div>
             <hr />
@@ -119,6 +123,10 @@ export default function HomePage() {
                     onClick={() => navigate('/login')}
                 />
             </div>
+
+            {/* Modals */}
+            <AboutUsModal isOpen={showAboutUs} onClose={() => setShowAboutUs(false)} />
+            <LearnMoreModal isOpen={showLearnMore} onClose={() => setShowLearnMore(false)} />
         </div>
     )
 }
