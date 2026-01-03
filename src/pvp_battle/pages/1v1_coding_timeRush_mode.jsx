@@ -14,6 +14,12 @@ const OneVOneCodingTimeRushMode = () => {
     // Timer state (starting from 30:00 = 1800 seconds)
     const [timeLeft, setTimeLeft] = useState(1800);
     
+    const handleLanguageChange = (e) => {
+        const newLanguage = e.target.value;
+        setSelectedLanguage(newLanguage);
+        setCode(`## WRITE YOUR ${newLanguage} CODE\n##FROM HERE`);
+    };
+    
     // Reset timer when problem changes
     useEffect(() => {
         setTimeLeft(1800); // Reset to 30 minutes for each new problem
@@ -100,7 +106,7 @@ const OneVOneCodingTimeRushMode = () => {
                     </div>
                 </div>
                 
-                <button className="exit-btn" onClick={() => navigate('/playmode1v1')}>EXIT</button>
+                <button className="exit-btn" onClick={() => navigate('/1v1-local')}>EXIT</button>
             </div>
 
             {/* Main Content */}
@@ -137,7 +143,7 @@ const OneVOneCodingTimeRushMode = () => {
                         <select 
                             className="language-selector"
                             value={selectedLanguage}
-                            onChange={(e) => setSelectedLanguage(e.target.value)}
+                            onChange={handleLanguageChange}
                         >
                             <option value="PYTHON">PYTHON</option>
                             <option value="JAVASCRIPT">JAVASCRIPT</option>
@@ -160,7 +166,7 @@ const OneVOneCodingTimeRushMode = () => {
                         className="code-editor"
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
-                        placeholder="## WRITE YOUR PYTHON CODE\n##FROM HERE"
+                        placeholder={`## WRITE YOUR ${selectedLanguage} CODE\n##FROM HERE`}
                     ></textarea>
                     
                     <div className="editor-footer">

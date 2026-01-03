@@ -28,7 +28,7 @@ const OneVOneCodingBattlePage = () => {
                     </div>
                 </div>
                 
-                <button className="exit-btn" onClick={() => navigate('/playmode1v1')}>EXIT</button>
+                <button className="exit-btn" onClick={() => navigate('/1v1-local')}>EXIT</button>
             </div>
 
             {/* Main Content */}
