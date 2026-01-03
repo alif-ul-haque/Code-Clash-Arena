@@ -94,7 +94,7 @@
 .search-heading {
     color: #1a1a1a;
     font-family: 'PlayMeGame', sans-serif;
-    font-size: 48px;
+    font-size: 72px;
     margin-bottom: 20px;
     font-weight: bold;
     letter-spacing: 2px;
@@ -102,7 +102,7 @@
 
 .animated-dots {
     color: #1a1a1a;
-    font-size: 24px;
+    font-size: 44px;
     margin: 20px 0;
     letter-spacing: 3px;
     animation: blink 1.5s infinite;
