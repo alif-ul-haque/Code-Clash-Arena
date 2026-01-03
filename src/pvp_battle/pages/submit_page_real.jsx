@@ -16,7 +16,7 @@ const SubmitPageReal = () => {
                     <h1 className="result-heading">CONGRATULATIONS<br/>YOU WON!</h1>
                     
                     <div className="trophy-box">
-                        <img src={trophyIcon} alt="trophy" className="trophy-icon" />
+                        <img src={trophyIcon} alt="trophy" className="trophy-icon-real" />
                         <span className="points-text">+115</span>
                     </div>
                     
