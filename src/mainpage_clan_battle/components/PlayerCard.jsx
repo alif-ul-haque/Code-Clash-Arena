@@ -9,9 +9,9 @@ export default function PlayerCard({
     onToggleFriendRequest
 }) {
     return (
-        <div className="player-card">
-            <div className="player-info">
-                <h3 className="player-name">{player.name}</h3>
+        <div className="player-card-friend">
+            <div className="player-info-friend">
+                <h3 className="player-name-friend">{player.name}</h3>
                 <p className="player-clan">{player.clanName}</p>
             </div>
             <div className="player-rating">

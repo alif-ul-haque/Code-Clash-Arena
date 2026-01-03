@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import bgimage from '../../assets/images/world_map.jpg';
 import Button from '../../assets/components/Button';
 import closeIcon from '../../assets/icons/x-mark.png';
-import Participant from '../components/Participant.jsx';
+import ClanMember from '../components/ClanMember.jsx';
 
 export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
     const {
@@ -126,7 +126,7 @@ export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
                 </div>
                 <div className="clan-participants">
                     {sortedParticipants.map((participant, index) => (
-                        <Participant
+                        <ClanMember
                             key={participant.id || index}
                             position={index + 1}
                             name={participant.name}

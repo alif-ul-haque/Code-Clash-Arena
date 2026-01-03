@@ -1,4 +1,4 @@
-.player-card {
+.player-card-friend {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -14,7 +14,7 @@
     overflow: hidden;
 }
 
-.player-card::before {
+.player-card-friend::before {
     content: "";
     position: absolute;
     border-radius: 8px;
@@ -30,16 +30,17 @@
     z-index: 0;
 }
 
-.player-info {
+.player-info-friend {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 0.3rem;
     position: relative;
     z-index: 1;
+    line-height: 1;
 }
 
-.player-name {
+.player-name-friend {
     margin: 0;
     font-size: 1.2rem;
     font-weight: bold;
