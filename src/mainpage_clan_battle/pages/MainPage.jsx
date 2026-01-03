@@ -65,10 +65,19 @@ export default function MainPage() {
         setOpen(prev => ({ ...prev, [menuName]: value }));
     };
 
+    const handleCardHover = (index) => {
+        setShowCarousel(true);
+        setCurrentCardIndex(index);
+    };
+
+    const handleCardLeave = () => {
+        setShowCarousel(false);
+    };
+
     const handleCardClick = (index) => {
         setShowCarousel(true);
         setCurrentCardIndex(index);
-        
+
         // For Attack button (index 3), show overlay menu instead of navigating
         if (index === 3) {
             setTimeout(() => {
@@ -77,11 +86,11 @@ export default function MainPage() {
             }, 800);
             return;
         }
-        
+
         // Navigate after animation completes (800ms)
         setTimeout(() => {
             setIsTransitioning(true);
-            
+
             // Additional fade out time (800ms) before navigation
             setTimeout(() => {
                 const routes = [
@@ -243,7 +252,9 @@ export default function MainPage() {
                             icon={clanIcon}
                             showIcon={true}
                             justifyContent='space-around'
-                            onClick={() => handleCardClick(0)}
+                            onMouseEnter={() => handleCardHover(0)}
+                            onMouseLeave={handleCardLeave}
+                            onClick={() => handleMenuToggle(user_detail.haveClan ? 'myclan' : 'noclan', true)}
                         />
                         <Button
                             text="Practice"
@@ -253,6 +264,8 @@ export default function MainPage() {
                             icon={gym}
                             showIcon={true}
                             justifyContent='space-around'
+                            onMouseEnter={() => handleCardHover(1)}
+                            onMouseLeave={handleCardLeave}
                             onClick={() => handleCardClick(1)}
                         />
                         <Button
@@ -263,6 +276,8 @@ export default function MainPage() {
                             icon={swords}
                             showIcon={true}
                             justifyContent='space-around'
+                            onMouseEnter={() => handleCardHover(2)}
+                            onMouseLeave={handleCardLeave}
                             onClick={() => handleCardClick(2)}
                         />
                         <Button
@@ -273,7 +288,9 @@ export default function MainPage() {
                             icon={combat}
                             showIcon={true}
                             justifyContent='space-around'
-                            onClick={() => handleCardClick(3)}
+                            onMouseEnter={() => handleCardHover(3)}
+                            onMouseLeave={handleCardLeave}
+                            onClick={() => handleMenuToggle('overlayMenu', true)}
                         />
                         <Button
                             text="Battle History"
@@ -283,6 +300,8 @@ export default function MainPage() {
                             icon={history}
                             showIcon={true}
                             justifyContent='space-around'
+                            onMouseEnter={() => handleCardHover(4)}
+                            onMouseLeave={handleCardLeave}
                             onClick={() => handleCardClick(4)}
                         />
                         <Button
@@ -303,7 +322,7 @@ export default function MainPage() {
                         {!showCarousel ? (
                             <IntroCard />
                         ) : (
-                            <CardCarousel 
+                            <CardCarousel
                                 cards={carouselCards}
                                 currentIndex={currentCardIndex}
                                 onCardChange={handleCardClick}
