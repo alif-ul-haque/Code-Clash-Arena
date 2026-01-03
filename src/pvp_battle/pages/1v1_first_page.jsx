@@ -55,6 +55,7 @@ function FirstPage1v1() {
         <span>GET STARTED</span>
       </button>
     </div>
+    </div>
   );
 }
 

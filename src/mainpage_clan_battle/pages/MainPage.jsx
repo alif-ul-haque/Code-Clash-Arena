@@ -363,7 +363,7 @@ export default function MainPage() {
                 </div>
                 <OverlayMenu isOpen={open.overlayMenu} onClose={() => handleMenuToggle('overlayMenu', false)} />
                 <NoClanMenu isOpen={open.noclan} onClose={() => handleMenuToggle('noclan', false)} />
-                <MyClan isOpen={open.myclan} onClose={() => handleMenuToggle('myclan', false)} clanDetails={user_detail.clanDetails} />
+                <MyClan isOpen={open.myclan} onClose={() => handleMenuToggle('myclan', false)} clanDetails={userDetail.clanDetails} />
                 <SocialPage isOpen={open.social} onClose={() => handleMenuToggle('social', false)} />
             </div>
         </>
