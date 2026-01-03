@@ -1,12 +1,26 @@
-.page-container_first {
+.first-page-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  overflow: hidden;
+  background: #000814;
+}
+
+.first-page-container_inner {
+  position: relative;
   background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
   url('../../assets/images/10002.png');
   background-size: cover;
   background-position: center;
+  background-color: #000814;
   min-height: 100vh;
-  /* max-height: 100vh; */
+  height: 100vh;
   overflow: hidden;
   width: 100%;
+  z-index: 1;
 }
 
 .logo {

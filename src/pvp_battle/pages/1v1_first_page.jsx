@@ -17,8 +17,8 @@ function FirstPage1v1() {
   };
 
   return (
-    <div className={`page-container ${isTransitioning ? 'page-transition-out' : ''}`}>
-    <div className="page-container_first">
+    <div className={`first-page-container ${isTransitioning ? 'page-transition-out' : ''}`}>
+    <div className="first-page-container_inner">
       <img src={logo} alt="Code Clash Arena Logo" className="logo" />
       <div className="profile-section">
         <img src={userIcon} alt="User" className="user-icon" />
@@ -39,16 +39,6 @@ function FirstPage1v1() {
         <div className="feature-card">
           <h2>Real Problems Solve CodeForces problems head-to-head</h2>
         </div>
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
-        <Button
-          height='103px'
-          width='409px'
-          text='GET STARTED'
-          backgroundColor='#F1CA76'
-          showIcon={true}
-          onClick={() => handleNavigateWithTransition('/playmode')}
-        />
       </div>
       <button className="glow-btn" onClick={() => navigate("/playmode1v1")}>
         <span>▶</span>
