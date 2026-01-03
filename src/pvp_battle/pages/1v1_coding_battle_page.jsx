@@ -8,6 +8,12 @@ const OneVOneCodingBattlePage = () => {
     const [selectedLanguage, setSelectedLanguage] = useState('PYTHON');
     const [code, setCode] = useState('## WRITE YOUR PYTHON CODE\n##FROM HERE');
 
+    const handleLanguageChange = (e) => {
+        const newLanguage = e.target.value;
+        setSelectedLanguage(newLanguage);
+        setCode(`## WRITE YOUR ${newLanguage} CODE\n##FROM HERE`);
+    };
+
     return (
         <div className="coding-battle-container">
             {/* Header Section */}
@@ -58,7 +64,7 @@ const OneVOneCodingBattlePage = () => {
                         <select 
                             className="language-selector"
                             value={selectedLanguage}
-                            onChange={(e) => setSelectedLanguage(e.target.value)}
+                            onChange={handleLanguageChange}
                         >
                             <option value="PYTHON">PYTHON</option>
                             <option value="JAVASCRIPT">JAVASCRIPT</option>
@@ -73,7 +79,7 @@ const OneVOneCodingBattlePage = () => {
                         className="code-editor"
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
-                        placeholder="## WRITE YOUR PYTHON CODE\n##FROM HERE"
+                        placeholder={`## WRITE YOUR ${selectedLanguage} CODE\n##FROM HERE`}
                     ></textarea>
                     
                     <div className="editor-footer">
