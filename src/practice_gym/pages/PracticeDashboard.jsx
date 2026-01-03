@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../style/PracticeDashboard.css'
 import ccaLogo from '../../assets/icons/cca.png'
-import bg from '../../assets/images/bg.png'
+//import bg from '../../assets/images/bg.png'
 import ProblemPage from './ProblemPage.jsx'
 import SuccessPage from './SuccessPage.jsx'
 import AIAssistancePage from './AIAssistancePage.jsx'
 import ExitConfirmationPage from './ExitConfirmationPage.jsx'
 import TimerSetupPage from './TimerSetupPage.jsx'
+import Particles from "react-tsparticles"
+import { loadSlim } from "tsparticles-slim"
 import { 
   codeforcesAPI, 
   calculateUserStats, 
@@ -52,6 +54,91 @@ const Dashboard = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [availableTags, setAvailableTags] = useState([]);
   const [hideSolved, setHideSolved] = useState(true);
+
+  // Particle configuration
+  const particlesInit = useCallback(async engine => {
+    await loadSlim(engine);
+  }, []);
+
+  const particlesOptions = {
+    background: {
+      color: {
+        value: "transparent",
+      },
+    },
+    fpsLimit: 60,
+    interactivity: {
+      events: {
+        onHover: {
+          enable: true,
+          mode: "bubble",
+        },
+      },
+      modes: {
+        bubble: {
+          distance: 150,
+          size: 20,
+          duration: 2,
+          opacity: 1,
+        },
+      },
+    },
+    particles: {
+      color: {
+        value: ["#61dafb", "#f9ca24", "#6c5ce7", "#00b894", "#fd79a8"],
+      },
+      links: {
+        enable: false,
+      },
+      move: {
+        direction: "bottom",
+        enable: true,
+        outModes: {
+          default: "out",
+        },
+        random: false,
+        speed: 2,
+        straight: true,
+      },
+      number: {
+        density: {
+          enable: true,
+          area: 800,
+        },
+        value: 80,
+      },
+      opacity: {
+        value: 0.7,
+        random: true,
+        anim: {
+          enable: true,
+          speed: 1,
+          opacity_min: 0.3,
+          sync: false,
+        },
+      },
+      shape: {
+        type: "char",
+        options: {
+          char: {
+            value: ["function", "const", "let", "=>", "{}", "[]", "if", "else", "for", "while", "class", "return", "===", "!=", "&&", "||", "++", "--", "async", "await"],
+            font: "playMeGame",
+            style: "",
+            weight: "600",
+            fill: true,
+          },
+        },
+      },
+      size: {
+        value: 12,
+        random: {
+          enable: true,
+          minimumValue: 8,
+        },
+      },
+    },
+    detectRetina: true,
+  };
 
   // Fetch Codeforces data on component mount
   useEffect(() => {
@@ -281,6 +368,19 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       <div className="dashboard-bg"></div>
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        options={particlesOptions}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: 1,
+        }}
+      />
 
       {/* Top Bar */}
       <div className="top-bar">

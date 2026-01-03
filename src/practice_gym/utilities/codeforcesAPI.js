@@ -128,7 +128,7 @@ const getProblemSolvedCount = (problemStats, contestId, index) => {
 // Get recommended problems based on user rating
 export const getRecommendedProblems = (problemsData, userRating, solvedProblems, count = 20) => {
   const targetRating = userRating || 1200;
-  const ratingRange = [targetRating - 200, targetRating + 400];
+  const minRating = targetRating + 400;
 
   const { problems, problemStatistics } = problemsData;
 
@@ -136,8 +136,7 @@ export const getRecommendedProblems = (problemsData, userRating, solvedProblems,
     const problemId = `${problem.contestId}-${problem.index}`;
     return (
       problem.rating &&
-      problem.rating >= ratingRange[0] &&
-      problem.rating <= ratingRange[1] &&
+      problem.rating >= minRating &&
       !solvedProblems.has(problemId) &&
       problem.type === 'PROGRAMMING'
     );
