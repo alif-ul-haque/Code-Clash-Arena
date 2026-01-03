@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [timeLeft, setTimeLeft] = useState(null);
   const [timerActive, setTimerActive] = useState(false);
   const [userCode, setUserCode] = useState('');
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const problems = [
     { id: 1, title: "Theatre Square", tag: "math", rating: "1000", solved: "156.4k" },
@@ -47,6 +48,13 @@ const Dashboard = () => {
   const handleProblemClick = (problem) => {
     setSelectedProblem(problem);
     setShowTimerSetup(true);
+  };
+
+  const handleNavigateWithTransition = (path) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      navigate(path);
+    }, 1000);
   };
 
   const handleTimerStart = (seconds) => {
@@ -111,7 +119,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="dashboard">
+    <div className={`dashboard ${isTransitioning ? 'page-transition-out' : ''}`}>
       <div className="dashboard-bg"></div>
 
       {/* Top Bar */}
@@ -124,7 +132,7 @@ const Dashboard = () => {
 
         <div className="top-actions">
           <button className="btn practice">Let's Practice</button>
-          <button className="btn exit" onClick={() => navigate('/main')}>EXIT</button>
+          <button className="btn exit" onClick={() => handleNavigateWithTransition('/main')}>EXIT</button>
         </div>
       </div>
 
