@@ -12,7 +12,9 @@ export default function Button({
     showIcon = false,
     borderRadius = "15px",
     justifyContent = "center",
-    onClick
+    onClick,
+    onMouseEnter,
+    onMouseLeave
 }) {
     const buttonStyle = {
         backgroundColor: backgroundColor,
@@ -36,7 +38,7 @@ export default function Button({
     }
 
     return (
-        <button className="glow-btn" style={buttonStyle} onClick={onClick}>
+        <button className="glow-btn" style={buttonStyle} onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             {text && <span style={textStyle}>{text}</span>}
             {showIcon && <span style={iconStyle}><img id="logo" src={icon} /></span>}
         </button>

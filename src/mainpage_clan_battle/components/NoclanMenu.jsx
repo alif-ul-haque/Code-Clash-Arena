@@ -1,8 +1,15 @@
 import '../style/NoclanMenu.css';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../../assets/components/Button.jsx';
+import FindClan from '../components/FindClan.jsx';
 
 export default function NoClanMenu({ isOpen, onClose }) {
+    let [open, setOpen] = useState(false);
+    const handleChange = () => {
+        setOpen(true);
+        onclose();
+    }
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = "hidden";
@@ -34,6 +41,7 @@ export default function NoClanMenu({ isOpen, onClose }) {
                         width="200px"
                         fontSize="32px"
                         borderRadius="15px"
+                        onClick={handleChange}
                     />
                     <Button
                         text="create clan"
@@ -45,6 +53,7 @@ export default function NoClanMenu({ isOpen, onClose }) {
                     />
                 </div>
             </div>
+            <FindClan isOpen={open} onClose={() => setOpen(false)} />
         </div>
     );
 }
