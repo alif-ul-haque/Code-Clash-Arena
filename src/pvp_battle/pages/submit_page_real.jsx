@@ -20,7 +20,7 @@ const SubmitPageReal = () => {
                         <span className="points-text">+115</span>
                     </div>
                     
-                    <button className="lobby-btn" onClick={() => navigate('/1v1-local')}>GET BACK TO LOBBY</button>
+                    <button className="lobby-btn" onClick={() => navigate('/playmode1v1')}>GET BACK TO LOBBY</button>
                 </div>
             </div>
         </div>
