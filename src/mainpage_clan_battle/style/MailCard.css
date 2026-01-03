@@ -1,0 +1,81 @@
+.mail-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #C1C384;
+    border: 4px solid black;
+    border-radius: 15px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.mail-card::before {
+    content: "";
+    position: absolute;
+    border-radius: 8.88px;
+    top: 4%;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 60%;
+    width: 99%;
+    background: linear-gradient(to bottom,
+            rgb(253, 253, 253),
+            rgba(255, 255, 255, 0.055));
+    pointer-events: none;
+    z-index: 1;
+}
+
+
+.mail-icon {
+    font-size: 2.5rem;
+    min-width: 3rem;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mail-icon-img {
+    width: 3rem;
+    height: 3rem;
+}
+
+.mail-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    position: relative;
+    z-index: 1;
+}
+
+.mail-from {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: black;
+}
+
+.mail-message {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.mail-time {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.3rem;
+}
+
+.mail-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
