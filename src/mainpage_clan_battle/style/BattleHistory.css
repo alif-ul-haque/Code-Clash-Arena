@@ -1,0 +1,421 @@
+.battle-history-page {
+    position: relative;
+    min-height: 100vh;
+    background: linear-gradient(135deg, rgba(10, 60, 80, 0.98) 0%, rgba(5, 40, 60, 0.98) 100%), url('../../assets/images/10002.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+/* Header */
+.history-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: slideDown 0.6s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.history-header h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 0 0 60px rgba(255, 215, 0, 0.3);
+    margin: 0;
+    letter-spacing: 3px;
+}
+
+.history-header p {
+    font-size: 1.2rem;
+    color: #00FF7F;
+    margin-top: 0.5rem;
+    letter-spacing: 1px;
+}
+
+/* Tabs */
+.battle-tabs {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 14px 40px;
+    font-size: 1rem;
+    font-weight: 700;
+    border: 3px solid #00FF7F;
+    background: transparent;
+    color: #00FF7F;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+.tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 127, 0.3), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.tab-btn:hover {
+    background: rgba(0, 255, 127, 0.15);
+    box-shadow: 0 0 25px rgba(0, 255, 127, 0.5);
+    transform: translateY(-3px);
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #FFD700, #FFC700);
+    color: #0a3c50;
+    border-color: #FFD700;
+    box-shadow: 0 0 35px rgba(255, 215, 0, 0.8);
+}
+
+/* Battles Container */
+.battles-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.battles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Battle Row */
+.battle-row {
+    display: grid;
+    grid-template-columns: 150px 1fr 200px;
+    gap: 2rem;
+    align-items: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(0, 150, 150, 0.25) 0%, rgba(0, 120, 140, 0.15) 100%);
+    border: 2px solid #00FF7F;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    animation: slideUp 0.6s ease-out backwards;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.battle-row:nth-child(1) { animation-delay: 0.1s; }
+.battle-row:nth-child(2) { animation-delay: 0.2s; }
+.battle-row:nth-child(3) { animation-delay: 0.3s; }
+
+.battle-row:hover {
+    background: linear-gradient(135deg, rgba(0, 150, 150, 0.35) 0%, rgba(0, 120, 140, 0.25) 100%);
+    border-color: #FFD700;
+    box-shadow: 0 0 30px rgba(0, 255, 127, 0.3);
+    transform: translateY(-5px);
+}
+
+/* Date Info */
+.battle-date-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+}
+
+.date {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #FFD700;
+    letter-spacing: 1px;
+}
+
+.time {
+    font-size: 0.9rem;
+    color: #00FF7F;
+    opacity: 0.9;
+}
+
+/* 1v1 Players Section */
+.player-vs-player {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr;
+    gap: 1rem;
+    align-items: center;
+}
+
+.player-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 150, 150, 0.2);
+    border: 2px solid #00FF7F;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.player-card.win {
+    background: rgba(0, 200, 100, 0.15);
+    border-color: #00DD77;
+    box-shadow: inset 0 0 15px rgba(0, 221, 119, 0.2);
+}
+
+.player-card.loss {
+    background: rgba(200, 50, 50, 0.15);
+    border-color: #FF6644;
+    box-shadow: inset 0 0 15px rgba(255, 102, 68, 0.2);
+}
+
+.player-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(0, 255, 127, 0.4);
+}
+
+.player-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    border: 2px solid #FFD700;
+    object-fit: cover;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+.player-info {
+    flex: 1;
+}
+
+.player-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #FFD700;
+    margin: 0;
+}
+
+.player-rating {
+    font-size: 0.85rem;
+    color: #00FF7F;
+    margin: 0.2rem 0 0 0;
+}
+
+.player-score {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #FFD700;
+    min-width: 60px;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+.vs-divider {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #FFD700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    animation: vsPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes vsPulse {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+/* Clan Section */
+.clan-vs-clan {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr;
+    gap: 1rem;
+    align-items: center;
+}
+
+.clan-card {
+    padding: 1rem;
+    background: rgba(0, 150, 150, 0.2);
+    border: 2px solid #00FF7F;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.clan-card.win {
+    background: rgba(0, 200, 100, 0.15);
+    border-color: #00DD77;
+    box-shadow: inset 0 0 15px rgba(0, 221, 119, 0.2);
+}
+
+.clan-card.loss {
+    background: rgba(200, 50, 50, 0.15);
+    border-color: #FF6644;
+    box-shadow: inset 0 0 15px rgba(255, 102, 68, 0.2);
+}
+
+.clan-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(0, 255, 127, 0.4);
+}
+
+.clan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(0, 255, 127, 0.3);
+}
+
+.clan-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #FFD700;
+}
+
+.clan-score {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #00DD77;
+    text-shadow: 0 0 10px rgba(0, 221, 119, 0.4);
+}
+
+.clan-members {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.member-item {
+    font-size: 0.9rem;
+    color: #00FF7F;
+    padding: 0.4rem 0.8rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    border-left: 2px solid #00FF7F;
+    transition: all 0.2s ease;
+}
+
+.member-item:hover {
+    background: rgba(0, 255, 127, 0.1);
+    transform: translateX(5px);
+}
+
+/* Battle Stats Info */
+.battle-stats-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.8rem;
+    background: rgba(0, 150, 150, 0.2);
+    border: 1.5px solid #00FF7F;
+    border-radius: 8px;
+}
+
+.stat-item.rating-change,
+.stat-item.trophy-change {
+    border-color: #FFD700;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.stat-item.gain {
+    border-color: #00DD77;
+    background: rgba(0, 221, 119, 0.1);
+}
+
+.stat-item.loss {
+    border-color: #FF6644;
+    background: rgba(255, 102, 68, 0.1);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #00FF7F;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+.stat-item.gain .stat-value {
+    color: #00DD77;
+    text-shadow: 0 0 8px rgba(0, 221, 119, 0.4);
+}
+
+.stat-item.loss .stat-value {
+    color: #FF6644;
+    text-shadow: 0 0 8px rgba(255, 102, 68, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .battle-row {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .battle-date-info {
+        order: -1;
+    }
+    
+    .history-header h1 {
+        font-size: 2.5rem;
+    }
+}

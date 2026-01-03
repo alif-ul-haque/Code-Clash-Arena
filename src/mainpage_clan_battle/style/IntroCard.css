@@ -116,11 +116,11 @@
 }
 
 .intro-card.flipping {
-    animation: flipForward 0.7s ease-in-out;
+    animation: flipForward 0.9s ease-in-out;
 }
 
 .intro-card.flipping.backward {
-    animation: flipBackward 0.7s ease-in-out;
+    animation: flipBackward 0.9s ease-in-out;
 }
 
 /* Large screens - maintain original design */

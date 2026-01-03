@@ -78,21 +78,21 @@ export default function MainPage() {
             return;
         }
         
-        // Navigate after animation completes (800ms)
+        // Navigate after animation completes (800ms card flip + 500ms fade)
         setTimeout(() => {
             setIsTransitioning(true);
             
-            // Additional fade out time (800ms) before navigation
+            // Additional fade out time (500ms) before navigation
             setTimeout(() => {
                 const routes = [
-                    '/main',           // Your Clan (index 0)
-                    '/practice',       // Practice Gym (index 1)
-                    '/main',           // Clan Battle (index 2)
-                    '/1v1',            // Attack (index 3)
-                    '/main'            // Battle History (index 4)
+                    '/main',                // Your Clan (index 0)
+                    '/practice',            // Practice Gym (index 1)
+                    '/main',                // Clan Battle (index 2)
+                    '/1v1',                 // Attack (index 3)
+                    '/battle-history'       // Battle History (index 4)
                 ];
                 navigate(routes[index]);
-            }, 800);
+            }, 500);
         }, 800);
     };
 

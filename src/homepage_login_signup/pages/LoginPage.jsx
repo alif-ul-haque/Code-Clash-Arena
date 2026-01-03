@@ -19,6 +19,12 @@ export default function LoginPage() {
     const handleSubmit = (e) => {
         e.preventDefault()
         if (formData.username && formData.password) {
+            // Store user data in localStorage
+            localStorage.setItem('userId', formData.username)
+            localStorage.setItem('userProfile', JSON.stringify({
+                username: formData.username,
+                loginTime: new Date().toISOString()
+            }))
             navigate('/main')
         }
     }

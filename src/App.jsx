@@ -7,6 +7,7 @@ import FirstPage1v1 from './pvp_battle/pages/1v1_first_page.jsx'
 import PlayModePage from './pvp_battle/pages/1v1_playmode_page.jsx'
 import MainPage from './mainpage_clan_battle/pages/MainPage.jsx'
 import PracticeDashboard from './practice_gym/pages/PracticeDashboard.jsx'
+import BattleHistoryPage from './mainpage_clan_battle/pages/BattleHistoryPage.jsx'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/1v1" element={<FirstPage1v1 />} />
         <Route path="/playmode" element={<PlayModePage />} />
         <Route path="/practice" element={<PracticeDashboard />} />
+        <Route path="/battle-history" element={<BattleHistoryPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
