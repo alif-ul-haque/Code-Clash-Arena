@@ -103,6 +103,23 @@ export default function MainPage() {
         maxXp: 100,
         level: 10,
         haveClan: true,
+        clanDetails: {
+            name: "The Code Warriors",
+            totalPoints: 12500,
+            members: '25/50',
+            type: 'Open',
+            requiredRating: '1200',
+            warFrequency: 'Always',
+            location: 'Global',
+            warWon: 15,
+            participants: [
+                { id: 1, name: "Alice_99", role: "Leader", warParticipated: 10, problemsSolved: 95, rating: 1800 },
+                { id: 2, name: "Bob_Smith", role: "Co-Leader", warParticipated: 12, problemsSolved: 88, rating: 1650 },
+                { id: 3, name: "Charlie_Dev", role: "Member", warParticipated: 8, problemsSolved: 75, rating: 1500 },
+                { id: 4, name: "Diana_Code", role: "Member", warParticipated: 15, problemsSolved: 102, rating: 1900 },
+                { id: 5, name: "Eve_Hacker", role: "Elder", warParticipated: 6, problemsSolved: 67, rating: 1400 }
+            ]
+        }
     }
 
     const particlesInit = useCallback(async engine => {
@@ -296,7 +313,7 @@ export default function MainPage() {
                 </div>
                 <OverlayMenu isOpen={open.overlayMenu} onClose={() => handleMenuToggle('overlayMenu', false)} />
                 <NoClanMenu isOpen={open.noclan} onClose={() => handleMenuToggle('noclan', false)} />
-                <MyClan isOpen={open.myclan} onClose={() => handleMenuToggle('myclan', false)} />
+                <MyClan isOpen={open.myclan} onClose={() => handleMenuToggle('myclan', false)} clanDetails={user_detail.clanDetails} />
             </div>
         </>
     )

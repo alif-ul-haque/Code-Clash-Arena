@@ -42,9 +42,9 @@ export default function OverlayMenu({ isOpen, onClose }) {
                     <div className="close-button">
                         <Button
                             text=''
-                            height='3rem'
-                            width='3rem'
-                            fontSize='24px'
+                            height='clamp(2rem, 3vw, 3rem)'
+                            width='clamp(2rem, 3vw, 3rem)'
+                            fontSize='clamp(14px, 1.5vw, 20px)'
                             onClick={handleClose}
                             backgroundColor='#DF4F16'
                             borderRadius='10px'
@@ -61,10 +61,10 @@ export default function OverlayMenu({ isOpen, onClose }) {
                         <Button
                             backgroundColor='#E64E4E'
                             text='Enter'
-                            height='60px'
-                            width='200px'
+                            height='clamp(35px, 4vw, 55px)'
+                            width='clamp(100px, 12vw, 180px)'
                             color='black'
-                            fontSize='24px'
+                            fontSize='clamp(14px, 1.8vw, 22px)'
                             onClick={() => navigate('/1v1')}
                         />
                     </div>
@@ -74,10 +74,10 @@ export default function OverlayMenu({ isOpen, onClose }) {
                         <Button
                             backgroundColor='#E64E4E'
                             text='Enter'
-                            height='60px'
-                            width='200px'
+                            height='clamp(35px, 4vw, 55px)'
+                            width='clamp(100px, 12vw, 180px)'
                             color='black'
-                            fontSize='24px'
+                            fontSize='clamp(14px, 1.8vw, 22px)'
                             onClick={() => navigate('/practice')}
                         />
                     </div>

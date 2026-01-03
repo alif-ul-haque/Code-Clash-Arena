@@ -3,8 +3,8 @@
     inset: 0;
     background: rgba(0, 0, 0, 0.3);
 
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(0.5vw);
+    -webkit-backdrop-filter: blur(0.5vw);
 
     display: flex;
     align-items: center;
@@ -15,11 +15,11 @@
 
 .menu {
     background: #F1CA76;
-    padding-left: 2rem;
-    border-radius: 0px 15px 15px 0px;
-    min-width: 60vh;
-    max-width: 90%;
-    height: 70vh;
+    padding: clamp(1rem, 2vw, 2rem);
+    border-radius: 0px clamp(10px, 1vw, 15px) clamp(10px, 1vw, 15px) 0px;
+    min-width: clamp(40vw, 48vh, 56vw);
+    max-width: 72%;
+    height: clamp(60vh, 70vh, 80vh);
     position: absolute;
     left: 0;
     top: 50%;
@@ -27,10 +27,10 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    border-width: 4px 4px 4px 0px;
+    border-width: clamp(2px, 0.3vw, 4px) clamp(2px, 0.3vw, 4px) clamp(2px, 0.3vw, 4px) 0px;
     border-style: solid;
     border-color: black;
-    box-shadow: inset 4px 4px 20px 20px rgba(0, 0, 0, 0.55);
+    box-shadow: inset clamp(2px, 0.3vw, 4px) clamp(2px, 0.3vw, 4px) clamp(15px, 1.5vw, 20px) clamp(15px, 1.5vw, 20px) rgba(0, 0, 0, 0.55);
     animation: slideIn 0.3s forwards;
 }
 
@@ -40,69 +40,91 @@
 
 .close {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: clamp(8px, 1vw, 12px);
+    right: clamp(8px, 1vw, 12px);
     border: none;
     background: none;
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 1.2vw, 1.5rem);
     cursor: pointer;
 }
 
 .menu-header {
-    font-size: 4rem;
-    padding: 1rem 2rem;
-    margin-bottom: 1rem;
+    font-size: clamp(2rem, 4vw, 4rem);
+    padding: clamp(0.75rem, 1.5vw, 1rem) clamp(1rem, 2vw, 2rem);
+    margin-bottom: clamp(0.5rem, 1vw, 1rem);
     text-align: center;
     font-weight: bold;
     display: flex;
+    flex-wrap: nowrap;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     color: black;
-    gap: 10px;
-    margin-top: 1rem;
+    gap: clamp(5px, 1vw, 10px);
+    margin-top: 0;
     line-height: 1.1;
 }
 
 .menu-header p {
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-right: 0;
-    margin-left: 3rem;
+    margin: 0;
+    margin-left: clamp(1rem, 2vw, 3rem);
+    font-size: clamp(1.5rem, 5vw, 4rem) !important;
+    flex: 1;
+    min-width: clamp(100px, 12vw, 150px);
+    line-height: 1.1;
 }
 
 .close-button {
-    margin-top: 0.5rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .menu-image {
-    width: 150px;
-    height: 150px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 1rem;
-    margin-bottom: 0;
+    width: clamp(80px, 12vw, 140px);
+    height: clamp(80px, 12vw, 140px);
+    margin: 0;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
 .menu_pictures {
     display: flex;
-    justify-content: space-between;
-    padding: 1rem;
-    margin-left: -15px;
-    margin-right: 10px;
-    margin-top: -10px;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: clamp(1rem, 2vw, 2rem);
+    padding: clamp(0.75rem, 1.5vw, 1rem);
+    margin: 0 auto;
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .pvp {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 4px solid black;
-    width: 200px;
-    padding: 1rem;
+    justify-content: space-evenly;
+    border: clamp(2px, 0.3vw, 4px) solid black;
+    width: clamp(140px, 20vw, 220px);
+    min-height: clamp(280px, 40vh, 400px);
+    flex: 0 0 auto;
+    padding: clamp(1rem, 2vw, 1.5rem);
     background-color: #69D2FF;
-    border-radius: 15px;
-    box-shadow: inset 4px 4px 20px 5px rgba(0, 0, 0, 0.55);
+    border-radius: clamp(10px, 1vw, 15px);
+    box-shadow: inset clamp(2px, 0.3vw, 4px) clamp(2px, 0.3vw, 4px) clamp(15px, 1.5vw, 20px) clamp(3px, 0.5vw, 5px) rgba(0, 0, 0, 0.55);
     color: black;
+    box-sizing: border-box;
+    gap: clamp(0.5rem, 1vw, 1rem);
+}
+
+.pvp h1 {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    margin: 0;
+    text-align: center;
+    width: 100%;
 }
 
 @keyframes slideIn {
