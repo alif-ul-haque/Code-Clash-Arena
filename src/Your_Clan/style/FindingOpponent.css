@@ -1,0 +1,254 @@
+.finding-opponent-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, rgba(10, 60, 80, 0.98) 0%, rgba(5, 40, 60, 0.98) 100%), url('../../assets/images/10002.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.finding-overlay {
+    position: relative;
+    text-align: center;
+    z-index: 2;
+}
+
+/* Magnifying Glass - Clash of Clans style */
+.magnifying-glass {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 3rem;
+    animation: searchMove 3s ease-in-out infinite, rotate 4s linear infinite;
+}
+
+@keyframes searchMove {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+    25% {
+        transform: translate(60px, -40px) scale(1.1);
+    }
+    50% {
+        transform: translate(-50px, 30px) scale(0.9);
+    }
+    75% {
+        transform: translate(40px, 50px) scale(1.05);
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.glass-lens {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border: 8px solid #FFD700;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0, 255, 127, 0.2) 0%, rgba(0, 200, 150, 0.3) 100%);
+    box-shadow: 
+        0 0 30px rgba(255, 215, 0, 0.6),
+        inset 0 0 30px rgba(0, 255, 127, 0.2),
+        0 0 60px rgba(0, 255, 127, 0.4);
+    top: 0;
+    left: 0;
+    animation: lensGlow 2s ease-in-out infinite;
+}
+
+@keyframes lensGlow {
+    0%, 100% {
+        box-shadow: 
+            0 0 30px rgba(255, 215, 0, 0.6),
+            inset 0 0 30px rgba(0, 255, 127, 0.2),
+            0 0 60px rgba(0, 255, 127, 0.4);
+    }
+    50% {
+        box-shadow: 
+            0 0 50px rgba(255, 215, 0, 0.9),
+            inset 0 0 50px rgba(0, 255, 127, 0.4),
+            0 0 80px rgba(0, 255, 127, 0.6);
+    }
+}
+
+.glass-handle {
+    position: absolute;
+    width: 12px;
+    height: 90px;
+    background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
+    border-radius: 6px;
+    bottom: -70px;
+    right: 10px;
+    transform: rotate(-45deg);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.search-glow {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 255, 127, 0.3) 0%, transparent 70%);
+    top: -10px;
+    left: -10px;
+    animation: glowPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+}
+
+/* Text */
+.finding-title {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 0 0 60px rgba(255, 215, 0, 0.3);
+    margin: 0 0 1rem 0;
+    letter-spacing: 3px;
+    animation: titlePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.finding-subtitle {
+    font-size: 1.3rem;
+    color: #00FF7F;
+    letter-spacing: 2px;
+    animation: fadeInOut 2s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Scan Lines */
+.scan-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.scan-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00FF7F, transparent);
+    box-shadow: 0 0 10px rgba(0, 255, 127, 0.8);
+}
+
+.scan-line:nth-child(1) {
+    top: 20%;
+    animation: scanDown 3s linear infinite;
+}
+
+.scan-line:nth-child(2) {
+    top: 50%;
+    animation: scanDown 3s linear infinite 1s;
+}
+
+.scan-line:nth-child(3) {
+    top: 80%;
+    animation: scanDown 3s linear infinite 2s;
+}
+
+@keyframes scanDown {
+    0% {
+        transform: translateY(-100vh);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+}
+
+/* Background particles */
+.finding-opponent-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(0, 255, 127, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+    animation: particleFloat 8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes particleFloat {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(20px, -30px);
+    }
+    50% {
+        transform: translate(-30px, 20px);
+    }
+    75% {
+        transform: translate(15px, 25px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .magnifying-glass {
+        width: 150px;
+        height: 150px;
+    }
+
+    .glass-lens {
+        width: 90px;
+        height: 90px;
+    }
+
+    .finding-title {
+        font-size: 2rem;
+    }
+
+    .finding-subtitle {
+        font-size: 1rem;
+    }
+}

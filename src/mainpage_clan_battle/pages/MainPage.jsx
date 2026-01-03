@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import '../style/MainPage.css'
 import XpBar from '../components/XpBar'
 import xpImage from '../../assets/icons/xp.png'
@@ -94,7 +94,7 @@ export default function MainPage() {
             // Additional fade out time (500ms) before navigation
             setTimeout(() => {
                 const routes = [
-                    '/main',                // Your Clan (index 0)
+                    '/your-clan',           // Your Clan (index 0)
                     '/practice',            // Practice Gym (index 1)
                     '/main',                // Clan Battle (index 2)
                     '/1v1',                 // Attack (index 3)
@@ -106,8 +106,10 @@ export default function MainPage() {
     };
 
     const navigate = useNavigate();
-    let user_detail = {
-        username: "rizvee_113",
+    
+    // Retrieve user data from localStorage
+    const [userDetail, setUserDetail] = useState({
+        username: "Guest",
         xp: 50,
         maxXp: 100,
         level: 10,
@@ -129,7 +131,34 @@ export default function MainPage() {
                 { id: 5, name: "Eve_Hacker", role: "Elder", warParticipated: 6, problemsSolved: 67, rating: 1400 }
             ]
         }
-    }
+    });
+
+    // Load user data from localStorage on component mount
+    useEffect(() => {
+        const storedUserId = localStorage.getItem('userId');
+        const storedProfile = localStorage.getItem('userProfile');
+        
+        if (storedUserId) {
+            setUserDetail(prev => ({
+                ...prev,
+                username: storedUserId
+            }));
+        }
+        
+        if (storedProfile) {
+            try {
+                const profileData = JSON.parse(storedProfile);
+                if (profileData.username) {
+                    setUserDetail(prev => ({
+                        ...prev,
+                        username: profileData.username
+                    }));
+                }
+            } catch (error) {
+                console.error('Error parsing user profile:', error);
+            }
+        }
+    }, []);
 
     const particlesInit = useCallback(async engine => {
         await loadSlim(engine);
@@ -238,9 +267,9 @@ export default function MainPage() {
                 <div className="menubar">
                     <div className="xpbar">
                         <div className="img-xp">
-                            <p className="level">{user_detail.level}</p>
+                            <p className="level">{userDetail.level}</p>
                             <img src={xpImage} alt="XP" className="xp-image" />
-                            <XpBar xp={50} maxXp={100} username={user_detail.username} />
+                            <XpBar xp={50} maxXp={100} username={userDetail.username} />
                         </div>
                     </div>
                     <div className="menubuttons">
@@ -254,7 +283,7 @@ export default function MainPage() {
                             justifyContent='space-around'
                             onMouseEnter={() => handleCardHover(0)}
                             onMouseLeave={handleCardLeave}
-                            onClick={() => handleMenuToggle(user_detail.haveClan ? 'myclan' : 'noclan', true)}
+                            onClick={() => handleCardClick(0)}
                         />
                         <Button
                             text="Practice"
@@ -332,7 +361,7 @@ export default function MainPage() {
                 </div>
                 <OverlayMenu isOpen={open.overlayMenu} onClose={() => handleMenuToggle('overlayMenu', false)} />
                 <NoClanMenu isOpen={open.noclan} onClose={() => handleMenuToggle('noclan', false)} />
-                <MyClan isOpen={open.myclan} onClose={() => handleMenuToggle('myclan', false)} clanDetails={user_detail.clanDetails} />
+                <MyClan isOpen={open.myclan} onClose={() => handleMenuToggle('myclan', false)} clanDetails={userDetail.clanDetails} />
             </div>
         </>
     )

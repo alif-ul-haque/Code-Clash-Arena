@@ -1,0 +1,338 @@
+.battle-arena-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, rgba(10, 60, 80, 0.98) 0%, rgba(5, 40, 60, 0.98) 100%), url('../../assets/images/10002.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding: 2rem;
+    color: white;
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Team Scores Header */
+.scores-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 3rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: slideDown 0.6s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.team-score {
+    background: linear-gradient(135deg, rgba(0, 150, 150, 0.3) 0%, rgba(0, 120, 140, 0.2) 100%);
+    border: 3px solid #00FF7F;
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.team-score::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 127, 0.2), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.your-team {
+    border-color: #00FF7F;
+    box-shadow: 0 0 30px rgba(0, 255, 127, 0.3);
+}
+
+.enemy-team {
+    border-color: #FF6644;
+    box-shadow: 0 0 30px rgba(255, 102, 68, 0.3);
+}
+
+.team-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #FFD700;
+    margin: 0 0 1rem 0;
+    letter-spacing: 1px;
+}
+
+.score-display {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+.vs-divider {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+    animation: vsPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes vsPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+}
+
+/* Problems Container */
+.problems-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.arena-title {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    text-align: center;
+    margin: 0 0 2rem 0;
+    letter-spacing: 3px;
+    animation: titleGlow 2s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+    0%, 100% {
+        text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    }
+    50% {
+        text-shadow: 0 0 50px rgba(255, 215, 0, 0.9);
+    }
+}
+
+.problems-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Problem Card */
+.problem-card {
+    position: relative;
+    background: linear-gradient(135deg, rgba(0, 150, 150, 0.25) 0%, rgba(0, 120, 140, 0.15) 100%);
+    border: 3px solid #00FF7F;
+    border-radius: 15px;
+    padding: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: cardAppear 0.6s ease-out backwards;
+    overflow: hidden;
+}
+
+@keyframes cardAppear {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.problem-card:hover {
+    transform: translateY(-5px);
+    border-color: #FFD700;
+    box-shadow: 0 0 40px rgba(0, 255, 127, 0.4);
+}
+
+.problem-card.solved {
+    border-color: #00DD77;
+    background: linear-gradient(135deg, rgba(0, 200, 100, 0.2) 0%, rgba(0, 150, 100, 0.1) 100%);
+}
+
+.problem-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.problem-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #FFD700;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.problem-difficulty {
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.4rem 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.problem-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.problem-points {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.points-label {
+    font-size: 0.9rem;
+    color: #00FF7F;
+}
+
+.points-value {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+.solved-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #00DD77;
+}
+
+.checkmark {
+    font-size: 1.5rem;
+    animation: checkBounce 0.5s ease-out;
+}
+
+@keyframes checkBounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+    }
+}
+
+/* Teammate Status */
+.teammate-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.teammate-badge {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.solved-badge {
+    background: rgba(0, 221, 119, 0.2);
+    border: 2px solid #00DD77;
+    color: #00DD77;
+}
+
+.solving-badge {
+    background: rgba(255, 215, 0, 0.2);
+    border: 2px solid #FFD700;
+    color: #FFD700;
+    animation: solvingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes solvingPulse {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    }
+}
+
+/* Glowing border effect */
+.problem-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 15px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    box-shadow: inset 0 0 30px rgba(0, 255, 127, 0.3);
+}
+
+.problem-card:hover .problem-glow {
+    opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .scores-header {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .vs-divider {
+        font-size: 2rem;
+    }
+
+    .arena-title {
+        font-size: 2rem;
+    }
+
+    .problem-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+
+    .problem-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+
+    .teammate-status {
+        flex-direction: column;
+    }
+}

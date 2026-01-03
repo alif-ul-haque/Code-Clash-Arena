@@ -92,26 +92,26 @@ export default function BattleHistoryPage() {
 
                                 <div className="player-vs-player">
                                     {/* Player 1 */}
-                                    <div className={`player-card ${battle.player1.result.toLowerCase()}`}>
-                                        <img src={battle.player1.avatar} alt={battle.player1.username} className="player-avatar" />
-                                        <div className="player-info">
-                                            <div className="player-name">{battle.player1.username}</div>
-                                            <div className="player-rating">{battle.player1.rating}</div>
+                                    <div className={`history-player-card ${battle.player1.result.toLowerCase()}`}>
+                                        <img src={battle.player1.avatar} alt={battle.player1.username} className="history-player-avatar" />
+                                        <div className="history-player-info">
+                                            <div className="history-player-name">{battle.player1.username}</div>
+                                            <div className="history-player-rating">{battle.player1.rating}</div>
                                         </div>
-                                        <div className="player-score">{battle.player1.score}</div>
+                                        <div className="history-player-score">{battle.player1.score}</div>
                                     </div>
 
                                     {/* VS */}
-                                    <div className="vs-divider">VS</div>
+                                    <div className="history-vs-divider">VS</div>
 
                                     {/* Player 2 */}
-                                    <div className={`player-card ${battle.player2.result.toLowerCase()}`}>
-                                        <img src={battle.player2.avatar} alt={battle.player2.username} className="player-avatar" />
-                                        <div className="player-info">
-                                            <div className="player-name">{battle.player2.username}</div>
-                                            <div className="player-rating">{battle.player2.rating}</div>
+                                    <div className={`history-player-card ${battle.player2.result.toLowerCase()}`}>
+                                        <img src={battle.player2.avatar} alt={battle.player2.username} className="history-player-avatar" />
+                                        <div className="history-player-info">
+                                            <div className="history-player-name">{battle.player2.username}</div>
+                                            <div className="history-player-rating">{battle.player2.rating}</div>
                                         </div>
-                                        <div className="player-score">{battle.player2.score}</div>
+                                        <div className="history-player-score">{battle.player2.score}</div>
                                     </div>
                                 </div>
 
@@ -154,7 +154,7 @@ export default function BattleHistoryPage() {
                                     </div>
 
                                     {/* VS */}
-                                    <div className="vs-divider">VS</div>
+                                    <div className="history-vs-divider">VS</div>
 
                                     {/* Clan 2 */}
                                     <div className={`clan-card ${battle.clan2.result.toLowerCase()}`}>

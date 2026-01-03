@@ -8,6 +8,11 @@ import PlayModePage from './pvp_battle/pages/1v1_playmode_page.jsx'
 import MainPage from './mainpage_clan_battle/pages/MainPage.jsx'
 import PracticeDashboard from './practice_gym/pages/PracticeDashboard.jsx'
 import BattleHistoryPage from './mainpage_clan_battle/pages/BattleHistoryPage.jsx'
+import YourClanTeam from './Your_Clan/pages/YourClanTeam.jsx'
+import FindingOpponent from './Your_Clan/pages/FindingOpponent.jsx'
+import RevealingWarriors from './Your_Clan/pages/RevealingWarriors.jsx'
+import BattleArena from './Your_Clan/pages/BattleArena.jsx'
+import ProblemSolving from './Your_Clan/pages/ProblemSolving.jsx'
 
 function App() {
   return (
@@ -21,6 +26,11 @@ function App() {
         <Route path="/playmode" element={<PlayModePage />} />
         <Route path="/practice" element={<PracticeDashboard />} />
         <Route path="/battle-history" element={<BattleHistoryPage />} />
+        <Route path="/your-clan" element={<YourClanTeam />} />
+        <Route path="/your-clan/finding-opponent" element={<FindingOpponent />} />
+        <Route path="/your-clan/revealing-warriors" element={<RevealingWarriors />} />
+        <Route path="/your-clan/battle-arena" element={<BattleArena />} />
+        <Route path="/your-clan/problem/:problemId" element={<ProblemSolving />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

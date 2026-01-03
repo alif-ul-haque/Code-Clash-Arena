@@ -1,0 +1,261 @@
+.revealing-warriors-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, rgba(10, 60, 80, 0.98) 0%, rgba(5, 40, 60, 0.98) 100%), url('../../assets/images/10002.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow: hidden;
+}
+
+.revealing-content {
+    width: 100%;
+    max-width: 1200px;
+    position: relative;
+}
+
+.revealing-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 0 0 60px rgba(255, 215, 0, 0.3);
+    text-align: center;
+    margin: 0 0 3rem 0;
+    letter-spacing: 3px;
+    animation: titleAppear 0.8s ease-out;
+}
+
+@keyframes titleAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.warriors-container {
+    position: relative;
+    animation: containerZoom 1s ease-out;
+}
+
+@keyframes containerZoom {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.clan-box {
+    background: linear-gradient(135deg, rgba(0, 150, 150, 0.3) 0%, rgba(0, 120, 140, 0.2) 100%);
+    border: 3px solid #00FF7F;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 0 40px rgba(0, 255, 127, 0.3);
+}
+
+.clan-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #FFD700;
+    text-align: center;
+    margin: 0 0 2rem 0;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.warriors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+}
+
+.warrior-card {
+    position: relative;
+    height: 200px;
+    perspective: 1000px;
+}
+
+/* Silhouette (before reveal) */
+.warrior-silhouette {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.8) 100%);
+    border: 2px solid #00FF7F;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: silhouettePulse 1.5s ease-in-out infinite;
+    transition: opacity 0.6s ease;
+}
+
+.warrior-silhouette::before {
+    content: '?';
+    font-size: 4rem;
+    color: #00FF7F;
+    font-weight: 900;
+    text-shadow: 0 0 20px rgba(0, 255, 127, 0.8);
+    animation: questionBounce 1s ease-in-out infinite;
+}
+
+@keyframes silhouettePulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(0, 255, 127, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(0, 255, 127, 0.8);
+    }
+}
+
+@keyframes questionBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Revealed warrior */
+.warrior-reveal {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 150, 150, 0.4) 0%, rgba(0, 120, 140, 0.3) 100%);
+    border: 3px solid #FFD700;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    opacity: 0;
+    transform: rotateY(180deg) scale(0.8);
+    transition: all 0.8s ease;
+}
+
+/* When revealed */
+.warriors-container.revealed .warrior-silhouette {
+    opacity: 0;
+}
+
+.warriors-container.revealed .warrior-reveal {
+    opacity: 1;
+    transform: rotateY(0) scale(1);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    animation: revealGlow 1.5s ease-out;
+}
+
+@keyframes revealGlow {
+    0% {
+        box-shadow: 0 0 80px rgba(255, 215, 0, 1);
+    }
+    100% {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    }
+}
+
+.warrior-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #FFD700;
+    object-fit: cover;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.warrior-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #FFD700;
+    margin: 0;
+    text-align: center;
+}
+
+.warrior-rating {
+    font-size: 0.9rem;
+    color: #00FF7F;
+    margin: 0;
+}
+
+/* VS Indicator */
+.vs-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4rem;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+    z-index: 10;
+    animation: vsFloat 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes vsFloat {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1) rotate(-5deg);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2) rotate(5deg);
+    }
+}
+
+/* Explosion effect on reveal */
+.warriors-container.revealed::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: explosionBurst 1s ease-out;
+    pointer-events: none;
+}
+
+@keyframes explosionBurst {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        width: 150%;
+        height: 150%;
+        opacity: 0;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .revealing-title {
+        font-size: 2.5rem;
+    }
+
+    .warriors-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .warrior-card {
+        height: 180px;
+    }
+
+    .vs-indicator {
+        font-size: 3rem;
+    }
+}
