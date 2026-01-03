@@ -9,10 +9,15 @@ const OneVOneCodingTimeRushMode = () => {
     const [selectedLanguage, setSelectedLanguage] = useState('PYTHON');
     const [code, setCode] = useState('## WRITE YOUR PYTHON CODE\n##FROM HERE');
     const [currentProblem, setCurrentProblem] = useState(1);
-    const totalProblems = 2; // This can be dynamic based on selection from time_rush_problem_count page
+    const totalProblems = 3; // This can be dynamic based on selection from time_rush_problem_count page
     
-    // Timer state (starting from 29:30 = 1770 seconds)
-    const [timeLeft, setTimeLeft] = useState(1770);
+    // Timer state (starting from 30:00 = 1800 seconds)
+    const [timeLeft, setTimeLeft] = useState(1800);
+    
+    // Reset timer when problem changes
+    useEffect(() => {
+        setTimeLeft(1800); // Reset to 30 minutes for each new problem
+    }, [currentProblem]);
     
     useEffect(() => {
         const timer = setInterval(() => {
@@ -57,6 +62,17 @@ const OneVOneCodingTimeRushMode = () => {
                     output: '["o","l","l","e","h"]'
                 }
             ]
+        },
+        {
+            id: 3,
+            title: 'LONGEST SUBSTRING WITHOUT REPEATING CHARACTERS',
+            statement: 'Given a string s, find the length of the longest substring without repeating characters.',
+            examples: [
+                {
+                    input: 's = "abcabcbb"',
+                    output: '3'
+                }
+            ]
         }
     ];
 
@@ -69,7 +85,7 @@ const OneVOneCodingTimeRushMode = () => {
                 <img src={logo} alt="Logo" className="battle-logo" />
                 
                 <div className="battle-title-section">
-                    <h1 className="battle-title">ALIF19 VS _RIUZEE</h1>
+                    <h1 className="battle-title">ALIF19 VS _RIZVEE</h1>
                     <div className="player-labels">
                         <span className="player-label">YOU</span>
                         <span className="player-label opponent-label">OPPONENT</span>
@@ -77,11 +93,11 @@ const OneVOneCodingTimeRushMode = () => {
                 </div>
                 
                 <div className="header-info">
+                    <div className="problem-counter">{currentProblem}/{totalProblems}</div>
+                    <img src={clockIcon} alt="clock" className="clock-icon" />
                     <div className="timer-display">
-                        <img src={clockIcon} alt="trophy" className="timer-icon" />
                         {formatTime(timeLeft)}
                     </div>
-                    <div className="problem-counter">{currentProblem}/{totalProblems}</div>
                 </div>
                 
                 <button className="exit-btn" onClick={() => navigate('/playmode1v1')}>EXIT</button>

@@ -15,7 +15,7 @@
   align-items: center;
   justify-content: space-between;
   height: 110px;
-  gap: 30px;
+  gap: 10px;
 }
 
 .battle-logo {
@@ -27,9 +27,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-left: 200px;
-  margin-top: 3px;
+  align-items: center;
   gap: 0px;
+  margin-left: -150px;
 }
 
 .battle-title {
@@ -37,13 +37,13 @@
   font-size: 72px;
   color: #000000;
   font-weight: bold;
+  
 }
 
 .player-labels {
   display: flex;
   gap: 200px;
-  margin-left: 50px;
-  margin-top: 0px;
+  margin: 0;
 }
 
 .player-label {
@@ -55,27 +55,43 @@
 
 .header-info {
   display: flex;
-  gap: 15px;
+  flex-direction: row;
   align-items: center;
+  gap: 10px;
+  margin-right: 150px;
+}
+
+.clock-icon {
+  width: 60px;
+  height: 60px;
 }
 
 .timer-display {
+  position: relative;
   background-color: #B515D9;
   border: 3px solid #000000;
   border-radius: 15px;
   padding: 12px 30px;
   font-family: 'PlayMeGame', sans-serif;
-  font-size: 32px;
+  font-size: 42px;
   color: #000000;
   font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
-.timer-icon {
-  width: 35px;
-  height: 35px;
+.timer-display::before {
+  content: "";
+  position: absolute;
+  border-radius: 10px;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 45%;
+  width: 92%;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 1;
 }
 
 .problem-counter {
@@ -85,6 +101,7 @@
   padding: 12px 25px;
   font-family: 'PlayMeGame', sans-serif;
   font-size: 32px;
+  margin-right: 110px;
   color: #000000;
   font-weight: bold;
 }
