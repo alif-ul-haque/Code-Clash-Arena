@@ -38,7 +38,7 @@ export default function MainPage() {
         xp: 50,
         maxXp: 100,
         level: 10,
-        haveClan: true,
+        haveClan: false,
         clanDetails: {
             name: "The Code Warriors",
             totalPoints: 12500,
