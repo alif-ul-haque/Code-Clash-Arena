@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 function FirstPage1v1() {
   const navigate = useNavigate();
   return (
-    <div className="page-container">
+    <div className="page-container_first">
       <img src={logo} alt="Code Clash Arena Logo" className="logo" />
       <div className="profile-section">
         <img src={userIcon} alt="User" className="user-icon" />
@@ -30,16 +30,10 @@ function FirstPage1v1() {
           <h2>Real Problems Solve CodeForces problems head-to-head</h2>
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
-        <Button
-          height='103px'
-          width='409px'
-          text='GET STARTED'
-          backgroundColor='#F1CA76'
-          showIcon={true}
-          onClick={() => navigate('/playmode')}
-        />
-      </div>
+      <button className="glow-btn" onClick={() => navigate("/playmode1v1")}>
+        <span>▶</span>
+        <span>GET STARTED</span>
+      </button>
     </div>
   );
 }
