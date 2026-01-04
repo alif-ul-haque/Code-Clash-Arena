@@ -309,7 +309,7 @@ export default function MainPage() {
                             justifyContent='space-around'
                             onMouseEnter={() => handleCardHover(2)}
                             onMouseLeave={handleCardLeave}
-                            onClick={() => handleCardClick(2)}
+                            onClick={() => handleCardClick(0)}
                         />
                         <Button
                             text="Attack"
