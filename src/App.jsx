@@ -7,6 +7,12 @@ import FirstPage1v1 from './pvp_battle/pages/1v1_first_page.jsx'
 import PlayModePage1v1 from './pvp_battle/pages/1v1_playmode_page.jsx'
 import MainPage from './mainpage_clan_battle/pages/MainPage.jsx'
 import PracticeDashboard from './practice_gym/pages/PracticeDashboard.jsx'
+import BattleHistoryPage from './mainpage_clan_battle/pages/BattleHistoryPage.jsx'
+import YourClanTeam from './Your_Clan/pages/YourClanTeam.jsx'
+import FindingOpponent from './Your_Clan/pages/FindingOpponent.jsx'
+import RevealingWarriors from './Your_Clan/pages/RevealingWarriors.jsx'
+import BattleArena from './Your_Clan/pages/BattleArena.jsx'
+import ProblemSolving from './Your_Clan/pages/ProblemSolving.jsx'
 import OneVOneGlobalPage from './pvp_battle/pages/1v1_global_page.jsx';
 import OneVOneLocalPage from './pvp_battle/pages/1v1_local_page.jsx';
 import BattleMode from './pvp_battle/pages/battle_mode.jsx'
@@ -37,6 +43,12 @@ function App() {
         <Route path="/1v1-coding-timeRush-mode" element={<OneVOneCodingTimeRushMode />} />
         <Route path="/submit-page-time-mode" element={<SubmitPageTimeMode />} />
         <Route path="/practice" element={<PracticeDashboard />} />
+        <Route path="/battle-history" element={<BattleHistoryPage />} />
+        <Route path="/your-clan" element={<YourClanTeam />} />
+        <Route path="/your-clan/finding-opponent" element={<FindingOpponent />} />
+        <Route path="/your-clan/revealing-warriors" element={<RevealingWarriors />} />
+        <Route path="/your-clan/battle-arena" element={<BattleArena />} />
+        <Route path="/your-clan/problem/:problemId" element={<ProblemSolving />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

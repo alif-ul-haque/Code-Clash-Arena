@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "../style/1v1_first_page.css";
 import logo from "../../assets/icons/cca.png";
 import Button from '../../assets/components/Button';
@@ -7,7 +7,17 @@ import { useNavigate } from "react-router-dom";
 
 function FirstPage1v1() {
   const navigate = useNavigate();
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const handleNavigateWithTransition = (path) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      navigate(path);
+    }, 1000);
+  };
+
   return (
+    <div className={`page-container ${isTransitioning ? 'page-transition-out' : ''}`}>
     <div className="page-container_first">
       <img src={logo} alt="Code Clash Arena Logo" className="logo" />
       <div className="profile-section">
@@ -29,6 +39,16 @@ function FirstPage1v1() {
         <div className="feature-card">
           <h2>Real Problems Solve CodeForces problems head-to-head</h2>
         </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+        <Button
+          height='103px'
+          width='409px'
+          text='GET STARTED'
+          backgroundColor='#F1CA76'
+          showIcon={true}
+          onClick={() => handleNavigateWithTransition('/playmode')}
+        />
       </div>
       <button className="glow-btn" onClick={() => navigate("/playmode1v1")}>
         <span>▶</span>

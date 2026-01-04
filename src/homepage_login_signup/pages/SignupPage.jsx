@@ -55,6 +55,15 @@ export default function SignupPage() {
         detectError(newErrors);
         const hasErrors = Object.values(newErrors).some(err => err);
         if (!hasErrors) {
+            // Store user data in localStorage
+            localStorage.setItem('userId', formData.username)
+            localStorage.setItem('userProfile', JSON.stringify({
+                username: formData.username,
+                email: formData.email,
+                cfhandle: formData.cfhandle,
+                signupTime: new Date().toISOString()
+            }))
+            
             setFormData({
                 email: "",
                 username: "",

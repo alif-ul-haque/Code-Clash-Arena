@@ -1,0 +1,26 @@
+/* Global Page Transition Animations */
+@keyframes pageTransitionOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes pageTransitionIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.page-transition-out {
+    animation: pageTransitionOut 1s ease-in-out forwards;
+}
+
+.page-transition-in {
+    animation: pageTransitionIn 1s ease-in-out forwards;
+}
