@@ -113,3 +113,115 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
+
+/* ======================= RESPONSIVE DESIGN ======================= */
+
+/* Tablets (max-width: 768px) */
+@media (max-width: 768px) {
+  .hint-card {
+    padding: 40px 50px;
+    width: 90%;
+  }
+
+  .hint-title {
+    font-size: 2rem;
+  }
+
+  .hint-content {
+    padding: 25px;
+    margin: 25px 0;
+  }
+
+  .hint-text {
+    font-size: 1.2rem;
+  }
+
+  .hint-description {
+    font-size: 1rem;
+  }
+
+  .hint-suggestion {
+    font-size: 0.95rem;
+  }
+
+  .return-btn {
+    padding: 12px 28px;
+    font-size: 1rem;
+  }
+}
+
+/* Mobile devices (max-width: 480px) */
+@media (max-width: 480px) {
+  .hint-card {
+    padding: 30px 25px;
+    width: 95%;
+  }
+
+  .hint-title {
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+  }
+
+  .underline {
+    width: 75%;
+  }
+
+  .hint-content {
+    padding: 20px;
+    margin: 20px 0;
+  }
+
+  .hint-text {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .hint-description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+  }
+
+  .hint-suggestion {
+    font-size: 0.9rem;
+    padding: 10px;
+    margin-top: 12px;
+  }
+
+  .return-btn {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Extra small devices (max-width: 360px) */
+@media (max-width: 360px) {
+  .hint-card {
+    padding: 25px 20px;
+  }
+
+  .hint-title {
+    font-size: 1.4rem;
+  }
+
+  .hint-content {
+    padding: 15px;
+  }
+
+  .hint-text {
+    font-size: 1rem;
+  }
+
+  .hint-description {
+    font-size: 0.9rem;
+  }
+
+  .hint-suggestion {
+    font-size: 0.85rem;
+  }
+
+  .return-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}

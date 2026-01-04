@@ -18,6 +18,7 @@ function FirstPage1v1() {
 
   return (
     <div className={`page-container ${isTransitioning ? 'page-transition-out' : ''}`}>
+    <div className="page-container_first">
       <img src={logo} alt="Code Clash Arena Logo" className="logo" />
       <div className="profile-section">
         <img src={userIcon} alt="User" className="user-icon" />
@@ -49,6 +50,10 @@ function FirstPage1v1() {
           onClick={() => handleNavigateWithTransition('/playmode')}
         />
       </div>
+      <button className="glow-btn" onClick={() => navigate("/playmode1v1")}>
+        <span>▶</span>
+        <span>GET STARTED</span>
+      </button>
     </div>
   );
 }

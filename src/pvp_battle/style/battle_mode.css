@@ -1,0 +1,101 @@
+.battle-mode-container {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.blur-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+    url('../../assets/images/10003.png');
+  background-size: cover;
+  background-position: center;
+  filter: blur(15px);
+  z-index: 1;
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-selection-card {
+  background-color: #F1CA76;
+  border: 4px solid #000000;
+  border-radius: 15px;
+  padding: 50px 60px;
+  text-align: center;
+  max-width: 1300px;
+  height:700px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.mode-heading {
+  font-family: 'PlayMeGame', sans-serif;
+  font-size: 72px;
+  color: #000000;
+  margin: 0 0 40px 0;
+  font-weight: bold;
+}
+
+.modes-container {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.mode-card {
+  background-color: transparent;
+  border: 3px solid #000000;
+  border-radius: 15px;
+  padding: 30px 25px;
+  width: 600px;
+  height: 400px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mode-card:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.mode-title {
+  font-family: 'PlayMeGame', sans-serif;
+  font-size: 72px;
+  color: #000000;
+  margin: 0 0 15px 0;
+  font-weight: bold;
+}
+
+.mode-description {
+  font-family: 'PlayMeGame', sans-serif;
+  font-size: 55px;
+  color: #000000;
+  margin-top: 30px;
+  line-height: 1.4;
+  animation: blink 0.2s infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}

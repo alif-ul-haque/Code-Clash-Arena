@@ -118,3 +118,90 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
+
+/* ======================= RESPONSIVE DESIGN ======================= */
+
+/* Tablets (max-width: 768px) */
+@media (max-width: 768px) {
+  .exit-card {
+    padding: 50px 60px;
+    width: 90%;
+  }
+
+  .exit-title {
+    font-size: 2.1rem;
+  }
+
+  .exit-subtitle {
+    font-size: 1.3rem;
+    margin: 25px 0 40px;
+  }
+
+  .button-group {
+    gap: 15px;
+  }
+
+  .back-btn,
+  .confirm-exit-btn {
+    padding: 14px 35px;
+    font-size: 1.1rem;
+  }
+}
+
+/* Mobile devices (max-width: 480px) */
+@media (max-width: 480px) {
+  .exit-card {
+    padding: 40px 30px;
+    width: 95%;
+  }
+
+  .exit-title {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+  }
+
+  .exit-subtitle {
+    font-size: 1.1rem;
+    margin: 20px 0 35px;
+    line-height: 1.5;
+  }
+
+  .underline {
+    width: 80%;
+  }
+
+  .button-group {
+    gap: 12px;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .back-btn,
+  .confirm-exit-btn {
+    width: 100%;
+    padding: 14px 30px;
+    font-size: 1rem;
+  }
+}
+
+/* Extra small devices (max-width: 360px) */
+@media (max-width: 360px) {
+  .exit-card {
+    padding: 30px 25px;
+  }
+
+  .exit-title {
+    font-size: 1.6rem;
+  }
+
+  .exit-subtitle {
+    font-size: 1rem;
+    margin: 18px 0 30px;
+  }
+
+  .back-btn,
+  .confirm-exit-btn {
+    padding: 12px 25px;
+    font-size: 0.95rem;
+  }
+}

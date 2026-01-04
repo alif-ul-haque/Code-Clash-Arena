@@ -177,18 +177,173 @@
 /* Layout */
 .content {
   display: grid;
-  grid-template-columns: 1fr 60px 1fr;
+  grid-template-columns: 1fr 1fr;
   padding: 25px;
-  gap: 15px;
+  gap: 25px;
 }
 
 /* Problem Panel */
 .problem-panel {
   background: #174c63;
-  padding: 25px;
+  padding: 30px;
   border-radius: 20px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   border: 2px solid rgba(243, 210, 125, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.problem-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.problem-header h2 {
+  margin: 0 0 15px 0;
+  color: #f3d27d;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-size: 1.8rem;
+}
+
+.problem-badges {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  background: linear-gradient(135deg, rgba(243, 210, 125, 0.2), rgba(217, 168, 77, 0.2));
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #f3d27d;
+  border: 2px solid rgba(243, 210, 125, 0.4);
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.rating-badge {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 193, 7, 0.2));
+  border-color: rgba(255, 215, 0, 0.5);
+  color: #ffd700;
+}
+
+.tag-badge {
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.2), rgba(11, 60, 93, 0.2));
+  border-color: rgba(30, 144, 255, 0.5);
+  color: #6db5ff;
+}
+
+.solved-badge {
+  background: linear-gradient(135deg, rgba(122, 217, 87, 0.2), rgba(92, 184, 58, 0.2));
+  border-color: rgba(122, 217, 87, 0.5);
+  color: #7ad957;
+}
+
+.problem-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.detail-card {
+  background: linear-gradient(135deg, rgba(11, 60, 93, 0.3), rgba(7, 39, 56, 0.3));
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 4px solid #f3d27d;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.detail-card h3 {
+  color: #f3d27d;
+  margin: 0 0 12px 0;
+  font-size: 1.2rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.detail-card p {
+  line-height: 1.6;
+  font-size: 15px;
+  color: #e0e0e0;
+  margin: 8px 0;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.tag-chip {
+  background: linear-gradient(135deg, #1e90ff, #0b7edb);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: bold;
+  border: 2px solid #0b3c5d;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.view-problem-btn {
+  display: block;
+  background: linear-gradient(135deg, #f3d27d, #d9a84d);
+  color: #0b3c5d;
+  padding: 16px 30px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 3px solid #b8892f;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  margin-top: 10px;
+}
+
+.view-problem-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #f5d68a, #e0b55c);
+}
+
+.problem-note {
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.15), rgba(11, 60, 93, 0.15));
+  padding: 15px 20px;
+  border-radius: 10px;
+  border: 2px solid rgba(30, 144, 255, 0.3);
+}
+
+.problem-note p {
+  margin: 0;
+  color: #6db5ff;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.problem-tip {
+  background: linear-gradient(135deg, rgba(122, 217, 87, 0.15), rgba(92, 184, 58, 0.15));
+  padding: 15px 20px;
+  border-radius: 10px;
+  border: 2px solid rgba(122, 217, 87, 0.3);
+  margin-top: 5px;
+}
+
+.problem-tip p {
+  margin: 0;
+  color: #7ad957;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.no-problem {
+  padding: 60px 25px;
+  text-align: center;
+  color: #f3d27d;
+  font-size: 18px;
 }
 
 .problem-panel h2 {
@@ -246,7 +401,14 @@
 .editor-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 15px;
+  gap: 15px;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
 }
 
 .language-select {
@@ -267,16 +429,37 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
+.run-btn,
 .submit-btn {
   background: linear-gradient(135deg, #79f28a, #5de070);
   border: none;
-  padding: 12px 30px;
+  padding: 12px 24px;
   border-radius: 14px;
   font-weight: bold;
   font-family: 'PlayMeGame', sans-serif;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  color: #0b3c5d;
+}
+
+.run-btn {
+  background: linear-gradient(135deg, #1e90ff, #0b7edb);
+  color: white;
+}
+
+.run-btn:hover {
+  background: linear-gradient(135deg, #0b7edb, #0a6bc9);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(30, 144, 255, 0.4);
+}
+
+.run-btn:disabled,
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .submit-btn:hover {
@@ -358,4 +541,292 @@
 .help-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ======================= RESPONSIVE DESIGN ======================= */
+
+/* Large tablets (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .content {
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .problem-panel,
+  .editor-panel {
+    padding: 25px;
+  }
+
+  .problem-title {
+    font-size: 1.9rem;
+  }
+
+  .code-editor {
+    min-height: 300px;
+  }
+}
+
+/* Tablets (max-width: 768px) */
+@media (max-width: 768px) {
+  .header {
+    padding: 15px 25px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .logo-box {
+    width: 80px;
+    height: 55px;
+  }
+
+  .problem-title {
+    font-size: 1.6rem;
+    text-align: center;
+    width: 100%;
+    order: 3;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .timer {
+    padding: 10px 18px;
+    font-size: 1rem;
+  }
+
+  .exit-btn {
+    padding: 10px 22px;
+    font-size: 0.95rem;
+  }
+
+  .content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 15px;
+  }
+
+  .problem-panel,
+  .editor-panel {
+    padding: 20px;
+  }
+
+  .problem-badges {
+    gap: 8px;
+  }
+
+  .badge {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+
+  .detail-card {
+    padding: 15px;
+  }
+
+  .detail-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .detail-card p {
+    font-size: 14px;
+  }
+
+  .view-problem-btn {
+    padding: 14px 25px;
+    font-size: 16px;
+  }
+
+  .divider {
+    min-height: 60px;
+    font-size: 1.1rem;
+  }
+
+  .editor-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .language-select,
+  .run-btn,
+  .submit-btn {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+
+  .code-editor {
+    min-height: 250px;
+    font-size: 14px;
+    padding: 15px;
+  }
+
+  .editor-footer {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .upload-btn {
+    width: 100%;
+  }
+
+  .help-btn {
+    width: 100%;
+  }
+}
+
+/* Mobile devices (max-width: 480px) */
+@media (max-width: 480px) {
+  .problem-page {
+    font-size: 14px;
+  }
+
+  .header {
+    padding: 12px 15px;
+  }
+
+  .logo-box {
+    width: 70px;
+    height: 50px;
+  }
+
+  .problem-title {
+    font-size: 1.3rem;
+  }
+
+  .timer {
+    padding: 8px 14px;
+    font-size: 0.9rem;
+  }
+
+  .exit-btn {
+    padding: 8px 18px;
+    font-size: 0.85rem;
+  }
+
+  .content {
+    padding: 12px;
+    gap: 15px;
+  }
+
+  .problem-panel,
+  .editor-panel {
+    padding: 15px;
+  }
+
+  .problem-panel h2 {
+    font-size: 1.4rem;
+  }
+
+  .problem-badges {
+    gap: 6px;
+  }
+
+  .badge {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  .detail-card {
+    padding: 12px;
+  }
+
+  .detail-card h3 {
+    font-size: 1rem;
+  }
+
+  .detail-card p {
+    font-size: 13px;
+  }
+
+  .tags-list {
+    gap: 6px;
+  }
+
+  .tag-chip {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .view-problem-btn {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+
+  .example-box {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .divider {
+    min-height: 50px;
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  .language-select,
+  .run-btn,
+  .submit-btn,
+  .upload-btn,
+  .help-btn {
+    padding: 10px 15px;
+    font-size: 12px;
+  }
+
+  .code-editor {
+    min-height: 200px;
+    font-size: 13px;
+    padding: 12px;
+  }
+
+  .language-info {
+    font-size: 12px;
+  }
+
+  .problem-note p,
+  .problem-tip p {
+    font-size: 12px;
+  }
+}
+
+/* Extra small devices (max-width: 360px) */
+@media (max-width: 360px) {
+  .problem-title {
+    font-size: 1.1rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .timer,
+  .exit-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .problem-panel h2 {
+    font-size: 1.2rem;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .view-problem-btn {
+    font-size: 14px;
+  }
+
+  .code-editor {
+    min-height: 180px;
+    font-size: 12px;
+  }
 }
