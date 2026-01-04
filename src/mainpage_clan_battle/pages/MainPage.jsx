@@ -116,7 +116,7 @@ export default function MainPage() {
         xp: 50,
         maxXp: 100,
         level: 10,
-        haveClan: true,
+        haveClan: false,
         clanDetails: {
             name: "The Code Warriors",
             totalPoints: 12500,
@@ -285,7 +285,7 @@ export default function MainPage() {
                             justifyContent='space-around'
                             onMouseEnter={() => handleCardHover(0)}
                             onMouseLeave={handleCardLeave}
-                            onClick={() => handleCardClick(0)}
+                             onClick={() => handleMenuToggle(userDetail.haveClan ? 'myclan' : 'noclan', true)}
                         />
                         <Button
                             text="ClashConnect"
