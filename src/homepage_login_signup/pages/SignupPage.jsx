@@ -5,9 +5,11 @@ import '../style/SignupPage.css'
 import Button from '../../assets/components/Button'
 import bg from '../../assets/images/wallpaperflare.com_wallpaper.jpg'
 import { signUpUser } from '../utilities/SIgnUp.js'
+import AlertPage from '../../assets/components/AlertPage.jsx'
 
 export default function SignupPage() {
     const navigate = useNavigate()
+    const [alert, setAlert] = useState(null)
 
     let [error, detectError] = useState({
         email: false,
@@ -44,7 +46,7 @@ export default function SignupPage() {
         });
     }
 
-    let handleSubmit =async (event) => {
+    let handleSubmit = async (event) => {
         event.preventDefault();
         const newErrors = {};
         Object.entries(formData).forEach(([key, value]) => {
@@ -53,18 +55,13 @@ export default function SignupPage() {
         detectError(newErrors);
         const hasErrors = Object.values(newErrors).some(err => err);
         if (!hasErrors) {
-            const { user, error } =await signUpUser(formData);
+            const { user, error } = await signUpUser(formData);
             if (error) {
-                if (error.message === "Invalid Codeforces handle.") {
-                    alert("The Codeforces handle you entered is invalid. Please check and try again.");
-                }
-                else {
-                    alert("An error occurred during signup: " + error.message);
-                }
+                setAlert({ message: error.message, type: 'error' });
                 return;
             }
             else {
-                alert("Signup successful! Welcome, check your email" + user.email);
+                setAlert({ message: `Signup successful! Welcome, check your email ${user.email}`, type: 'success' });
             }
 
             setFormData({
@@ -78,7 +75,9 @@ export default function SignupPage() {
                 password: false
             });
             // Navigate to main page on successful signup
-            navigate('/')
+            setTimeout(() => {
+                navigate('/');
+            }, 1500);
         }
     }
 
@@ -137,6 +136,15 @@ export default function SignupPage() {
                     </p>
                 </form>
             </div>
+
+            {/* Alert Popup */}
+            {alert && (
+                <AlertPage
+                    message={alert.message}
+                    type={alert.type}
+                    onClose={() => setAlert(null)}
+                />
+            )}
         </div>
     )
 }
