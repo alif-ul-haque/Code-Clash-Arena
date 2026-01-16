@@ -21,6 +21,7 @@ import IntroCard from '../components/IntroCard.jsx'
 import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png'
 import social from '../../assets/icons/social-network.png'
 import SocialPage from '../components/Social.jsx';
+import getUserData from '../utilities/UserData.js'
 
 
 
@@ -109,7 +110,7 @@ export default function MainPage() {
     };
 
     const navigate = useNavigate();
-    
+
     // Retrieve user data from localStorage
     const [userDetail, setUserDetail] = useState({
         username: "Guest",
@@ -136,31 +137,23 @@ export default function MainPage() {
         }
     });
 
-    // Load user data from localStorage on component mount
+    // Fetch user data from backend on component mount
     useEffect(() => {
-        const storedUserId = localStorage.getItem('userId');
-        const storedProfile = localStorage.getItem('userProfile');
-        
-        if (storedUserId) {
+        async function fetchUserData() {
+            const { data, error } = await getUserData();
+            if (error) {
+                console.error("Failed to fetch user data:", error);
+                return;
+            }
             setUserDetail(prev => ({
                 ...prev,
-                username: storedUserId
+                username: data.cf_handle ,
+                level: data.level ,
+                xp: data.xp
             }));
         }
-        
-        if (storedProfile) {
-            try {
-                const profileData = JSON.parse(storedProfile);
-                if (profileData.username) {
-                    setUserDetail(prev => ({
-                        ...prev,
-                        username: profileData.username
-                    }));
-                }
-            } catch (error) {
-                console.error('Error parsing user profile:', error);
-            }
-        }
+        fetchUserData();
+
     }, []);
 
     const particlesInit = useCallback(async engine => {
@@ -285,7 +278,7 @@ export default function MainPage() {
                             justifyContent='space-around'
                             onMouseEnter={() => handleCardHover(0)}
                             onMouseLeave={handleCardLeave}
-                             onClick={() => handleMenuToggle(userDetail.haveClan ? 'myclan' : 'noclan', true)}
+                            onClick={() => handleMenuToggle(userDetail.haveClan ? 'myclan' : 'noclan', true)}
                         />
                         <Button
                             text="ClashConnect"
