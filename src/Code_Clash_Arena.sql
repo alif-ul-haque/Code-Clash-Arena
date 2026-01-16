@@ -77,3 +77,24 @@ values (
 );
 
 select current_database();
+
+CREATE table onevonebattles (
+  onevone_battle_id UUID PRIMARY KEY default gen_random_uuid(),
+  battlefield VARCHAR(100),
+  battle_mode VARCHAR(100),
+  problem_count INTEGER,
+  status VARCHAR(20) NOT NULL,
+  trophy_reward INTEGER, 
+  start_time TIMESTAMP,
+  end_time TIMESTAMP
+);
+
+create table onevone_participants (
+  onevone_battle_id UUID REFERENCES onevonebattles(onevone_battle_id) ON DELETE CASCADE,
+  player_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  problem_solved INTEGER DEFAULT 0,
+  time_taken INTEGER DEFAULT 0,
+  PRIMARY KEY (onevone_battle_id, player_id)
+);
+
+
