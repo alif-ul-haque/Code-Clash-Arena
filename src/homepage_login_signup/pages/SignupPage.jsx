@@ -4,6 +4,8 @@ import mainLogo from '../../assets/icons/cca.png'
 import '../style/SignupPage.css'
 import Button from '../../assets/components/Button'
 import bg from '../../assets/images/wallpaperflare.com_wallpaper.jpg'
+import { signUpUser } from '../utilities/SIgnUp.js'
+import AlertPage from '../../assets/components/AlertPage.jsx'
 
 export default function SignupPage() {
     const navigate = useNavigate()
@@ -53,15 +55,15 @@ export default function SignupPage() {
         detectError(newErrors);
         const hasErrors = Object.values(newErrors).some(err => err);
         if (!hasErrors) {
-            // Store user data in localStorage
-            localStorage.setItem('userId', formData.username)
-            localStorage.setItem('userProfile', JSON.stringify({
-                username: formData.username,
-                email: formData.email,
-                cfhandle: formData.cfhandle,
-                signupTime: new Date().toISOString()
-            }))
-            
+            const { user, error } = await signUpUser(formData);
+            if (error) {
+                setAlert({ message: error.message, type: 'error' });
+                return;
+            }
+            else {
+                setAlert({ message: `Signup successful! Welcome, check your email ${user.email}`, type: 'success' });
+            }
+
             setFormData({
                 email: "",
                 cfhandle: "",
@@ -105,17 +107,7 @@ export default function SignupPage() {
                             style={error.email ? { color: 'red' } : {}}
                         >Email</label>
                     </div>
-                    <div className="input-group">
-                        <input
-                            type="text"
-                            placeholder=' '
-                            name="username"
-                            onChange={handleChange}
-                            value={formData.username}
-                            id="username"
-                        />
-                        <label htmlFor="username" style={error.username ? { color: 'red' } : {}}>Username</label>
-                    </div>
+
                     <div className="input-group">
                         <input
                             type="text"
@@ -139,7 +131,7 @@ export default function SignupPage() {
                         <label htmlFor="password" style={error.password ? { color: 'red' } : {}}>Password</label>
                     </div>
                     <Button backgroundColor='#176161' text='SignUp' height='80px' width='300px' color='black' fontSize='30px' />
-                    <p style={{ textAlign: 'center', marginTop: '-1.5 rem', color: '#ffffff' }}>
+                    <p style={{ textAlign: 'center', marginTop: '20px', color: '#ffffff' }}>
                         Have an account? <span onClick={() => navigate('/login')} style={{ color: '#FFD700', cursor: 'pointer', fontWeight: 'bold' }}>Log in</span>
                     </p>
                 </form>
