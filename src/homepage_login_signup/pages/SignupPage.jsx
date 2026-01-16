@@ -4,19 +4,18 @@ import mainLogo from '../../assets/icons/cca.png'
 import '../style/SignupPage.css'
 import Button from '../../assets/components/Button'
 import bg from '../../assets/images/wallpaperflare.com_wallpaper.jpg'
+import { signUpUser } from '../utilities/SIgnUp.js'
 
 export default function SignupPage() {
     const navigate = useNavigate()
 
     let [error, detectError] = useState({
-        username: false,
         email: false,
         cfhandle: false,
         password: false
     })
     let [formData, setFormData] = useState({
         email: "",
-        username: "",
         cfhandle: "",
         password: ""
     })
@@ -30,7 +29,6 @@ export default function SignupPage() {
 
             if (allFilled) {
                 detectError({
-                    username: false,
                     email: false,
                     cfhandle: false,
                     password: false
@@ -46,7 +44,7 @@ export default function SignupPage() {
         });
     }
 
-    let handleSubmit = (event) => {
+    let handleSubmit =async (event) => {
         event.preventDefault();
         const newErrors = {};
         Object.entries(formData).forEach(([key, value]) => {
@@ -55,29 +53,32 @@ export default function SignupPage() {
         detectError(newErrors);
         const hasErrors = Object.values(newErrors).some(err => err);
         if (!hasErrors) {
-            // Store user data in localStorage
-            localStorage.setItem('userId', formData.username)
-            localStorage.setItem('userProfile', JSON.stringify({
-                username: formData.username,
-                email: formData.email,
-                cfhandle: formData.cfhandle,
-                signupTime: new Date().toISOString()
-            }))
-            
+            const { user, error } =await signUpUser(formData);
+            if (error) {
+                if (error.message === "Invalid Codeforces handle.") {
+                    alert("The Codeforces handle you entered is invalid. Please check and try again.");
+                }
+                else {
+                    alert("An error occurred during signup: " + error.message);
+                }
+                return;
+            }
+            else {
+                alert("Signup successful! Welcome, check your email" + user.email);
+            }
+
             setFormData({
                 email: "",
-                username: "",
                 cfhandle: "",
                 password: ""
             });
             detectError({
-                username: false,
                 email: false,
                 cfhandle: false,
                 password: false
             });
             // Navigate to main page on successful signup
-            navigate('/main')
+            navigate('/')
         }
     }
 
@@ -107,17 +108,7 @@ export default function SignupPage() {
                             style={error.email ? { color: 'red' } : {}}
                         >Email</label>
                     </div>
-                    <div className="input-group">
-                        <input
-                            type="text"
-                            placeholder=' '
-                            name="username"
-                            onChange={handleChange}
-                            value={formData.username}
-                            id="username"
-                        />
-                        <label htmlFor="username" style={error.username ? { color: 'red' } : {}}>Username</label>
-                    </div>
+
                     <div className="input-group">
                         <input
                             type="text"
