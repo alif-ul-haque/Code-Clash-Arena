@@ -204,10 +204,21 @@
   transform: translateX(-50%);
   width: 85%;
   max-width: 1300px;
+  max-height: 445px;
   margin-top: 60px;
   display: flex;
   flex-direction: column;
   gap: 15px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.friends-list::-webkit-scrollbar {
+  display: none;
 }
 
 .friend-card {
