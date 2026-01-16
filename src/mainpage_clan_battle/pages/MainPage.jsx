@@ -21,6 +21,8 @@ import IntroCard from '../components/IntroCard.jsx'
 import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png'
 import social from '../../assets/icons/social-network.png'
 import SocialPage from '../components/Social.jsx';
+import getUserData from '../utilities/UserData.js'
+import { supabase } from '../../supabaseclient.js'
 
 
 
@@ -109,63 +111,64 @@ export default function MainPage() {
     };
 
     const navigate = useNavigate();
-    
+
     // Retrieve user data from localStorage
     const [userDetail, setUserDetail] = useState({
-        username: "Guest",
-        xp: 50,
-        maxXp: 100,
-        level: 10,
-        haveClan: true,
+        username: "",
+        xp: 0,
+        maxXp: 0,
+        level: 0,
+        haveClan: false,
         clanDetails: {
-            name: "The Code Warriors",
-            totalPoints: 12500,
-            members: '25/50',
-            type: 'Open',
-            requiredRating: '1200',
-            warFrequency: 'Always',
-            location: 'Global',
-            warWon: 15,
-            participants: [
-                { id: 1, name: "Alice_99", role: "Leader", warParticipated: 10, problemsSolved: 95, rating: 1800 },
-                { id: 2, name: "Bob_Smith", role: "Co-Leader", warParticipated: 12, problemsSolved: 88, rating: 1650 },
-                { id: 3, name: "Charlie_Dev", role: "Member", warParticipated: 8, problemsSolved: 75, rating: 1500 },
-                { id: 4, name: "Diana_Code", role: "Member", warParticipated: 15, problemsSolved: 102, rating: 1900 },
-                { id: 5, name: "Eve_Hacker", role: "Elder", warParticipated: 6, problemsSolved: 67, rating: 1400 }
-            ]
+            name: "",
+            totalPoints: 0,
+            members: '',
+            type: '',
+            requiredRating: '',
+            warFrequency: '',
+            location: '',
+            warWon: 0,
+            participants: []
         }
     });
 
-    // Load user data from localStorage on component mount
+    // Fetch user data from backend on component mount
     useEffect(() => {
-        const storedUserId = localStorage.getItem('userId');
-        const storedProfile = localStorage.getItem('userProfile');
-        
-        if (storedUserId) {
+        async function fetchUserData() {
+            const { data, error } = await getUserData();
+            if (error) {
+                console.error("Failed to fetch user data:", error);
+                return;
+            }
             setUserDetail(prev => ({
                 ...prev,
-                username: storedUserId
+                username: data.cf_handle,
+                level: data.level,
+                xp: data.xp,
+                maxXp: data.level * 10
             }));
         }
-        
-        if (storedProfile) {
-            try {
-                const profileData = JSON.parse(storedProfile);
-                if (profileData.username) {
-                    setUserDetail(prev => ({
-                        ...prev,
-                        username: profileData.username
-                    }));
-                }
-            } catch (error) {
-                console.error('Error parsing user profile:', error);
-            }
-        }
+        fetchUserData();
+
     }, []);
 
     const particlesInit = useCallback(async engine => {
         await loadSlim(engine);
     }, []);
+
+    const handleLogout = async () => {
+        try {
+            const { error } = await supabase.auth.signOut();
+
+            if (error) {
+                console.error('Error logging out:', error);
+                return;
+            }
+            navigate('/HomePage');
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+    }
 
     const particlesOptions = {
         background: {
@@ -271,7 +274,7 @@ export default function MainPage() {
                         <div className="img-xp">
                             <p className="level">{userDetail.level}</p>
                             <img src={xpImage} alt="XP" className="xp-image" />
-                            <XpBar xp={50} maxXp={100} username={userDetail.username} />
+                            <XpBar xp={userDetail.xp} maxXp={userDetail.maxXp} username={userDetail.username} />
                         </div>
                     </div>
                     <div className="menubuttons">
@@ -285,7 +288,7 @@ export default function MainPage() {
                             justifyContent='space-around'
                             onMouseEnter={() => handleCardHover(0)}
                             onMouseLeave={handleCardLeave}
-                             onClick={() => handleMenuToggle(userDetail.haveClan ? 'myclan' : 'noclan', true)}
+                            onClick={() => handleMenuToggle(userDetail.haveClan ? 'myclan' : 'noclan', true)}
                         />
                         <Button
                             text="ClashConnect"
@@ -341,7 +344,7 @@ export default function MainPage() {
                             width="230px"
                             fontSize="36px"
                             backgroundColor='#DC7922'
-                            onClick={() => navigate('/HomePage')}
+                            onClick={handleLogout}
                         />
 
                     </div>
