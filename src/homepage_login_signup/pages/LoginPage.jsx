@@ -6,26 +6,34 @@ import Button from '../../assets/components/Button.jsx'
 import showIcon from '../../assets/icons/show.png'
 import loginIcon from '../../assets/icons/login__0.png';
 import bgImage from '../../assets/images/10002.png'
+import { supabase } from '../../supabaseclient.js'
+import AlertPage from '../../assets/components/AlertPage.jsx'
 
 export default function LoginPage() {
     const navigate = useNavigate()
     const [showPassword, setShowPassword] = useState(false)
     const [passwordFocused, setPasswordFocused] = useState(false)
+    const [alert, setAlert] = useState(null)
     const [formData, setFormData] = useState({
         username: '',
         password: ''
     })
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         if (formData.username && formData.password) {
-            // Store user data in localStorage
-            localStorage.setItem('userId', formData.username)
-            localStorage.setItem('userProfile', JSON.stringify({
-                username: formData.username,
-                loginTime: new Date().toISOString()
-            }))
-            navigate('/main')
+            const { error } = await supabase.auth.signInWithPassword({
+                email: formData.username,
+                password: formData.password
+            })
+            if (error) {
+                setAlert({ message: error.message, type: 'error' });
+                return;
+            }
+            setAlert({ message: 'Sign in successful!', type: 'success' });
+            setTimeout(() => {
+                navigate('/main');
+            }, 1500);
         }
     }
 
@@ -82,7 +90,7 @@ export default function LoginPage() {
                             placeholder=" "
                             required
                         />
-                        <label htmlFor="username" className="floating-label">Username or Email</label>
+                        <label htmlFor="username" className="floating-label">Email</label>
                         <svg className="input-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
@@ -145,6 +153,15 @@ export default function LoginPage() {
                     <p className="signup-link" onClick={() => navigate('/signup')}>Sign Up</p>
                 </div>
             </div>
+
+            {/* Alert Popup */}
+            {alert && (
+                <AlertPage
+                    message={alert.message}
+                    type={alert.type}
+                    onClose={() => setAlert(null)}
+                />
+            )}
         </div>
     )
 }
