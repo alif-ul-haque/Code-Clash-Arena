@@ -1,12 +1,98 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/1v1_local_page.css';
 import logo from '../../assets/icons/cca.png';
 import trophyIcon from '../../assets/icons/trophy.png';
+import { supabase } from '../../supabaseclient';
+
 
 const OneVOneLocalPage = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('friends');
+
+    // State to store user data fetched from database
+    const [userData, setUserData] = useState({
+        username: "Loading...",
+        rating: 0
+    });
+
+    // State to store friends list fetched from database
+    const [friendsList, setFriendsList] = useState([]);
+
+    // State to track if data is still loading
+    const [isLoading, setIsLoading] = useState(true);
+
+    // State to store any errors that occur
+    const [error, setError] = useState(null);
+
+    // useEffect: Runs once when component loads to fetch data from database
+    useEffect(() => {
+        // Async function to fetch user data and friends from Supabase
+        const fetchData = async () => {
+            try {
+                setIsLoading(true); // Set loading to true while fetching
+
+                // FETCH USER DATA
+                // Query the 'users' table in Supabase database
+                const { data: user, error: userError } = await supabase
+                    .from('users') // Access the 'users' table
+                    .select('cf_handle, trophy') // Get only username and rating columns
+                    .eq('cf_handle', 'alif19') // Filter: WHERE username = 'alif19'
+                    .single(); // Return single object (not array)
+
+                // If there was an error fetching user, throw it
+                if (userError) throw userError;
+
+                // If user data was found, update the state
+                if (user) {
+                    setUserData({
+                        cf_handle: user.cf_handle,
+                        trophy: user.trophy || 0 // Use 0 if rating is null
+                    });
+                }
+
+                // FETCH FRIENDS LIST
+                // Step 1: Get alif19's id from users table
+                const { data: currentUserData } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('cf_handle', 'alif19')
+                    .single();
+
+                const alifId = currentUserData.id;
+
+                // Step 2: Get friend IDs from friends table
+                const { data: friendData } = await supabase
+                    .from('friends')
+                    .select('f_id')
+                    .eq('u_id', alifId);
+
+                // Step 3: Get detailed friend information from users table
+                const friendIds = friendData.map(f => f.f_id);
+
+                const { data: friendsInfo } = await supabase
+                    .from('users')
+                    .select('cf_handle, email, xp, trophy')
+                    .in('id', friendIds);
+
+                // Store friends info in state
+                if (friendsInfo) {
+                    setFriendsList(friendsInfo);
+                }
+
+            } catch (err) {
+                // Handle any errors that occurred
+                console.error('Error fetching data:', err);
+                setError(err.message);
+            } finally {
+                // Always set loading to false when done (success or error)
+                setIsLoading(false);
+            }
+        };
+
+        // Call the function to fetch data
+        fetchData();
+    }, []); // Empty array means run only once when component mounts
 
     // History data
     const historyData = [
@@ -26,15 +112,29 @@ const OneVOneLocalPage = () => {
 
             <div className="user-info-banner">
                 <div className="user-info-left">
-                    <h2 className="username">alif19</h2>
+                    <h2 className="username">{isLoading ? "Loading..." : userData.cf_handle}</h2>
                     <p className="tagline">Ready to Clash?</p>
                 </div>
 
                 <div className="user-info-right">
-                    <h2 className="rating-number">1500</h2>
+                    <h2 className="rating-number">{isLoading ? "..." : userData.trophy}</h2>
                     <p className="rating-label">rating</p>
                 </div>
             </div>
+
+            {/* Show error message if something went wrong */}
+            {error && (
+                <div style={{
+                    color: 'red',
+                    background: 'rgba(255, 0, 0, 0.1)',
+                    padding: '10px',
+                    borderRadius: '5px',
+                    margin: '10px 0',
+                    textAlign: 'center'
+                }}>
+                    Error loading data: {error}
+                </div>
+            )}
 
             <div className="tabs-container">
                 <button
@@ -53,78 +153,41 @@ const OneVOneLocalPage = () => {
 
             {activeTab === 'friends' && (
                 <div className="friends-list">
-                    <div className="friend-card">
-                        <span className="friend-bullet">•</span>
-                        <span className="friend-name">MATIN008</span>
-                        <button className="view-details-btn">VIEW DETAILS</button>
-
-                        <div className="details-overlay"></div>
-
-                        <div className="details-popup">
-                            <p className="popup-text">Problems Solved:</p>
-                            <p className="popup-value">3500+</p>
-                            <p className="popup-text">Rating: 1800</p>
+                    {/* Show loading message while fetching friends */}
+                    {isLoading && (
+                        <div style={{ textAlign: 'center', padding: '20px', color: 'white' }}>
+                            Loading friends...
                         </div>
-                        <div className="status-container">
-                            <div className="status-indicator"></div>
-                            <span className="status-text">active</span>
-                        </div>
-                        <button className="challenge-btn" onClick={() => navigate('/battle-mode')}>challenge!</button>
-                    </div>
+                    )}
 
-                    <div className="friend-card">
-                        <span className="friend-bullet">•</span>
-                        <span className="friend-name">THAN_007</span>
-                        <button className="view-details-btn">VIEW DETAILS</button>
-                        <div className="details-overlay"></div>
+                    {/* Show message if no friends found */}
+                    {!isLoading && friendsList.length === 0 && (
+                        <div style={{ textAlign: 'center', padding: '20px', color: 'white' }}>
+                            No friends found. Add some friends to start battling!
+                        </div>
+                    )}
 
-                        <div className="details-popup">
-                            <p className="popup-text">Problems Solved:</p>
-                            <p className="popup-value">3500+</p>
-                            <p className="popup-text">Rating: 1800</p>
-                        </div>
-                        <div className="status-container">
-                            <div className="status-indicator"></div>
-                            <span className="status-text">active</span>
-                        </div>
-                        <button className="challenge-btn" onClick={() => navigate('/battle-mode')}>challenge!</button>
-                    </div>
+                    {/* Display each friend from database */}
+                    {!isLoading && friendsList.map((friend, index) => (
+                        <div key={index} className="friend-card">
+                            <span className="friend-bullet">•</span>
+                            <span className="friend-name">{friend.cf_handle}</span>
+                            <button className="view-details-btn">VIEW DETAILS</button>
 
-                    <div className="friend-card">
-                        <span className="friend-bullet">•</span>
-                        <span className="friend-name">TakiL096</span>
-                        <button className="view-details-btn">VIEW DETAILS</button>
-                        <div className="details-overlay"></div>
+                            <div className="details-overlay"></div>
 
-                        <div className="details-popup">
-                            <p className="popup-text">Problems Solved:</p>
-                            <p className="popup-value">3500+</p>
-                            <p className="popup-text">Rating: 1800</p>
+                            <div className="details-popup">
+                                <p className="popup-text">XP Earned:</p>
+                                <p className="popup-value">{friend.xp || 0}</p>
+                                <p className="popup-text">Trophy: {friend.trophy || 0}</p>
+                            </div>
+                            <div className="status-container">
+                                <div className="status-indicator"></div>
+                                <span className="status-text">active</span>
+                            </div>
+                            <button className="challenge-btn" onClick={() => navigate('/battle-mode')}>challenge!</button>
                         </div>
-                        <div className="status-container">
-                            <div className="status-indicator"></div>
-                            <span className="status-text">active</span>
-                        </div>
-                        <button className="challenge-btn" onClick={() => navigate('/battle-mode')}>challenge!</button>
-                    </div>
-
-                    <div className="friend-card">
-                        <span className="friend-bullet">•</span>
-                        <span className="friend-name">Usama_Jeager</span>
-                        <button className="view-details-btn">VIEW DETAILS</button>
-                        <div className="details-overlay"></div>
-
-                        <div className="details-popup">
-                            <p className="popup-text">Problems Solved:</p>
-                            <p className="popup-value">3500+</p>
-                            <p className="popup-text">Rating: 1800</p>
-                        </div>
-                        <div className="status-container">
-                            <div className="status-indicator"></div>
-                            <span className="status-text">active</span>
-                        </div>
-                        <button className="challenge-btn" onClick={() => navigate('/battle-mode')}>challenge!</button>
-                    </div>
+                    ))}
                 </div>
             )}
 
