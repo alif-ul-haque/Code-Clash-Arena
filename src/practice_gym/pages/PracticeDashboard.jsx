@@ -34,7 +34,7 @@ const Dashboard = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Codeforces data states
-  const [cfHandle] = useState('Scomrades'); // Hardcoded username for now
+  const [cfHandle] = useState('alif_uL_haQue'); // Hardcoded username for now
   const [userStats, setUserStats] = useState({
     rating: 0,
     dayStreak: 0,
