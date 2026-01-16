@@ -65,4 +65,15 @@ create table problem (
   status_id text
 );
 
+-- Insert sample data into users table
+insert into users (email, password, cf_handle, xp, trophy, clan_id)
+values (
+  'alifulhaque19@gmail.com',
+  '1234',  -- hashed password
+  'alif19',
+  100.50,
+  50,
+  null
+);
+
 select current_database();
