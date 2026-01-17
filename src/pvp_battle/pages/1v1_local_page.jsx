@@ -32,12 +32,21 @@ const OneVOneLocalPage = () => {
             try {
                 setIsLoading(true); // Set loading to true while fetching
 
+                // Get logged-in user's cf_handle from localStorage
+                const loggedInUser = localStorage.getItem('loggedInUser');
+                
+                if (!loggedInUser) {
+                    setError('No user logged in');
+                    setIsLoading(false);
+                    return;
+                }
+
                 // FETCH USER DATA
                 // Query the 'users' table in Supabase database
                 const { data: user, error: userError } = await supabase
                     .from('users') // Access the 'users' table
                     .select('cf_handle, trophy') // Get only username and rating columns
-                    .eq('cf_handle', 'alif19') // Filter: WHERE username = 'alif19'
+                    .eq('cf_handle', loggedInUser) // Filter: WHERE username = logged-in user
                     .single(); // Return single object (not array)
 
                 // If there was an error fetching user, throw it
@@ -52,11 +61,11 @@ const OneVOneLocalPage = () => {
                 }
 
                 // FETCH FRIENDS LIST
-                // Step 1: Get alif19's id from users table
+                // Step 1: Get logged-in user's id from users table
                 const { data: currentUserData } = await supabase
                     .from('users')
                     .select('id')
-                    .eq('cf_handle', 'alif19')
+                    .eq('cf_handle', loggedInUser)
                     .single();
 
                 const alifId = currentUserData.id;

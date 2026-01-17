@@ -116,8 +116,8 @@ values ('sambani@gmail.com', 'sambani129', 69.50, 1700, null);
 
 insert into friends (u_id, f_id, status)
 select 
-  (select id from users where cf_handle = 'alif19') as u_id,
+  (select id from users where cf_handle = 'alif_uL_haQue') as u_id,
   id as f_id,
   'accepted' as status
 from users
-where cf_handle <> 'alif19';
+where cf_handle <> 'alif_uL_haQue';

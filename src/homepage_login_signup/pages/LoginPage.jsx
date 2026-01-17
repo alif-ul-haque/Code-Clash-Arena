@@ -22,7 +22,7 @@ export default function LoginPage() {
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (formData.username && formData.password) {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { data: authData, error } = await supabase.auth.signInWithPassword({
                 email: formData.username,
                 password: formData.password
             })
@@ -30,6 +30,24 @@ export default function LoginPage() {
                 setAlert({ message: error.message, type: 'error' });
                 return;
             }
+            
+            // Fetch user's cf_handle from database after successful login
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('cf_handle')
+                .eq('email', formData.username)
+                .single();
+            
+            if (userError) {
+                setAlert({ message: 'Error fetching user data', type: 'error' });
+                return;
+            }
+            
+            // Store cf_handle in localStorage for use in other pages
+            if (userData && userData.cf_handle) {
+                localStorage.setItem('loggedInUser', userData.cf_handle);
+            }
+            
             setAlert({ message: 'Sign in successful!', type: 'success' });
             setTimeout(() => {
                 navigate('/main');

@@ -29,11 +29,20 @@ function FirstPage1v1() {
       try {
         setIsLoading(true); // Set loading to true while fetching
         
+        // Get logged-in user's cf_handle from localStorage
+        const loggedInUser = localStorage.getItem('loggedInUser');
+        
+        if (!loggedInUser) {
+          setError('No user logged in');
+          setIsLoading(false);
+          return;
+        }
+        
         // Query the 'users' table in Supabase database
         const { data: user, error: userError } = await supabase
           .from('users') // Access the 'users' table
           .select('cf_handle') // Get only username and rating columns
-          .eq('cf_handle', 'alif19') // Filter: WHERE username = 'alif19'
+          .eq('cf_handle', loggedInUser) // Filter: WHERE username = logged-in user
           .single(); // Return single object (not array)
         
         // If there was an error, throw it to be caught below
