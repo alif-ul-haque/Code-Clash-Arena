@@ -11,7 +11,7 @@ export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
         totalPoints = 0,
         members = '0/0',
         type = 'N/A',
-        requiredRating = 'N/A',
+        requiredTrophy = 'N/A',
         warFrequency = 'N/A',
         location = 'N/A',
         warWon = 0,
@@ -73,8 +73,8 @@ export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
                             <span className="info-value">{type}</span>
                         </div>
                         <div className="info-item">
-                            <span className="info-label">Required Rating</span>
-                            <span className="info-value">{requiredRating}</span>
+                            <span className="info-label">Required Trophy</span>
+                            <span className="info-value">{requiredTrophy}</span>
                         </div>
                         <div className="info-item">
                             <span className="info-label">War Frequency</span>

@@ -2,6 +2,7 @@ import '../style/CreateClan.css';
 import { useEffect, useState } from 'react';
 import Button from '../../assets/components/Button.jsx';
 import createIcon from '../../assets/icons/play-button-arrowhead.png';
+import { createClan } from '../utilities/CreateClan.js';
 
 export default function CreateClan({ isOpen, onClose }) {
 
@@ -39,7 +40,22 @@ export default function CreateClan({ isOpen, onClose }) {
             }
         }
 
-        // Here you would typically send the data to your backend
+        const addClan = async () => {
+            const response = await createClan({
+                clanName: clanData.clanName,
+                type: clanData.type,
+                location: clanData.location,
+                warFrequency: clanData.warFrequency,
+                minTrophy: clanData.minTrophy ? parseInt(clanData.minTrophy) : null,
+                maxTrophy: clanData.maxTrophy ? parseInt(clanData.maxTrophy) : null
+            });
+            return response;
+        }
+        addClan().then(() => {
+            alert("Clan created successfully!");
+        }).catch((error) => {
+            alert("Error creating clan: " + error.message);
+        });
         // Reset form after successful submission
         setClanData({
             clanName: '',
