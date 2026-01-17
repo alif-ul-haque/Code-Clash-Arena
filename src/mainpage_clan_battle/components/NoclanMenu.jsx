@@ -2,13 +2,27 @@ import '../style/NoclanMenu.css';
 import { useEffect, useState } from 'react';
 import Button from '../../assets/components/Button.jsx';
 import FindClan from '../components/FindClan.jsx';
+import CreateClan from './CreateClan.jsx';
 
 export default function NoClanMenu({ isOpen, onClose }) {
-    let [open, setOpen] = useState(false);
-    const handleChange = () => {
-        setOpen(true);
-        onclose();
-    }
+    let [open, setOpen] = useState({
+        findClan: false,
+        createClan: false
+    });
+
+    const handleOpenFindClan = () => {
+        setOpen((prev) => ({
+            ...prev,
+            findClan: true
+        }));
+    };
+
+    const handleOpenCreateClan = () => {
+        setOpen((prev) => ({
+            ...prev,
+            createClan: true
+        }));
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -41,7 +55,7 @@ export default function NoClanMenu({ isOpen, onClose }) {
                         width="200px"
                         fontSize="32px"
                         borderRadius="15px"
-                        onClick={handleChange}
+                        onClick={handleOpenFindClan}
                     />
                     <Button
                         text="create clan"
@@ -50,10 +64,12 @@ export default function NoClanMenu({ isOpen, onClose }) {
                         width="200px"
                         fontSize="32px"
                         borderRadius="15px"
+                        onClick={handleOpenCreateClan}
                     />
                 </div>
             </div>
-            <FindClan isOpen={open} onClose={() => setOpen(false)} />
+            <FindClan isOpen={open.findClan} onClose={() => setOpen({ findClan: false, createClan: false })} />
+            <CreateClan isOpen={open.createClan} onClose={() => setOpen({ findClan: false, createClan: false })} />
         </div>
     );
 }
