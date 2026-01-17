@@ -62,3 +62,13 @@ export async function countClanMembers(clanId) {
     }
     return { count: data, error: null };
 }
+
+export async function getClanMembers(clanId) {
+    const { data, error } = await supabase.rpc('get_clan_members_with_user_data' , { p_clan_id: clanId });
+    if (error) {
+        console.error("Error fetching clan members:", error.message);
+        return { members: [], error };
+    }
+    console.log("Fetched clan members:", data);
+    return { members: data, error: null };
+}

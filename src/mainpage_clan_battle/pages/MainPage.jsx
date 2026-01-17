@@ -21,7 +21,7 @@ import IntroCard from '../components/IntroCard.jsx'
 import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png'
 import social from '../../assets/icons/social-network.png'
 import SocialPage from '../components/Social.jsx';
-import getUserData , {getClanData , countClanMembers} from '../utilities/UserData.js'
+import getUserData , {getClanData , countClanMembers , getClanMembers} from '../utilities/UserData.js'
 import { supabase } from '../../supabaseclient.js'
 
 
@@ -153,6 +153,12 @@ export default function MainPage() {
                 return;
             }
 
+            const { members: clanMembers, error: membersError } = await getClanMembers(data.clan_id);
+            if (membersError) {
+                console.error("Failed to fetch clan members:", membersError);
+                return;
+            }
+
             setUserDetail(prev => ({
                 ...prev,
                 haveClan: data.clan_id ? true : false,
@@ -169,6 +175,7 @@ export default function MainPage() {
                     warFrequency: clanData.war_frequency,
                     location: clanData.location,
                     warWon: clanData.war_won,
+                    participants: clanMembers
                 }
             }));
         }

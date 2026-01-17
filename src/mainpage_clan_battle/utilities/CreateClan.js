@@ -47,5 +47,18 @@ export async function createClan({ clanName, type, location, warFrequency, minTr
         throw updateError;
     }
 
+    //update clan_members table
+    const { error: memberError } = await supabase.from('clan_members').insert([
+        {
+            clan_id: clanId,
+            user_id: userData.id,
+            role: 'leader'
+        }
+    ]);
+    if (memberError) {
+        console.error("Error adding clan member:", memberError.message);
+        throw memberError;
+    }
+
     return { success: true, clanId };
 }
