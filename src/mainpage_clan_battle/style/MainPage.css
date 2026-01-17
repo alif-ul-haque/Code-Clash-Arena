@@ -37,6 +37,7 @@
 .level {
     position: absolute;
     font-size: 40px;
+    font-weight: 700;
     left: 68px;
     top: 35px;
     transform: translate(-50%, -50%);
@@ -52,6 +53,11 @@
         0 3px 0 #000;
     z-index: 10;
     white-space: nowrap;
+}
+
+.level-two-digit {
+    font-weight: 600;
+    font-size: 38px;
 }
 
 .menubuttons {

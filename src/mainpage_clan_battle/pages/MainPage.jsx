@@ -118,6 +118,7 @@ export default function MainPage() {
         xp: 0,
         maxXp: 0,
         level: 0,
+        displayXp: 0,
         haveClan: false,
         clanDetails: {
             name: "",
@@ -143,20 +144,23 @@ export default function MainPage() {
             
             // Calculate level and XP progress
             const totalXp = data.xp; // Total accumulated XP (e.g., 55.75)
-            const xpPerLevel = 10; // Each level requires 10 XP
+            
+            // Display XP is the ceiling of total XP (e.g., 55.75 → 56)
+            const displayXp = Math.ceil(totalXp);
+            
+            // Get fractional part for bar fill (e.g., 0.75 from 55.75)
+            const fractionalPart = totalXp - Math.floor(totalXp);
             
             // Calculate current level (starting from level 1)
-            const currentLevel = Math.floor(totalXp / xpPerLevel) + 1;
-            
-            // Calculate XP progress within current level
-            const xpInCurrentLevel = totalXp % xpPerLevel;
+            const currentLevel = Math.floor(totalXp / 10) + 1;
             
             setUserDetail(prev => ({
                 ...prev,
                 username: data.cf_handle,
                 level: currentLevel,
-                xp: xpInCurrentLevel, // XP within current level (e.g., 5.75 out of 10)
-                maxXp: xpPerLevel // Always 10 XP per level
+                displayXp: displayXp, // Rounded up XP for display (56)
+                xp: fractionalPart, // Fractional part for bar (0.75)
+                maxXp: 1 // Always 1 since we're using fractional part (0-1 range)
             }));
         }
         fetchUserData();
@@ -283,7 +287,7 @@ export default function MainPage() {
                 <div className="menubar">
                     <div className="xpbar">
                         <div className="img-xp">
-                            <p className="level">{userDetail.level}</p>
+                            <p className={`level ${userDetail.displayXp >= 10 ? 'level-two-digit' : ''}`}>{userDetail.displayXp}</p>
                             <img src={xpImage} alt="XP" className="xp-image" />
                             <XpBar xp={userDetail.xp} maxXp={userDetail.maxXp} username={userDetail.username} />
                         </div>
