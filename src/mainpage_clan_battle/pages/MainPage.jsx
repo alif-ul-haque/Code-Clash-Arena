@@ -140,12 +140,23 @@ export default function MainPage() {
                 console.error("Failed to fetch user data:", error);
                 return;
             }
+            
+            // Calculate level and XP progress
+            const totalXp = data.xp; // Total accumulated XP (e.g., 55.75)
+            const xpPerLevel = 10; // Each level requires 10 XP
+            
+            // Calculate current level (starting from level 1)
+            const currentLevel = Math.floor(totalXp / xpPerLevel) + 1;
+            
+            // Calculate XP progress within current level
+            const xpInCurrentLevel = totalXp % xpPerLevel;
+            
             setUserDetail(prev => ({
                 ...prev,
                 username: data.cf_handle,
-                level: data.level,
-                xp: data.xp,
-                maxXp: data.level * 10
+                level: currentLevel,
+                xp: xpInCurrentLevel, // XP within current level (e.g., 5.75 out of 10)
+                maxXp: xpPerLevel // Always 10 XP per level
             }));
         }
         fetchUserData();
