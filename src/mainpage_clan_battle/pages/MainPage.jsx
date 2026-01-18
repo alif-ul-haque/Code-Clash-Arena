@@ -38,6 +38,10 @@ export default function MainPage() {
     const [showCarousel, setShowCarousel] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
 
+    // State for incoming battle requests
+    const [incomingRequests, setIncomingRequests] = useState([]);
+    const [currentUserId, setCurrentUserId] = useState(null);
+
     const carouselCards = [
         {
             title: 'Your Clan',
@@ -162,10 +166,173 @@ export default function MainPage() {
                 xp: fractionalPart, // Fractional part for bar (0.75)
                 maxXp: 1 // Always 1 since we're using fractional part (0-1 range)
             }));
+
+            // Get and store current user ID for battle requests
+            const { data: userData } = await supabase
+                .from('users')
+                .select('id')
+                .eq('cf_handle', data.cf_handle)
+                .single();
+            
+            if (userData) {
+                setCurrentUserId(userData.id);
+                // Check for existing incoming requests
+                await checkIncomingRequests(userData.id);
+            }
         }
         fetchUserData();
 
     }, []);
+
+    // Subscribe to incoming battle requests in real-time
+    useEffect(() => {
+        if (!currentUserId) return;
+
+        const channel = supabase
+            .channel('global-battle-requests')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'onevone_participants',
+                    filter: `player_id=eq.${currentUserId}`
+                },
+                async (payload) => {
+                    await checkIncomingRequests(currentUserId);
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'onevonebattles'
+                },
+                async (payload) => {
+                    await checkIncomingRequests(currentUserId);
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [currentUserId]);
+
+    // Function to check for incoming battle requests
+    const checkIncomingRequests = async (userId) => {
+        try {
+            const { data: myParticipations } = await supabase
+                .from('onevone_participants')
+                .select('onevone_battle_id')
+                .eq('player_id', userId);
+
+            if (!myParticipations || myParticipations.length === 0) return;
+
+            const battleIds = myParticipations.map(p => p.onevone_battle_id);
+
+            const { data: pendingBattles } = await supabase
+                .from('onevonebattles')
+                .select('*')
+                .in('onevone_battle_id', battleIds)
+                .eq('status', 'request_sent');
+
+            if (!pendingBattles || pendingBattles.length === 0) {
+                setIncomingRequests([]);
+                return;
+            }
+
+            const requestsWithDetails = await Promise.all(
+                pendingBattles.map(async (battle) => {
+                    const { data: participants } = await supabase
+                        .from('onevone_participants')
+                        .select('player_id')
+                        .eq('onevone_battle_id', battle.onevone_battle_id);
+
+                    const opponentId = participants.find(p => p.player_id !== userId)?.player_id;
+
+                    if (!opponentId) return null;
+
+                    const { data: opponentInfo } = await supabase
+                        .from('users')
+                        .select('cf_handle, rating')
+                        .eq('id', opponentId)
+                        .single();
+
+                    return {
+                        battleId: battle.onevone_battle_id,
+                        mode: battle.battle_mode,
+                        opponent: opponentInfo,
+                        timestamp: battle.start_time,
+                        problemCount: battle.problem_count
+                    };
+                })
+            );
+
+            setIncomingRequests(requestsWithDetails.filter(r => r !== null));
+
+        } catch (err) {
+            console.error('Error checking incoming requests:', err);
+        }
+    };
+
+    // Function to accept battle request
+    const handleAcceptRequest = async (battleId, opponent, mode, problemCount) => {
+        try {
+            const { error } = await supabase
+                .from('onevonebattles')
+                .update({ status: 'active' })
+                .eq('onevone_battle_id', battleId);
+
+            if (error) throw error;
+
+            const loggedInUser = localStorage.getItem('loggedInUser');
+
+            if (mode === 'TIME RUSH MODE') {
+                navigate('/1v1-coding-timeRush-mode', {
+                    state: {
+                        battleId,
+                        opponent,
+                        currentUser: loggedInUser,
+                        mode,
+                        problemCount
+                    }
+                });
+            } else {
+                navigate('/1v1-coding-battle', {
+                    state: {
+                        battleId,
+                        opponent,
+                        currentUser: loggedInUser,
+                        mode
+                    }
+                });
+            }
+
+        } catch (err) {
+            console.error('Error accepting request:', err);
+            alert('Failed to accept battle request.');
+        }
+    };
+
+    // Function to decline battle request
+    const handleDeclineRequest = async (battleId) => {
+        try {
+            const { error } = await supabase
+                .from('onevonebattles')
+                .update({ status: 'declined' })
+                .eq('onevone_battle_id', battleId);
+
+            if (error) throw error;
+
+            setIncomingRequests(prev => prev.filter(r => r.battleId !== battleId));
+
+        } catch (err) {
+            console.error('Error declining request:', err);
+            alert('Failed to decline battle request.');
+        }
+    };
 
     const particlesInit = useCallback(async engine => {
         await loadSlim(engine);
@@ -267,6 +434,41 @@ export default function MainPage() {
 
     return (
         <>
+            {/* Incoming Battle Requests Notification */}
+            {incomingRequests.length > 0 && (
+                <div className="battle-request-overlay">
+                    <div className="battle-request-modal">
+                        <h2 className="request-title">INCOMING BATTLE REQUEST!</h2>
+                        {incomingRequests.map((request, index) => (
+                            <div key={index} className="request-card">
+                                <p className="request-from">
+                                    <strong>{request.opponent.cf_handle}</strong> challenges you!
+                                </p>
+                                <p className="request-mode">Mode: {request.mode}</p>
+                                {request.problemCount && (
+                                    <p className="request-mode">Problems: {request.problemCount}</p>
+                                )}
+                                <p className="request-rating">Rating: {request.opponent.rating}</p>
+                                <div className="request-actions">
+                                    <button 
+                                        className="accept-btn"
+                                        onClick={() => handleAcceptRequest(request.battleId, request.opponent, request.mode, request.problemCount)}
+                                    >
+                                        ACCEPT
+                                    </button>
+                                    <button 
+                                        className="decline-btn"
+                                        onClick={() => handleDeclineRequest(request.battleId)}
+                                    >
+                                        DECLINE
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <div id="maindiv"
                 className={isTransitioning ? 'transitioning' : ''}
                 style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }}
