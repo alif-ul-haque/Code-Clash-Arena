@@ -21,7 +21,7 @@ import IntroCard from '../components/IntroCard.jsx'
 import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png'
 import social from '../../assets/icons/social-network.png'
 import SocialPage from '../components/Social.jsx';
-import getUserData , {getClanData , countClanMembers , getClanMembers} from '../utilities/UserData.js'
+import getUserData, { getClanData, countClanMembers, getClanMembers } from '../utilities/UserData.js'
 import { supabase } from '../../supabaseclient.js'
 
 
@@ -141,22 +141,31 @@ export default function MainPage() {
                 return;
             }
 
-            const {data : clanData, error: clanError} = await getClanData(data.clan_id);
-            if(clanError) {
-                console.error("Failed to fetch clan data:", clanError);
-                return;
-            }
+            let clanData = null;
+            let memberCount = 0;
+            let clanMembers = [];
 
-            const { count: memberCount, error: countError } = await countClanMembers(data.clan_id);
-            if (countError) {
-                console.error("Failed to count clan members:", countError);
-                return;
-            }
+            if (data.clan_id) {
+                const { data: fetchedClanData, error: clanError } = await getClanData(data.clan_id);
+                if (clanError) {
+                    console.error("Failed to fetch clan data:", clanError);
+                    return;
+                }
+                clanData = fetchedClanData;
 
-            const { members: clanMembers, error: membersError } = await getClanMembers(data.clan_id);
-            if (membersError) {
-                console.error("Failed to fetch clan members:", membersError);
-                return;
+                const { count: fetchedMemberCount, error: countError } = await countClanMembers(data.clan_id);
+                if (countError) {
+                    console.error("Failed to count clan members:", countError);
+                    return;
+                }
+                memberCount = fetchedMemberCount;
+
+                const { members: fetchedClanMembers, error: membersError } = await getClanMembers(data.clan_id);
+                if (membersError) {
+                    console.error("Failed to fetch clan members:", membersError);
+                    return;
+                }
+                clanMembers = fetchedClanMembers;
             }
 
             setUserDetail(prev => ({
@@ -166,7 +175,7 @@ export default function MainPage() {
                 level: data.level,
                 xp: data.xp,
                 maxXp: data.level * 10,
-                clanDetails: {
+                clanDetails: clanData ? {
                     name: clanData.clan_name,
                     members: memberCount,
                     totalPoints: clanData.total_points,
@@ -176,6 +185,16 @@ export default function MainPage() {
                     location: clanData.location,
                     warWon: clanData.war_won,
                     participants: clanMembers
+                } : {
+                    name: "",
+                    members: 0,
+                    totalPoints: 0,
+                    type: "",
+                    requiredTrophy: "",
+                    warFrequency: "",
+                    location: "",
+                    warWon: 0,
+                    participants: []
                 }
             }));
         }
