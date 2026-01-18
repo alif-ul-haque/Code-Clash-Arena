@@ -1,12 +1,14 @@
 import '../style/FindClan.css';
-import { useEffect , useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../../assets/components/Button.jsx';
 import searchIcon from '../../assets/icons/magnifier.png';
+import ClanDetails from './ClanDetails.jsx';
+import FindClans from '../utilities/FindClans.js';
 
 export default function FindClan({ isOpen, onClose }) {
 
     let [clanName, setClanName] = useState('');
-    
+
     const handleInputChange = (event) => {
         setClanName(event.target.value);
     }
@@ -29,6 +31,21 @@ export default function FindClan({ isOpen, onClose }) {
         };
     }, [isOpen]);
 
+    const [fetchedClans, setFetchedClans] = useState([]);
+
+    useEffect(() => {
+        async function fetchClans() {
+            const { clans, error } = await FindClans();
+            if (error) {
+                console.error("Error fetching clans:", error);
+            }
+            else {
+                setFetchedClans(clans);
+            }
+        }
+        fetchClans();
+    }, []);
+
     if (!isOpen) return null;
 
     return (
@@ -37,6 +54,9 @@ export default function FindClan({ isOpen, onClose }) {
                 className="find-clan-menu"
                 onClick={(e) => e.stopPropagation()} // prevent close on menu click
             >
+                <button className="find-clan-close-btn" onClick={onClose}>
+                    ✕
+                </button>
                 <div className="search-button">
                     <div className="search-bar">
                         <p>Search Clan:</p>
@@ -60,6 +80,26 @@ export default function FindClan({ isOpen, onClose }) {
                             onClick={handleInputSubmit}
                         />
                     </div>
+
+                </div>
+                <div className="fewclan">
+                    <p className="few_clan_text">Few Clans:</p>
+                    {fetchedClans.map((clan, index) => {
+                        return (
+                            <ClanDetails
+                                key={index}
+                                clanName={clan.name}
+                                clanType={clan.type}
+                                minRating={clan.minRating}
+                                maxRating={clan.maxRating}
+                                location={clan.location}
+                                totalMembers={clan.totalMembers}
+                                maxMembers={clan.maxMembers}
+                                level ={clan.level}
+                                onJoinClick={() => { console.log(`Joining clan: ${clan.name}`); }}
+                            />
+                        )
+                    })}
                 </div>
             </div>
         </div>
