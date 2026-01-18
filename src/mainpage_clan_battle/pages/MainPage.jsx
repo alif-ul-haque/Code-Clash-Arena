@@ -21,7 +21,7 @@ import IntroCard from '../components/IntroCard.jsx'
 import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png'
 import social from '../../assets/icons/social-network.png'
 import SocialPage from '../components/Social.jsx';
-import getUserData from '../utilities/UserData.js'
+import getUserData , {getClanData , countClanMembers , getClanMembers} from '../utilities/UserData.js'
 import { supabase } from '../../supabaseclient.js'
 
 
@@ -141,26 +141,43 @@ export default function MainPage() {
                 console.error("Failed to fetch user data:", error);
                 return;
             }
-            
-            // Calculate level and XP progress
-            const totalXp = data.xp; // Total accumulated XP (e.g., 55.75)
-            
-            // Display XP is the ceiling of total XP (e.g., 55.75 → 56)
-            const displayXp = Math.ceil(totalXp);
-            
-            // Get fractional part for bar fill (e.g., 0.75 from 55.75)
-            const fractionalPart = totalXp - Math.floor(totalXp);
-            
-            // Calculate current level (starting from level 1)
-            const currentLevel = Math.floor(totalXp / 10) + 1;
-            
+
+            const {data : clanData, error: clanError} = await getClanData(data.clan_id);
+            if(clanError) {
+                console.error("Failed to fetch clan data:", clanError);
+                return;
+            }
+
+            const { count: memberCount, error: countError } = await countClanMembers(data.clan_id);
+            if (countError) {
+                console.error("Failed to count clan members:", countError);
+                return;
+            }
+
+            const { members: clanMembers, error: membersError } = await getClanMembers(data.clan_id);
+            if (membersError) {
+                console.error("Failed to fetch clan members:", membersError);
+                return;
+            }
+
             setUserDetail(prev => ({
                 ...prev,
+                haveClan: data.clan_id ? true : false,
                 username: data.cf_handle,
-                level: currentLevel,
-                displayXp: displayXp, // Rounded up XP for display (56)
-                xp: fractionalPart, // Fractional part for bar (0.75)
-                maxXp: 1 // Always 1 since we're using fractional part (0-1 range)
+                level: data.level,
+                xp: data.xp,
+                maxXp: data.level * 10,
+                clanDetails: {
+                    name: clanData.clan_name,
+                    members: memberCount,
+                    totalPoints: clanData.total_points,
+                    type: clanData.type,
+                    requiredTrophy: clanData.min_trophy,
+                    warFrequency: clanData.war_frequency,
+                    location: clanData.location,
+                    warWon: clanData.war_won,
+                    participants: clanMembers
+                }
             }));
         }
         fetchUserData();

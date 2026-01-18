@@ -11,7 +11,7 @@ export default async function getUserData() {
 
         const { data, error } = await supabase
             .from('users')
-            .select('level, cf_handle, xp')
+            .select('level, cf_handle, xp, clan_id')
             .eq('email', user.email)
             .maybeSingle();
 
@@ -30,4 +30,45 @@ export default async function getUserData() {
         console.error("Unexpected error in getUserData:", err);
         return { data: null, error: err };
     }
+}
+
+export async function getClanData(clanId) {
+    try {
+        const { data, error } = await supabase
+            .from('clans')
+            .select('*')
+            .eq('clan_id', clanId)
+            .maybeSingle();
+        if (error) {
+            console.error("Error fetching clan data:", error.message);
+            return { data: null, error };
+        }
+        if (!data) {
+            console.warn("No clan data found for clan ID:", clanId);
+            return { data: null, error: new Error("Clan data not found") };
+        }
+        return { data, error: null };
+    } catch (err) {
+        console.error("Unexpected error in getclanData:", err);
+        return { data: null, error: err };
+    }
+}
+
+export async function countClanMembers(clanId) {
+    const { data, error } = await supabase.rpc('count_users_by_clan', { p_clan_id: clanId });
+    if (error) {
+        console.error("Error counting clan members:", error.message);
+        return { count: 0, error };
+    }
+    return { count: data, error: null };
+}
+
+export async function getClanMembers(clanId) {
+    const { data, error } = await supabase.rpc('get_clan_members_with_user_data' , { p_clan_id: clanId });
+    if (error) {
+        console.error("Error fetching clan members:", error.message);
+        return { members: [], error };
+    }
+    console.log("Fetched clan members:", data);
+    return { members: data, error: null };
 }
