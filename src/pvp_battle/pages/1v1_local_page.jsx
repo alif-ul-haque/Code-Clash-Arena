@@ -285,18 +285,32 @@ const OneVOneLocalPage = () => {
             const loggedInUser = localStorage.getItem('loggedInUser');
             const { data: battle } = await supabase
                 .from('onevonebattles')
-                .select('battle_mode')
+                .select('battle_mode, problem_count')
                 .eq('onevone_battle_id', battleId)
                 .single();
 
-            navigate('/1v1-coding-battle', {
-                state: {
-                    battleId,
-                    opponent,
-                    currentUser: loggedInUser,
-                    mode: battle.battle_mode
-                }
-            });
+            // Navigate to appropriate page based on battle mode
+            if (battle.battle_mode === 'TIME RUSH MODE') {
+                navigate('/1v1-coding-timeRush-mode', {
+                    state: {
+                        battleId,
+                        opponent,
+                        currentUser: loggedInUser,
+                        mode: battle.battle_mode,
+                        problemCount: battle.problem_count
+                    }
+                });
+            } else {
+                // Real Mode
+                navigate('/1v1-coding-battle', {
+                    state: {
+                        battleId,
+                        opponent,
+                        currentUser: loggedInUser,
+                        mode: battle.battle_mode
+                    }
+                });
+            }
 
         } catch (err) {
             console.error('Error accepting request:', err);
