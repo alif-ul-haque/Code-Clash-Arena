@@ -1,13 +1,127 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../style/1v1_coding_battle_page.css';
 import logo from '../../assets/icons/cca.png';
+import { supabase } from '../../supabaseclient';
 
 const OneVOneCodingBattlePage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { battleId, opponent, currentUser, mode } = location.state || {};
+    
     const [selectedLanguage, setSelectedLanguage] = useState('PYTHON');
     const [code, setCode] = useState('## WRITE YOUR PYTHON CODE\n##FROM HERE');
     const fileInputRef = useRef(null);
+    
+    // Battle state tracking
+    const [battleState, setBattleState] = useState({
+        myProgress: 0,
+        opponentProgress: 0,
+        myStatus: 'coding',
+        opponentStatus: 'coding',
+        winner: null
+    });
+    const [currentUserId, setCurrentUserId] = useState(null);
+    const [opponentId, setOpponentId] = useState(null);
+    const [startTime] = useState(Date.now());
+
+    // Fetch user IDs and set up real-time subscription
+    useEffect(() => {
+        const setupBattle = async () => {
+            try {
+                // Get current user's ID
+                const { data: userData } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('cf_handle', currentUser)
+                    .single();
+
+                setCurrentUserId(userData?.id);
+
+                // Get opponent's ID
+                const { data: opponentData } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('cf_handle', opponent.cf_handle)
+                    .single();
+
+                setOpponentId(opponentData?.id);
+
+                // Subscribe to real-time changes on participants table
+                const channel = supabase
+                    .channel('battle-updates')
+                    .on(
+                        'postgres_changes',
+                        {
+                            event: 'UPDATE',
+                            schema: 'public',
+                            table: 'onevone_participants',
+                            filter: `onevone_battle_id=eq.${battleId}`
+                        },
+                        (payload) => {
+                            // Update battle state when any participant's status changes
+                            checkBattleStatus();
+                        }
+                    )
+                    .subscribe();
+
+                // Initial status check
+                checkBattleStatus();
+
+                // Cleanup subscription on unmount
+                return () => {
+                    supabase.removeChannel(channel);
+                };
+
+            } catch (err) {
+                console.error('Error setting up battle:', err);
+            }
+        };
+
+        if (battleId && currentUser && opponent) {
+            setupBattle();
+        }
+    }, [battleId, currentUser, opponent]);
+
+    // Function to check current battle status
+    const checkBattleStatus = async () => {
+        try {
+            const { data: participants } = await supabase
+                .from('onevone_participants')
+                .select('player_id, problem_solved, time_taken')
+                .eq('onevone_battle_id', battleId);
+
+            if (participants) {
+                const myData = participants.find(p => p.player_id === currentUserId);
+                const opponentData = participants.find(p => p.player_id === opponentId);
+
+                setBattleState({
+                    myProgress: myData?.problem_solved || 0,
+                    opponentProgress: opponentData?.problem_solved || 0,
+                    myStatus: myData?.problem_solved > 0 ? 'solved' : 'coding',
+                    opponentStatus: opponentData?.problem_solved > 0 ? 'solved' : 'coding',
+                    winner: myData?.problem_solved > 0 ? 'you' : 
+                            opponentData?.problem_solved > 0 ? 'opponent' : null
+                });
+
+                // If someone won, navigate to result page
+                if (myData?.problem_solved > 0 || opponentData?.problem_solved > 0) {
+                    setTimeout(() => {
+                        navigate('/submit-page-real', {
+                            state: {
+                                battleId,
+                                won: myData?.problem_solved > 0,
+                                opponent: opponent.cf_handle,
+                                trophyChange: myData?.problem_solved > 0 ? '+115' : '-50'
+                            }
+                        });
+                    }, 1000);
+                }
+            }
+        } catch (err) {
+            console.error('Error checking battle status:', err);
+        }
+    };
 
     const handleLanguageChange = (e) => {
         const newLanguage = e.target.value;
@@ -24,7 +138,6 @@ const OneVOneCodingBattlePage = () => {
         if (file) {
             const fileExtension = file.name.split('.').pop().toLowerCase();
             
-            // Update language based on file extension
             const languageMap = {
                 'py': 'PYTHON',
                 'js': 'JAVASCRIPT',
@@ -37,12 +150,58 @@ const OneVOneCodingBattlePage = () => {
                 setSelectedLanguage(languageMap[fileExtension]);
             }
             
-            // Read file content
             const reader = new FileReader();
             reader.onload = (event) => {
                 setCode(event.target.result);
             };
             reader.readAsText(file);
+        }
+    };
+
+    const handleSubmit = async () => {
+        try {
+            // Calculate time taken (in seconds)
+            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+
+            // Update participant status - mark problem as solved
+            const { error } = await supabase
+                .from('onevone_participants')
+                .update({
+                    problem_solved: 1,
+                    time_taken: timeTaken
+                })
+                .eq('onevone_battle_id', battleId)
+                .eq('player_id', currentUserId);
+
+            if (error) throw error;
+
+            // Update battle status to completed
+            await supabase
+                .from('onevonebattles')
+                .update({
+                    status: 'completed',
+                    end_time: new Date().toISOString()
+                })
+                .eq('onevone_battle_id', battleId);
+
+            // Update user's trophy count
+            const { data: currentUserData } = await supabase
+                .from('users')
+                .select('rating, xp')
+                .eq('id', currentUserId)
+                .single();
+
+            await supabase
+                .from('users')
+                .update({
+                    rating: (currentUserData.rating || 0) + 115,
+                    xp: (currentUserData.xp || 0) + 5
+                })
+                .eq('id', currentUserId);
+
+        } catch (err) {
+            console.error('Error submitting solution:', err);
+            alert('Failed to submit. Please try again.');
         }
     };
 
@@ -53,10 +212,14 @@ const OneVOneCodingBattlePage = () => {
                 <img src={logo} alt="Logo" className="battle-logo" />
                 
                 <div className="battle-title-section">
-                    <h1 className="battle-title">ALIF19 VS _RIUZEE</h1>
+                    <h1 className="battle-title">{currentUser?.toUpperCase()} VS {opponent?.cf_handle?.toUpperCase()}</h1>
                     <div className="player-labels">
-                        <span className="player-label">YOU</span>
-                        <span className="player-label opponent-label">OPPONENT</span>
+                        <span className="player-label">
+                            YOU {battleState.myStatus === 'solved' && '✓'}
+                        </span>
+                        <span className="player-label opponent-label">
+                            OPPONENT {battleState.opponentStatus === 'solved' && '✓'}
+                        </span>
                     </div>
                 </div>
                 
@@ -104,7 +267,7 @@ const OneVOneCodingBattlePage = () => {
                             <option value="C++">C++</option>
                         </select>
                         
-                        <button className="submit-btn" onClick={() => navigate('/submit-page-real')}>SUBMIT</button>
+                        <button className="submit-btn" onClick={handleSubmit}>SUBMIT</button>
                     </div>
                     
                     <textarea 
