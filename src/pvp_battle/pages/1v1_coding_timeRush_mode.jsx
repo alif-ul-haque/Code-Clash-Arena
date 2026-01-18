@@ -1,19 +1,55 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../style/1v1_coding_timeRush_mode.css';
 import logo from '../../assets/icons/cca.png';
 import clockIcon from '../../assets/icons/clock.png';
+import { supabase } from '../../supabaseclient';
 
 const OneVOneCodingTimeRushMode = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { battleId, opponent, currentUser, problemCount: initialProblemCount } = location.state || {};
+    
     const [selectedLanguage, setSelectedLanguage] = useState('PYTHON');
     const [code, setCode] = useState('## WRITE YOUR PYTHON CODE\n##FROM HERE');
     const [currentProblem, setCurrentProblem] = useState(1);
-    const totalProblems = 3; // This can be dynamic based on selection from time_rush_problem_count page
+    const totalProblems = initialProblemCount || 3;
     
     // Timer state (starting from 30:00 = 1800 seconds)
     const [timeLeft, setTimeLeft] = useState(1800);
     const fileInputRef = useRef(null);
+    const [startTime] = useState(Date.now());
+    const [currentUserId, setCurrentUserId] = useState(null);
+    const [opponentId, setOpponentId] = useState(null);
+
+    // Fetch user IDs
+    useEffect(() => {
+        const fetchUserIds = async () => {
+            try {
+                if (currentUser) {
+                    const { data: userData } = await supabase
+                        .from('users')
+                        .select('id')
+                        .eq('cf_handle', currentUser)
+                        .single();
+                    setCurrentUserId(userData?.id);
+                }
+
+                if (opponent?.cf_handle) {
+                    const { data: opponentData } = await supabase
+                        .from('users')
+                        .select('id')
+                        .eq('cf_handle', opponent.cf_handle)
+                        .single();
+                    setOpponentId(opponentData?.id);
+                }
+            } catch (err) {
+                console.error('Error fetching user IDs:', err);
+            }
+        };
+
+        fetchUserIds();
+    }, [currentUser, opponent]);
     
     const handleLanguageChange = (e) => {
         const newLanguage = e.target.value;
@@ -123,7 +159,9 @@ const OneVOneCodingTimeRushMode = () => {
                 <img src={logo} alt="Logo" className="battle-logo" />
                 
                 <div className="battle-title-section">
-                    <h1 className="battle-title">ALIF19 VS _RIZVEE</h1>
+                    <h1 className="battle-title">
+                        {currentUser?.toUpperCase() || 'ALIF19'} VS {opponent?.cf_handle?.toUpperCase() || '_RIZVEE'}
+                    </h1>
                     <div className="player-labels">
                         <span className="player-label">YOU</span>
                         <span className="player-label opponent-label">OPPONENT</span>
@@ -183,11 +221,69 @@ const OneVOneCodingTimeRushMode = () => {
                             <option value="C++">C++</option>
                         </select>
                         
-                        <button className="submit-btn" onClick={() => {
-                            if (currentProblem < totalProblems) {
-                                setCurrentProblem(currentProblem + 1);
-                            } else {
-                                navigate('/submit-page-time-mode');
+                        <button className="submit-btn" onClick={async () => {
+                            try {
+                                // Calculate time taken
+                                const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+
+                                if (currentProblem < totalProblems) {
+                                    // Update progress for current problem
+                                    await supabase
+                                        .from('onevone_participants')
+                                        .update({
+                                            problem_solved: currentProblem,
+                                            time_taken: timeTaken
+                                        })
+                                        .eq('onevone_battle_id', battleId)
+                                        .eq('player_id', currentUserId);
+
+                                    setCurrentProblem(currentProblem + 1);
+                                } else {
+                                    // Final submission - mark all problems solved
+                                    await supabase
+                                        .from('onevone_participants')
+                                        .update({
+                                            problem_solved: totalProblems,
+                                            time_taken: timeTaken
+                                        })
+                                        .eq('onevone_battle_id', battleId)
+                                        .eq('player_id', currentUserId);
+
+                                    // Update battle status
+                                    await supabase
+                                        .from('onevonebattles')
+                                        .update({
+                                            status: 'completed',
+                                            end_time: new Date().toISOString()
+                                        })
+                                        .eq('onevone_battle_id', battleId);
+
+                                    // Update user stats
+                                    const { data: userData } = await supabase
+                                        .from('users')
+                                        .select('rating, xp')
+                                        .eq('id', currentUserId)
+                                        .single();
+
+                                    await supabase
+                                        .from('users')
+                                        .update({
+                                            rating: (userData.rating || 0) + 150,
+                                            xp: (userData.xp || 0) + 8
+                                        })
+                                        .eq('id', currentUserId);
+
+                                    navigate('/submit-page-time-mode', {
+                                        state: {
+                                            battleId,
+                                            won: true,
+                                            opponent: opponent?.cf_handle,
+                                            trophyChange: '+150'
+                                        }
+                                    });
+                                }
+                            } catch (err) {
+                                console.error('Error submitting:', err);
                             }
                         }}>
                             SUBMIT

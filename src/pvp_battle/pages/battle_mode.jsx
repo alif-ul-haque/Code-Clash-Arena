@@ -53,7 +53,20 @@ const BattleMode = () => {
 
     const handleModeSelection = async (mode) => {
         try {
-            // Update battle mode and set status to 'request_sent'
+            if (mode === 'TIME RUSH MODE') {
+                // For Time Rush, navigate to problem count selection first
+                navigate('/time-rush-problem-count', {
+                    state: {
+                        battleId,
+                        opponent,
+                        currentUser,
+                        mode
+                    }
+                });
+                return;
+            }
+
+            // For Real Mode, send request immediately
             const { error } = await supabase
                 .from('onevonebattles')
                 .update({

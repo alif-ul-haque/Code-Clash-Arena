@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../style/time_rush_problem_count.css';
+import { supabase } from '../../supabaseclient';
 
 const TimeRushProblemCount = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { battleId, opponent, currentUser, mode } = location.state || {};
     const [problemCount, setProblemCount] = useState(1);
 
     const incrementCount = () => {
@@ -13,6 +16,37 @@ const TimeRushProblemCount = () => {
     const decrementCount = () => {
         if (problemCount > 1) {
             setProblemCount(prev => prev - 1);
+        }
+    };
+
+    const handleGetStarted = async () => {
+        try {
+            // Update battle with problem count and send request
+            const { error } = await supabase
+                .from('onevonebattles')
+                .update({
+                    battle_mode: mode,
+                    problem_count: problemCount,
+                    status: 'request_sent'
+                })
+                .eq('onevone_battle_id', battleId);
+
+            if (error) throw error;
+
+            // Navigate to waiting page
+            navigate('/waiting-page', {
+                state: {
+                    battleId,
+                    opponent,
+                    currentUser,
+                    mode,
+                    problemCount
+                }
+            });
+
+        } catch (err) {
+            console.error('Error sending battle request:', err);
+            alert('Failed to send battle request. Please try again.');
         }
     };
 
@@ -32,7 +66,7 @@ const TimeRushProblemCount = () => {
                         </div>
                     </div>
                     
-                    <button className="get-started-btn" onClick={() => navigate('/waiting-page')}>
+                    <button className="get-started-btn" onClick={handleGetStarted}>
                         <span className="play-icon">▶</span> GET STARTED
                     </button>
                 </div>
