@@ -1,0 +1,173 @@
+.clan-details-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #C1C384;
+    border: clamp(2px, 0.3vw, 3px) solid black;
+    border-radius: clamp(8px, 1vw, 12px);
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 5rem;
+    box-sizing: border-box;
+    box-shadow: 0 clamp(2px, 0.3vw, 3px) clamp(4px, 0.5vw, 6px) rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    margin-top: .2rem;
+}
+
+.clan-details-container::before {
+    content: "";
+    position: absolute;
+    border-radius: 8.88px;
+    top: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 60%;
+    width: 99%;
+    background: linear-gradient(to bottom,
+            rgb(253, 253, 253),
+            rgba(255, 255, 255, 0.055));
+    pointer-events: none;
+    z-index: 0;
+    transition: all 0.3s ease;
+}
+
+.clan-details-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    padding: clamp(0.75rem, 1.5vw, 1rem) clamp(0.75rem, 1.5vw, 1.5rem);
+    border-right: 3px solid black;
+    height: 100%;
+    min-width: clamp(150px, 15vw, 200px);
+}
+
+.clan-details-header {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(4px, 0.5vw, 6px);
+}
+
+.clan-details-name {
+    margin: 0;
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    font-weight: bold;
+    color: black;
+    line-height: 1.2;
+    text-align: left;
+}
+
+.clan-details-level {
+    margin: 0;
+    font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+    font-weight: 600;
+    color: #333;
+    line-height: 1.2;
+}
+
+.clan-details-info-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    padding: clamp(0.75rem, 1.5vw, 1rem);
+    border-right: 3px solid black;
+    height: 100%;
+    gap: clamp(6px, 0.8vw, 10px);
+}
+
+.clan-details-info {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(6px, 0.8vw, 8px);
+}
+
+.clan-details-type {
+    margin: 0;
+    font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+    font-weight: 600;
+    color: black;
+    line-height: 1.2;
+}
+
+.clan-details-rating {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(4px, 0.5vw, 6px);
+}
+
+.rating-text {
+    margin: 0;
+    font-size: clamp(0.8rem, 1.3vw, 1rem);
+    color: #333;
+    line-height: 1.2;
+}
+
+.clan-details-location-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    padding: clamp(0.75rem, 1.5vw, 1rem);
+    border-right: 3px solid black;
+    height: 100%;
+    gap: clamp(4px, 0.5vw, 6px);
+    min-width: clamp(140px, 14vw, 180px);
+}
+
+.clan-details-location {
+    margin: 0;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    font-weight: bold;
+    color: black;
+    line-height: 1.2;
+}
+
+.clan-details-members {
+    margin: 0;
+    font-size: clamp(0.85rem, 1.4vw, 1.1rem);
+    font-weight: 600;
+    color: #333;
+    line-height: 1.2;
+}
+
+.clan-details-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    padding: clamp(0.5rem, 1vw, 1rem);
+    height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .clan-details-container {
+        flex-wrap: wrap;
+        height: auto;
+    }
+
+    .clan-details-main,
+    .clan-details-info-section,
+    .clan-details-location-section {
+        border-right: none;
+        border-bottom: 3px solid black;
+        width: 100%;
+    }
+
+    .clan-details-button {
+        border-bottom: none;
+        width: 100%;
+    }
+}
