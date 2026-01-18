@@ -14,7 +14,7 @@
     box-shadow: 0 clamp(2px, 0.3vw, 3px) clamp(4px, 0.5vw, 6px) rgba(0, 0, 0, 0.2);
     position: relative;
     overflow: hidden;
-    margin-top: .2rem;
+    margin-top: 1rem;
 }
 
 .clan-details-container::before {

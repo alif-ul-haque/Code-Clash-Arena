@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Button from '../../assets/components/Button.jsx';
 import searchIcon from '../../assets/icons/magnifier.png';
 import ClanDetails from './ClanDetails.jsx';
+import FindClans from '../utilities/FindClans.js';
 
 export default function FindClan({ isOpen, onClose }) {
 
@@ -30,13 +31,22 @@ export default function FindClan({ isOpen, onClose }) {
         };
     }, [isOpen]);
 
-    if (!isOpen) return null;
+    const [demoClans, setDemoClans] = useState([]);
 
-    let demoClans = [
-        { name: "Warriors", type: "Anyone can Join", minRating: 1200, maxRating: 1800, location: "USA", totalMembers: 25, maxMembers: 50 },
-        { name: "Champions", type: "Invite Only", minRating: 1500, maxRating: 2000, location: "UK", totalMembers: 40, maxMembers: 60 },
-        { name: "Legends", type: "Anyone can Join", minRating: 1000, maxRating: 1600, location: "Canada", totalMembers: 30, maxMembers: 50 },
-    ];
+    useEffect(() => {
+        async function fetchClans() {
+            const { clans, error } = await FindClans();
+            if (error) {
+                console.error("Error fetching clans:", error);
+            }
+            else {
+                setDemoClans(clans);
+            }
+        }
+        fetchClans();
+    }, []);
+
+    if (!isOpen) return null;
 
     return (
         <div className="find-clan-overlay" onClick={onClose}>
