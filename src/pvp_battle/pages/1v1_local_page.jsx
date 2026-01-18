@@ -45,7 +45,7 @@ const OneVOneLocalPage = () => {
                 // Query the 'users' table in Supabase database
                 const { data: user, error: userError } = await supabase
                     .from('users') // Access the 'users' table
-                    .select('cf_handle, trophy') // Get only username and rating columns
+                    .select('cf_handle, rating') // Get only username and rating columns
                     .eq('cf_handle', loggedInUser) // Filter: WHERE username = logged-in user
                     .single(); // Return single object (not array)
 
@@ -56,7 +56,7 @@ const OneVOneLocalPage = () => {
                 if (user) {
                     setUserData({
                         cf_handle: user.cf_handle,
-                        trophy: user.trophy || 0 // Use 0 if rating is null
+                        rating: user.rating || 0 // Use 0 if rating is null
                     });
                 }
 
@@ -81,7 +81,7 @@ const OneVOneLocalPage = () => {
 
                 const { data: friendsInfo } = await supabase
                     .from('users')
-                    .select('cf_handle, email, xp, trophy')
+                    .select('cf_handle, email, xp, rating')
                     .in('id', friendIds);
 
                 // Store friends info in state
@@ -126,7 +126,7 @@ const OneVOneLocalPage = () => {
                 </div>
 
                 <div className="user-info-right">
-                    <h2 className="rating-number">{isLoading ? "..." : userData.trophy}</h2>
+                    <h2 className="rating-number">{isLoading ? "..." : userData.rating}</h2>
                     <p className="rating-label">rating</p>
                 </div>
             </div>
