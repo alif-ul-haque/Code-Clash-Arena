@@ -40,7 +40,7 @@ const BattleMode = () => {
                         });
                     } else if (newStatus === 'declined') {
                         alert('Opponent declined the battle request.');
-                        navigate('/local1v1');
+                        navigate('/1v1-local');
                     }
                 }
             )
@@ -90,7 +90,14 @@ const BattleMode = () => {
                         <button 
                             className="lobby-btn" 
                             style={{ marginTop: '30px' }}
-                            onClick={() => navigate('/local1v1')}
+                            onClick={async () => {
+                                // Cancel the battle by updating status to 'cancelled'
+                                await supabase
+                                    .from('onevonebattles')
+                                    .update({ status: 'cancelled' })
+                                    .eq('onevone_battle_id', battleId);
+                                navigate('/1v1-local');
+                            }}
                         >
                             CANCEL
                         </button>

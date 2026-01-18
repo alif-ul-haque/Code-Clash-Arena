@@ -55,7 +55,8 @@ const OneVOneLocalPage = () => {
                     problem_count: 1,
                     status: 'waiting',
                     trophy_reward: 115,
-                    start_time: new Date().toISOString()
+                    start_time: new Date().toISOString(),
+                    invited_player_id: opponentUser.id // Track who is being invited
                 })
                 .select()
                 .single();
@@ -220,21 +221,11 @@ const OneVOneLocalPage = () => {
     // Function to check for incoming battle requests
     const checkIncomingRequests = async (userId) => {
         try {
-            // Get all battles where current user is a participant
-            const { data: myParticipations } = await supabase
-                .from('onevone_participants')
-                .select('onevone_battle_id')
-                .eq('player_id', userId);
-
-            if (!myParticipations || myParticipations.length === 0) return;
-
-            const battleIds = myParticipations.map(p => p.onevone_battle_id);
-
-            // Get battles with status 'request_sent' or 'waiting'
+            // Get battles where current user is the INVITED player (not the sender)
             const { data: pendingBattles } = await supabase
                 .from('onevonebattles')
                 .select('*')
-                .in('onevone_battle_id', battleIds)
+                .eq('invited_player_id', userId)
                 .eq('status', 'request_sent');
 
             if (!pendingBattles || pendingBattles.length === 0) {
@@ -251,22 +242,22 @@ const OneVOneLocalPage = () => {
                         .select('player_id')
                         .eq('onevone_battle_id', battle.onevone_battle_id);
 
-                    // Find the opponent (the one who is NOT current user)
-                    const opponentId = participants.find(p => p.player_id !== userId)?.player_id;
+                    // Find the sender (the one who is NOT current user)
+                    const senderId = participants.find(p => p.player_id !== userId)?.player_id;
 
-                    if (!opponentId) return null;
+                    if (!senderId) return null;
 
-                    // Get opponent details
-                    const { data: opponentInfo } = await supabase
+                    // Get sender's details
+                    const { data: senderInfo } = await supabase
                         .from('users')
                         .select('cf_handle, rating')
-                        .eq('id', opponentId)
+                        .eq('id', senderId)
                         .single();
 
                     return {
                         battleId: battle.onevone_battle_id,
                         mode: battle.battle_mode,
-                        opponent: opponentInfo,
+                        opponent: senderInfo,
                         timestamp: battle.start_time
                     };
                 })
