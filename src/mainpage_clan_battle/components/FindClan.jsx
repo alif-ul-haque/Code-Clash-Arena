@@ -40,7 +40,16 @@ export default function FindClan({ isOpen, onClose }) {
                 console.error("Error fetching clans:", error);
             }
             else {
-                setDemoClans(clans);
+                setDemoClans((prev) => {
+                    return [...prev, {
+                        clanName: clans[0].name,
+                        clanType: clans[0].type,
+                        minRating: clans[0].required_trophy,
+                        maxRating: clans[0].required_trophy + 500,
+                        location: clans[0].location,
+                        totalMembers: clans[0].totalMembers,
+                    }]
+                });
             }
         }
         fetchClans();

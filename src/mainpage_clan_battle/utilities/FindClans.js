@@ -4,7 +4,12 @@ export default async function showAllClans() {
     const { data, error } = await supabase
         .from('clans')
         .select(`
-            *,
+            clan_name,
+            location,
+            type,
+            min_trophy,
+            max_trophy,
+            level,
             users!clan_id(count)
         `);
 
@@ -17,7 +22,12 @@ export default async function showAllClans() {
     const randomClans = shuffled.slice(0, 5);
 
     const clansWithMembers = randomClans.map(clan => ({
-        ...clan,
+        name: clan.clan_name,
+        location: clan.location,
+        type: clan.type,
+        minRating: clan.min_trophy,
+        maxRating: clan.max_trophy,
+        level: clan.level,
         totalMembers: clan.users?.[0]?.count || 0
     }));
 
