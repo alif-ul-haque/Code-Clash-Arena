@@ -2,13 +2,14 @@ import '../style/ClanDetails.css';
 import Button from '../../assets/components/Button.jsx';
 
 export default function ClanDetails({
-    clanName = 'Clan Name',
-    clanType = 'Anyone can Join',
-    minRating = 1000,
-    maxRating = 1600,
-    location = 'Location',
-    totalMembers = 0,
+    clanName ,
+    clanType ,
+    minRating ,
+    maxRating ,
+    location ,
+    totalMembers,
     maxMembers = 10,
+    level,
     onJoinClick
 }) {
     return (
@@ -16,7 +17,7 @@ export default function ClanDetails({
             <div className="clan-details-main">
                 <div className="clan-details-header">
                     <h2 className="clan-details-name">{clanName}</h2>
-                    <p className="clan-details-level">Level : 10</p>
+                    <p className="clan-details-level">Level: {level}</p>
                 </div>
             </div>
             <div className="clan-details-info-section">

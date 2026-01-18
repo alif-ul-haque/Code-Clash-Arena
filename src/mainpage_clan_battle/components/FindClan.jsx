@@ -31,7 +31,7 @@ export default function FindClan({ isOpen, onClose }) {
         };
     }, [isOpen]);
 
-    const [demoClans, setDemoClans] = useState([]);
+    const [fetchedClans, setFetchedClans] = useState([]);
 
     useEffect(() => {
         async function fetchClans() {
@@ -40,16 +40,7 @@ export default function FindClan({ isOpen, onClose }) {
                 console.error("Error fetching clans:", error);
             }
             else {
-                setDemoClans((prev) => {
-                    return [...prev, {
-                        clanName: clans[0].name,
-                        clanType: clans[0].type,
-                        minRating: clans[0].required_trophy,
-                        maxRating: clans[0].required_trophy + 500,
-                        location: clans[0].location,
-                        totalMembers: clans[0].totalMembers,
-                    }]
-                });
+                setFetchedClans(clans);
             }
         }
         fetchClans();
@@ -93,7 +84,7 @@ export default function FindClan({ isOpen, onClose }) {
                 </div>
                 <div className="fewclan">
                     <p className="few_clan_text">Few Clans:</p>
-                    {demoClans.map((clan, index) => {
+                    {fetchedClans.map((clan, index) => {
                         return (
                             <ClanDetails
                                 key={index}
@@ -104,6 +95,7 @@ export default function FindClan({ isOpen, onClose }) {
                                 location={clan.location}
                                 totalMembers={clan.totalMembers}
                                 maxMembers={clan.maxMembers}
+                                level ={clan.level}
                                 onJoinClick={() => { console.log(`Joining clan: ${clan.name}`); }}
                             />
                         )
