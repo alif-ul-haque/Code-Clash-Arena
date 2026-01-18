@@ -22,7 +22,7 @@ const OneVOneCodingTimeRushMode = () => {
     const [currentUserId, setCurrentUserId] = useState(null);
     const [opponentId, setOpponentId] = useState(null);
 
-    // Fetch user IDs
+    // Fetch user IDs from database
     useEffect(() => {
         const fetchUserIds = async () => {
             try {
