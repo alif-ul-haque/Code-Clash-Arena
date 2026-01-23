@@ -1,9 +1,9 @@
 import { supabase } from "../../supabaseclient.js";
 import getUserData from "./UserData.js";
 
-const { data, error } = await getUserData();
-
 export async function getPendingClanRequests() {
+    const { data, error } = await getUserData();
+
     if (error) {
         console.error("Error getting user data:", error);
         return { requests: null, error };
@@ -26,7 +26,7 @@ export async function getPendingClanRequests() {
         console.error("Error fetching pending requests:", requestsError);
         return { requests: null, error: requestsError };
     }
-    console.log("Fetched pending requests:", requestsData);
+    // console.log("Fetched pending requests:", requestsData);
     return { requests: requestsData, error: null };
 }
 

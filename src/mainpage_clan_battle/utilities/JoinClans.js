@@ -1,14 +1,13 @@
 import { supabase } from "../../supabaseclient";
 import getUserData from "./UserData.js";
 
-const { data, error } = await getUserData();
-
 export async function joinClan(clanId) {
+    const { data, error } = await getUserData();
     if (error) {
         console.error("Error getting user data:", error);
         return { success: false, error };
     }
-    
+
     const userId = data.id;
     const { error: joinClanError } = await supabase.from('clan_join_requests').insert([
         {
@@ -25,6 +24,7 @@ export async function joinClan(clanId) {
 }
 
 export async function fetchStatus(clanId) {
+    const { data, error } = await getUserData();
     if (error) {
         console.error("Error getting user data:", error);
         return { status: null, error };
