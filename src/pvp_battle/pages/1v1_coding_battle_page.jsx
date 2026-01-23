@@ -352,20 +352,17 @@ const OneVOneCodingBattlePage = () => {
                                 </div>
                             )}
                             
-                                        <MathRenderer text={problem.constraints} />
-                                    
                             {problem?.constraints && (
                                 <div className="problem-statement">
                                     <h3 className="statement-heading">Note :</h3>
-                                    <p className="statement-text">{problem.constraints}</p>
+                                    <p className="statement-text">
+                                        <MathRenderer text={problem.constraints} />
+                                    </p>
                                 </div>
                             )}
                         </>
                     )}
                 </div>
-
-                {/* Vertical Separator */}
-                <div className="vertical-separator"></div>
 
                 {/* Right Section - Code Editor */}
                 <div className="editor-section">

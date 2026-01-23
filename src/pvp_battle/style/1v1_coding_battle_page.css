@@ -92,7 +92,7 @@
 .battle-content {
   display: flex;
   flex: 1;
-  gap: 0;
+  gap: 30px;
 }
 
 /* Problem Section */
@@ -101,6 +101,34 @@
   padding: 30px 40px;
   color: #ffffff;
   overflow-y: auto;
+}
+
+/* Custom scrollbar for problem section */
+.problem-section::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+.problem-section::-webkit-scrollbar-track {
+  display: none;
+}
+
+.problem-section::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+.problem-section::-webkit-scrollbar-thumb:hover {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.problem-section {
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar for IE and Edge */
+.problem-section {
+  -ms-overflow-style: none;
 }
 
 .problem-title {
