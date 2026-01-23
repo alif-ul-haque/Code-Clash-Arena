@@ -5,6 +5,7 @@ export default async function showAllClans() {
         .from('clans')
         .select(`
             clan_name,
+            clan_id,
             location,
             type,
             min_trophy,
@@ -23,6 +24,7 @@ export default async function showAllClans() {
 
     const clansWithMembers = randomClans.map(clan => ({
         name: clan.clan_name,
+        clanId: clan.clan_id,
         location: clan.location,
         type: clan.type,
         minRating: clan.min_trophy,

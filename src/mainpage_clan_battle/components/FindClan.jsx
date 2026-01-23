@@ -95,8 +95,8 @@ export default function FindClan({ isOpen, onClose }) {
                                 location={clan.location}
                                 totalMembers={clan.totalMembers}
                                 maxMembers={clan.maxMembers}
-                                level ={clan.level}
-                                onJoinClick={() => { console.log(`Joining clan: ${clan.name}`); }}
+                                level={clan.level}
+                                clanId={clan.clanId}
                             />
                         )
                     })}

@@ -11,7 +11,7 @@ export default async function getUserData() {
 
         const { data, error } = await supabase
             .from('users')
-            .select('level, cf_handle, xp, clan_id')
+            .select('level, cf_handle, xp, clan_id, id')
             .eq('email', user.email)
             .maybeSingle();
 
