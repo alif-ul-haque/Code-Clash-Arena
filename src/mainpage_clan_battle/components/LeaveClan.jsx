@@ -5,7 +5,7 @@ import { supabase } from '../../supabaseclient.js';
 import getUserData from '../utilities/UserData.js';
 import AlertPage from '../../assets/components/AlertPage.jsx';
 
-export default function LeaveClan({ isOpen, onClose }) {
+export default function LeaveClan({ isOpen, onClose, onLeave }) {
     const [message, setMessage] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [alertType, setAlertType] = useState('success');
@@ -50,10 +50,19 @@ export default function LeaveClan({ isOpen, onClose }) {
             console.error("Error updating user's profile:", profileError);
             return;
         }
+
         setAlertType('success');
         setMessage('You have successfully left the clan.');
         setShowAlert(true);
-        onClose();
+
+        // Close the modal and notify parent after a short delay
+        setTimeout(() => {
+            setShowAlert(false);
+            if (onLeave) {
+                onLeave();
+            }
+            onClose();
+        }, 1500);
     }
     return (
         <>
