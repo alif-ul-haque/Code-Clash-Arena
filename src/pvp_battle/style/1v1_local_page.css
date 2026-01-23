@@ -237,23 +237,26 @@
 }
 
 .battle-request-modal {
-  background: linear-gradient(135deg, #1a4d4d 0%, #0f2828 100%);
-  border: 5px solid #71E9D5;
+  background: linear-gradient(to bottom, 
+    rgba(26, 26, 46, 0.95) 0%, 
+    rgba(22, 33, 62, 0.95) 100%);
+  border: 4px solid #F1CA76;
   border-radius: 20px;
-  padding: 40px;
+  padding: 35px 40px;
   min-width: 500px;
   max-width: 600px;
-  box-shadow: 0 0 30px rgba(113, 233, 213, 0.5);
-  animation: slideDown 0.4s ease;
+  box-shadow: 0 0 40px rgba(241, 202, 118, 0.5),
+              0 0 80px rgba(241, 202, 118, 0.3);
+  animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes slideDown {
   from {
-    transform: translateY(-100px);
+    transform: translateY(-100px) scale(0.8);
     opacity: 0;
   }
   to {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
   }
 }
@@ -261,15 +264,16 @@
 .request-title {
   font-family: 'PlayMeGame', sans-serif;
   font-size: 36px;
-  color: #FFD700;
+  color: #F1CA76;
   text-align: center;
   margin-bottom: 30px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 0 20px rgba(241, 202, 118, 0.8),
+               0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 .request-card {
   background: rgba(0, 0, 0, 0.3);
-  border: 3px solid #71E9D5;
+  border: 2px solid rgba(241, 202, 118, 0.3);
   border-radius: 15px;
   padding: 25px;
   margin-bottom: 20px;
@@ -284,14 +288,15 @@
 }
 
 .request-from strong {
-  color: #FFD700;
+  color: #F1CA76;
+  text-shadow: 0 0 10px rgba(241, 202, 118, 0.6);
 }
 
 .request-mode,
 .request-rating {
   font-family: 'PlayMeGame', sans-serif;
   font-size: 20px;
-  color: #71E9D5;
+  color: #F1CA76;
   text-align: center;
   margin: 10px 0;
 }
@@ -305,35 +310,109 @@
 
 .accept-btn,
 .decline-btn {
+  position: relative;
   font-family: 'PlayMeGame', sans-serif;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
-  padding: 15px 40px;
-  border-radius: 12px;
-  border: 3px solid #000;
+  padding: 12px 40px;
+  border-radius: 15px;
+  border: 4px solid #000000;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  color: #000000;
+  min-width: 160px;
+  height: 60px;
 }
 
 .accept-btn {
-  background: linear-gradient(to bottom, #4CAF50, #2E7D32);
-  color: #fff;
+  background: linear-gradient(to bottom, #66BB6A, #4CAF50);
+}
+
+.accept-btn::before {
+  content: "";
+  position: absolute;
+  border-radius: 10px;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 45%;
+  width: 92%;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.accept-btn::after {
+  content: "";
+  position: absolute;
+  border-radius: 10px;
+  top: 2px;
+  left: 4px;
+  right: 4px;
+  height: 30%;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 1;
 }
 
 .accept-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(76, 175, 80, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(76, 175, 80, 0.5);
+}
+
+.accept-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .decline-btn {
-  background: linear-gradient(to bottom, #f44336, #c62828);
-  color: #fff;
+  background: linear-gradient(to bottom, #ef5350, #f44336);
+}
+
+.decline-btn::before {
+  content: "";
+  position: absolute;
+  border-radius: 10px;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 45%;
+  width: 92%;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.decline-btn::after {
+  content: "";
+  position: absolute;
+  border-radius: 10px;
+  top: 2px;
+  left: 4px;
+  right: 4px;
+  height: 30%;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 1;
 }
 
 .decline-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(244, 67, 54, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(244, 67, 54, 0.5);
+}
+
+.decline-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
