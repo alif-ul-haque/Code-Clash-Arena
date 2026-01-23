@@ -4,11 +4,13 @@ import Button from '../../assets/components/Button.jsx';
 import searchIcon from '../../assets/icons/magnifier.png';
 import PlayerCard from './PlayerCard.jsx';
 import MailCard from './MailCard.jsx';
+import { loadMailBox } from '../utilities/LoadMailBox.js';
 
 export default function Social({ isOpen, onClose }) {
     const [activeTab, setActiveTab] = useState('friend');
     const [searchQuery, setSearchQuery] = useState('');
     const [friendRequests, setFriendRequests] = useState(new Set());
+    const [mails, setMails] = useState([]);
 
     const dummyPlayers = [
         { id: 1, name: "Alice_99", clanName: "Code Warriors", rating: 1800 },
@@ -16,13 +18,6 @@ export default function Social({ isOpen, onClose }) {
         { id: 3, name: "Charlie_Dev", clanName: "Syntax Squad", rating: 1500 },
         { id: 4, name: "Diana_Code", clanName: "Debug Masters", rating: 1900 },
         { id: 5, name: "Eve_Hacker", clanName: "Code Ninjas", rating: 1400 },
-    ];
-
-    const dummyMails = [
-        { id: 1, type: 'clan', from: "Code Warriors", message: "You have been invited to join Code Warriors clan!", time: "2h ago" },
-        { id: 2, type: 'friend', from: "Alice_99", message: "Sent you a friend request", time: "5h ago" },
-        { id: 3, type: 'friend', from: "Bob_Smith", message: "Sent you a friend request", time: "1d ago" },
-        { id: 4, type: 'clan', from: "Debug Masters", message: "You have been invited to join Debug Masters clan!", time: "2d ago" },
     ];
 
     const toggleFriendRequest = (playerId) => {
@@ -38,8 +33,20 @@ export default function Social({ isOpen, onClose }) {
     };
 
     useEffect(() => {
+        const fetchMails = async () => {
+            const { mails: loadedMails, error } = await loadMailBox();
+            if (!error) {
+                setMails(loadedMails);
+            }
+        };
+        fetchMails();
+    }, []);
+
+
+    useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = "hidden";
+
         } else {
             document.body.style.overflow = "";
         }
@@ -119,9 +126,9 @@ export default function Social({ isOpen, onClose }) {
                         <div className="mail-section">
                             <h2 className="mail-header">Invitations & Requests</h2>
                             <div className="mail-feed">
-                                {dummyMails.map((mail) => (
+                                {mails.map((mail, index) => (
                                     <MailCard
-                                        key={mail.id}
+                                        key={index}
                                         mail={mail}
                                         onAccept={() => console.log("Accepted:", mail.from)}
                                         onDecline={() => console.log("Declined:", mail.from)}

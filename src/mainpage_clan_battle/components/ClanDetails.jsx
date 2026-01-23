@@ -2,6 +2,7 @@ import '../style/ClanDetails.css';
 import Button from '../../assets/components/Button.jsx';
 import { joinClan, fetchStatus } from '../utilities/JoinClans.js';
 import { useState, useEffect } from 'react';
+import AlertPage from '../../assets/components/AlertPage.jsx';
 
 export default function ClanDetails({
     clanName,
@@ -16,6 +17,9 @@ export default function ClanDetails({
 }) {
     const [buttonColor, setButtonColor] = useState("#5DADE2");
     const [isPending, setIsPending] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertType, setAlertType] = useState('success');
 
     useEffect(() => {
         const pendingStatus = async () => {
@@ -25,7 +29,7 @@ export default function ClanDetails({
                 return;
             }
             if (status === 'pending') {
-                setButtonColor("#F4D03F"); 
+                setButtonColor("#F4D03F");
                 setIsPending(true);
             }
         };
@@ -64,18 +68,30 @@ export default function ClanDetails({
                     borderRadius="10px"
                     onClick={async () => {
                         if (isPending) {
-                            return; 
+                            return;
                         }
                         const result = await joinClan(clanId);
                         if (result.success) {
-                            alert(`Join request sent to clan: ${clanName}`);
+                            setAlertMessage(`Join request sent to clan: ${clanName}`);
+                            setAlertType('success');
+                            setShowAlert(true);
                             setButtonColor("#F4D03F");
+                            setIsPending(true);
                         } else {
-                            alert(`Failed to send join request: ${result.error}`);
+                            setAlertMessage(`Failed to send join request: ${result.error}`);
+                            setAlertType('error');
+                            setShowAlert(true);
                         }
                     }}
                 />
             </div>
+            {showAlert && (
+                <AlertPage
+                    message={alertMessage}
+                    type={alertType}
+                    onClose={() => setShowAlert(false)}
+                />
+            )}
         </div>
     );
 }
