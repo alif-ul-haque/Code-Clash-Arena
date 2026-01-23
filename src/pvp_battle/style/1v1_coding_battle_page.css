@@ -159,6 +159,11 @@
   margin: 0;
 }
 
+.constraints-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
 .examples-section {
   margin-top: 30px;
 }

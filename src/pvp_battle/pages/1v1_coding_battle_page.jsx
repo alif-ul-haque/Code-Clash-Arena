@@ -356,9 +356,9 @@ const OneVOneCodingBattlePage = () => {
                             {problem?.constraints && (
                                 <div className="problem-statement">
                                     <h3 className="statement-heading">Note :</h3>
-                                    <p className="statement-text">
+                                    <div className="statement-text constraints-text">
                                         <MathRenderer text={problem.constraints} />
-                                    </p>
+                                    </div>
                                 </div>
                             )}
                         </>

@@ -288,20 +288,31 @@ const parseCodeforcesProblemHTML = (html) => {
     const noteHeader = Array.from(doc.querySelectorAll('.section-title')).find(
       el => el.textContent.trim() === 'Note'
     );
-    if (noteHeader && noteHeader.nextElementSibling) {
-      const noteDiv = noteHeader.nextElementSibling;
+    if (noteHeader) {
+      // Collect all content after Note header until next section or end
+      const noteContainer = document.createElement('div');
+      let currentElement = noteHeader.nextElementSibling;
       
-      // Process .tex-span elements
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = noteDiv.innerHTML;
-      const texSpans = tempDiv.querySelectorAll('.tex-span');
+      while (currentElement) {
+        // Stop if we hit another section title
+        if (currentElement.classList && currentElement.classList.contains('section-title')) {
+          break;
+        }
+        
+        // Clone and add the element
+        noteContainer.appendChild(currentElement.cloneNode(true));
+        currentElement = currentElement.nextElementSibling;
+      }
+      
+      // Process .tex-span elements in the collected content
+      const texSpans = noteContainer.querySelectorAll('.tex-span');
       texSpans.forEach(span => {
         let mathText = span.textContent.trim();
         mathText = mathText.replace(/^\$+|\$+$/g, '');
         span.replaceWith(mathText);
       });
       
-      constraints = tempDiv.textContent.trim();
+      constraints = noteContainer.textContent.trim();
       constraints = constraints.replace(/\$+/g, '');
     }
 
