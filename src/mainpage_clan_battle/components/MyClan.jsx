@@ -1,11 +1,14 @@
 import '../style/MyClan.css';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import bgimage from '../../assets/images/world_map.jpg';
 import Button from '../../assets/components/Button';
 import closeIcon from '../../assets/icons/x-mark.png';
 import ClanMember from '../components/ClanMember.jsx';
+import LeaveClan from './LeaveClan.jsx';
+import { supabase } from '../../supabaseclient.js';
 
-export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
+export default function MyClan({ isOpen, onClose, clanDetails = {}, onDataChange }) {
+    const [showLeaveClan, setShowLeaveClan] = useState(false); const [userId, setUserId] = useState(null);
     const {
         name = "",
         totalPoints = 0,
@@ -18,8 +21,49 @@ export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
         participants = []
     } = clanDetails;
 
-    // Sort participants by rating in descending order
     const sortedParticipants = [...participants].sort((a, b) => b.rating - a.rating);
+    useEffect(() => {
+        const clansChannel = supabase
+            .channel('my_clan_clans', { config: { broadcast: { self: true } } })
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'clans'
+                },
+                (payload) => {
+                    console.log('✅ Realtime: Clan data changed:', payload);
+                    if (onDataChange) onDataChange();
+                }
+            )
+            .subscribe((status) => {
+                console.log('Clans channel status:', status);
+            });
+
+        const membersChannel = supabase
+            .channel('my_clan_members', { config: { broadcast: { self: true } } })
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'clan_members'
+                },
+                (payload) => {
+                    console.log('✅ Realtime: Clan members changed:', payload);
+                    if (onDataChange) onDataChange();
+                }
+            )
+            .subscribe((status) => {
+                console.log('Clan members channel status:', status);
+            });
+
+        return () => {
+            supabase.removeChannel(clansChannel);
+            supabase.removeChannel(membersChannel);
+        };
+    }, [userId, isOpen, onDataChange]);
 
     useEffect(() => {
         if (isOpen) {
@@ -122,6 +166,7 @@ export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
                         fontSize="24px"
                         backgroundColor="#C55021"
                         borderRadius="12px"
+                        onClick={() => setShowLeaveClan(true)}
                     />
                 </div>
                 <div className="clan-participants">
@@ -138,6 +183,7 @@ export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
                     ))}
                 </div>
             </div>
+            <LeaveClan isOpen={showLeaveClan} onClose={() => setShowLeaveClan(false)} />
         </div>
     );
 }

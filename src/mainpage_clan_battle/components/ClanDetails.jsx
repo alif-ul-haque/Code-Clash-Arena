@@ -1,17 +1,40 @@
 import '../style/ClanDetails.css';
 import Button from '../../assets/components/Button.jsx';
+import { joinClan, fetchStatus } from '../utilities/JoinClans.js';
+import { useState, useEffect } from 'react';
+import AlertPage from '../../assets/components/AlertPage.jsx';
 
 export default function ClanDetails({
-    clanName ,
-    clanType ,
-    minRating ,
-    maxRating ,
-    location ,
+    clanName,
+    clanId,
+    clanType,
+    minRating,
+    maxRating,
+    location,
     totalMembers,
     maxMembers = 10,
-    level,
-    onJoinClick
+    level
 }) {
+    const [buttonColor, setButtonColor] = useState("#5DADE2");
+    const [isPending, setIsPending] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertType, setAlertType] = useState('success');
+
+    useEffect(() => {
+        const pendingStatus = async () => {
+            const { status, error } = await fetchStatus(clanId);
+            if (error) {
+                console.error("Error fetching join status:", error);
+                return;
+            }
+            if (status === 'pending') {
+                setButtonColor("#F4D03F");
+                setIsPending(true);
+            }
+        };
+        pendingStatus();
+    }, [clanId]);
     return (
         <div className="clan-details-container">
             <div className="clan-details-main">
@@ -41,11 +64,34 @@ export default function ClanDetails({
                     height="60px"
                     width="150px"
                     fontSize="32px"
-                    backgroundColor="#5DADE2"
+                    backgroundColor={buttonColor}
                     borderRadius="10px"
-                    onClick={onJoinClick}
+                    onClick={async () => {
+                        if (isPending) {
+                            return;
+                        }
+                        const result = await joinClan(clanId);
+                        if (result.success) {
+                            setAlertMessage(`Join request sent to clan: ${clanName}`);
+                            setAlertType('success');
+                            setShowAlert(true);
+                            setButtonColor("#F4D03F");
+                            setIsPending(true);
+                        } else {
+                            setAlertMessage(`Failed to send join request: ${result.error}`);
+                            setAlertType('error');
+                            setShowAlert(true);
+                        }
+                    }}
                 />
             </div>
+            {showAlert && (
+                <AlertPage
+                    message={alertMessage}
+                    type={alertType}
+                    onClose={() => setShowAlert(false)}
+                />
+            )}
         </div>
     );
 }

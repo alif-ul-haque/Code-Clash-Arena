@@ -23,6 +23,7 @@ import social from '../../assets/icons/social-network.png'
 import SocialPage from '../components/Social.jsx';
 import getUserData, { getClanData, countClanMembers, getClanMembers } from '../utilities/UserData.js'
 import { supabase } from '../../supabaseclient.js'
+import { loadMailBox } from '../utilities/LoadMailBox.js'
 
 
 
@@ -37,6 +38,7 @@ export default function MainPage() {
     const [currentCardIndex, setCurrentCardIndex] = useState(0);
     const [showCarousel, setShowCarousel] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [hasNewMails, setHasNewMails] = useState(false);
 
     const carouselCards = [
         {
@@ -203,6 +205,139 @@ export default function MainPage() {
 
     }, []);
 
+
+    useEffect(() => {
+        const usersChannel = supabase
+            .channel('users_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'users'
+                },
+                async (payload) => {
+                    console.log('User data changed:', payload);
+                    const { data, error } = await getUserData();
+                    if (!error && data) {
+                        setUserDetail(prev => ({
+                            ...prev,
+                            username: data.cf_handle,
+                            level: data.level,
+                            xp: data.xp,
+                            maxXp: data.level * 10,
+                            haveClan: data.clan_id ? true : false
+                        }));
+
+                        if (data.clan_id) {
+                            const { data: clanData, error: clanError } = await getClanData(data.clan_id);
+                            const { count: memberCount } = await countClanMembers(data.clan_id);
+                            const { members: clanMembers } = await getClanMembers(data.clan_id);
+
+                            if (!clanError && clanData) {
+                                setUserDetail(prev => ({
+                                    ...prev,
+                                    clanDetails: {
+                                        name: clanData.clan_name,
+                                        members: memberCount,
+                                        totalPoints: clanData.total_points,
+                                        type: clanData.type,
+                                        requiredTrophy: clanData.min_trophy,
+                                        warFrequency: clanData.war_frequency,
+                                        location: clanData.location,
+                                        warWon: clanData.war_won,
+                                        participants: clanMembers
+                                    }
+                                }));
+                            }
+                        }
+                    }
+                }
+            )
+            .subscribe();
+
+        const clansChannel = supabase
+            .channel('clans_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'clans'
+                },
+                async (payload) => {
+                    console.log('Clan data changed:', payload);
+                    const { data } = await getUserData();
+                    if (data?.clan_id) {
+                        const { data: clanData, error: clanError } = await getClanData(data.clan_id);
+                        const { count: memberCount } = await countClanMembers(data.clan_id);
+                        const { members: clanMembers } = await getClanMembers(data.clan_id);
+
+                        if (!clanError && clanData) {
+                            setUserDetail(prev => ({
+                                ...prev,
+                                clanDetails: {
+                                    name: clanData.clan_name,
+                                    members: memberCount,
+                                    totalPoints: clanData.total_points,
+                                    type: clanData.type,
+                                    requiredTrophy: clanData.min_trophy,
+                                    warFrequency: clanData.war_frequency,
+                                    location: clanData.location,
+                                    warWon: clanData.war_won,
+                                    participants: clanMembers
+                                }
+                            }));
+                        }
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(usersChannel);
+            supabase.removeChannel(clansChannel);
+        };
+    }, []);
+
+    // Check for new mails and setup real-time subscription
+    useEffect(() => {
+        const checkMails = async () => {
+            try {
+                const { mails, error } = await loadMailBox();
+                if (!error && mails && mails.length > 0) {
+                    setHasNewMails(true);
+                } else {
+                    setHasNewMails(false);
+                }
+            } catch (error) {
+                console.error('Error checking mails:', error);
+            }
+        };
+
+        checkMails();
+
+        // Subscribe to clan_join_requests changes
+        const mailChannel = supabase
+            .channel('mail_notifications')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'clan_join_requests'
+                },
+                async () => {
+                    await checkMails();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(mailChannel);
+        };
+    }, []);
+
     const particlesInit = useCallback(async engine => {
         await loadSlim(engine);
     }, []);
@@ -352,6 +487,7 @@ export default function MainPage() {
                             onMouseEnter={() => handleCardHover(1)}
                             onMouseLeave={handleCardLeave}
                             onClick={() => handleMenuToggle('social', true)}
+                            showNotification={hasNewMails}
                         />
                         <Button
                             text="Clan Battle"
@@ -418,7 +554,7 @@ export default function MainPage() {
                 <OverlayMenu isOpen={open.overlayMenu} onClose={() => handleMenuToggle('overlayMenu', false)} />
                 <NoClanMenu isOpen={open.noclan} onClose={() => handleMenuToggle('noclan', false)} />
                 <MyClan isOpen={open.myclan} onClose={() => handleMenuToggle('myclan', false)} clanDetails={userDetail.clanDetails} />
-                <SocialPage isOpen={open.social} onClose={() => handleMenuToggle('social', false)} />
+                <SocialPage isOpen={open.social} onClose={() => handleMenuToggle('social', false)} hasNewMails={hasNewMails} onMailsRead={() => setHasNewMails(false)} />
             </div>
         </>
     )
