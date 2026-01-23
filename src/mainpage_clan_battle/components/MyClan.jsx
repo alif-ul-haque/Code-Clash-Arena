@@ -1,11 +1,14 @@
 import '../style/MyClan.css';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import bgimage from '../../assets/images/world_map.jpg';
 import Button from '../../assets/components/Button';
 import closeIcon from '../../assets/icons/x-mark.png';
 import ClanMember from '../components/ClanMember.jsx';
+import LeaveClan from './LeaveClan.jsx';
 
 export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
+    const [showLeaveClan, setShowLeaveClan] = useState(false);
+
     const {
         name = "",
         totalPoints = 0,
@@ -121,6 +124,7 @@ export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
                         fontSize="24px"
                         backgroundColor="#C55021"
                         borderRadius="12px"
+                        onClick={() => setShowLeaveClan(true)}
                     />
                 </div>
                 <div className="clan-participants">
@@ -137,6 +141,7 @@ export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
                     ))}
                 </div>
             </div>
+            <LeaveClan isOpen={showLeaveClan} onClose={() => setShowLeaveClan(false)} />
         </div>
     );
 }

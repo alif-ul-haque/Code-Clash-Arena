@@ -30,6 +30,21 @@
     justify-content: flex-start;
 }
 
+.social-header {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+}
+
+.close-button {
+    margin: 0;
+}
+
+.close-button img {
+    display: inline-block;
+}
+
 .social-tabs {
     display: flex;
     gap: 2rem;

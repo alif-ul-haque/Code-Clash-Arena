@@ -2,6 +2,7 @@ import '../style/Social.css';
 import { useEffect, useState } from 'react';
 import Button from '../../assets/components/Button.jsx';
 import searchIcon from '../../assets/icons/magnifier.png';
+import closeIcon from '../../assets/icons/x-mark.png';
 import PlayerCard from './PlayerCard.jsx';
 import MailCard from './MailCard.jsx';
 import { loadMailBox } from '../utilities/LoadMailBox.js';
@@ -16,6 +17,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     const [mails, setMails] = useState([]);
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
+    const [alertType, setAlertType] = useState('success');
 
     const dummyPlayers = [
         { id: 1, name: "Alice_99", clanName: "Code Warriors", rating: 1800 },
@@ -99,6 +101,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                 setMails(loadedMails);
             }
         } catch (error) {
+            setAlertType('error');
             setAlertMessage('Failed to accept request');
             setShowAlert(true);
         }
@@ -114,6 +117,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                 setMails(loadedMails);
             }
         } catch (error) {
+            setAlertType('error');
             setAlertMessage('Failed to decline request');
             setShowAlert(true);
         }
@@ -143,6 +147,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                     message={alertMessage}
                     isVisible={showAlert}
                     onClose={() => setShowAlert(false)}
+                    type={alertType}
                 />
             )}
             <div className="social-overlay" onClick={onClose}>
@@ -150,6 +155,21 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                     className="social-menu"
                     onClick={(e) => e.stopPropagation()}
                 >
+                    <div className="social-header">
+                        <div className="close-button">
+                            <Button
+                                text=''
+                                height='2rem'
+                                width='2rem'
+                                fontSize='24px'
+                                onClick={onClose}
+                                backgroundColor='#DF4F16'
+                                borderRadius='10px'
+                                icon={closeIcon}
+                                showIcon={true}
+                            />
+                        </div>
+                    </div>
                     <div className="social-tabs">
                         <Button
                             text="Friend"
