@@ -4,6 +4,7 @@ import '../style/1v1_coding_battle_page.css';
 import logo from '../../assets/icons/cca.png';
 import { supabase } from '../../supabaseclient';
 import { fetchCodeforcesProblem } from '../utilities/codeforcesProblemFetcher';
+import MathRenderer from '../components/MathRenderer';
 
 const OneVOneCodingBattlePage = () => {
     const navigate = useNavigate();
@@ -315,21 +316,25 @@ const OneVOneCodingBattlePage = () => {
                             <div className="problem-statement">
                                 <h3 className="statement-heading">Problem Statement :</h3>
                                 <p className="statement-text">
-                                    {problem?.statement || 'Loading...'}
+                                    <MathRenderer text={problem?.statement || 'Loading...'} />
                                 </p>
                             </div>
                             
                             {problem?.inputSpec && (
                                 <div className="problem-statement">
                                     <h3 className="statement-heading">Input :</h3>
-                                    <p className="statement-text">{problem.inputSpec}</p>
+                                    <p className="statement-text">
+                                        <MathRenderer text={problem.inputSpec} />
+                                    </p>
                                 </div>
                             )}
                             
                             {problem?.outputSpec && (
                                 <div className="problem-statement">
                                     <h3 className="statement-heading">Output :</h3>
-                                    <p className="statement-text">{problem.outputSpec}</p>
+                                    <p className="statement-text">
+                                        <MathRenderer text={problem.outputSpec} />
+                                    </p>
                                 </div>
                             )}
                             
@@ -347,6 +352,8 @@ const OneVOneCodingBattlePage = () => {
                                 </div>
                             )}
                             
+                                        <MathRenderer text={problem.constraints} />
+                                    
                             {problem?.constraints && (
                                 <div className="problem-statement">
                                     <h3 className="statement-heading">Note :</h3>

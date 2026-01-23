@@ -34,64 +34,76 @@ export const fetchCodeforcesProblem = async (contestId, problemIndex) => {
 
     console.log('Problem metadata found:', problem.name);
 
-    // Try multiple CORS proxies in order
+    // Try multiple CORS proxies in order (most reliable first)
+    const targetUrl = `https://codeforces.com/problemset/problem/${contestId}/${problemIndex}`;
     const corsProxies = [
-      'https://corsproxy.io/?',
-      'https://api.allorigins.win/raw?url=',
-      'https://cors-anywhere.herokuapp.com/'
+      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
+      `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
     ];
     
-    const targetUrl = `https://codeforces.com/problemset/problem/${contestId}/${problemIndex}`;
     let html = null;
     let lastError = null;
 
     // Try each proxy
-    for (const proxy of corsProxies) {
+    for (let i = 0; i < corsProxies.length; i++) {
       try {
-        console.log(`Trying CORS proxy: ${proxy.slice(0, 30)}...`);
-        const proxyController = new AbortController();
-        const proxyTimeoutId = setTimeout(() => proxyController.abort(), 15000); // 15 second timeout
+        const proxyUrl = corsProxies[i];
+        console.log(`[Attempt ${i + 1}/${corsProxies.length}] Fetching HTML...`);
         
-        const url = proxy.includes('corsproxy.io') 
-          ? proxy + encodeURIComponent(targetUrl)
-          : proxy.includes('allorigins')
-          ? proxy + encodeURIComponent(targetUrl)
-          : proxy + targetUrl;
-          
-        const htmlResponse = await fetch(url, {
-          signal: proxyController.signal
+        const proxyController = new AbortController();
+        const proxyTimeoutId = setTimeout(() => proxyController.abort(), 20000); // 20 second timeout
+        
+        const htmlResponse = await fetch(proxyUrl, {
+          signal: proxyController.signal,
+          headers: {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          }
         });
         clearTimeout(proxyTimeoutId);
         
         if (htmlResponse.ok) {
           html = await htmlResponse.text();
-          console.log('HTML fetched successfully!');
-          break;
+          
+          // Verify HTML contains problem content
+          if (html && html.includes('problem-statement')) {
+            console.log(`✓ HTML fetched successfully (${Math.round(html.length / 1024)}KB)`);
+            break;
+          } else {
+            console.warn('HTML fetched but does not contain problem statement');
+            html = null;
+          }
+        } else {
+          console.warn(`HTTP ${htmlResponse.status}: ${htmlResponse.statusText}`);
         }
       } catch (proxyError) {
-        console.warn(`Proxy ${proxy} failed:`, proxyError.message);
+        console.warn(`Proxy failed: ${proxyError.message}`);
         lastError = proxyError;
         continue;
       }
     }
+    
+    console.log(html ? '✓ Problem HTML ready for parsing' : '✗ All proxies failed');
 
     // If we couldn't fetch HTML, return basic problem info from API
     if (!html) {
-      console.warn('Could not fetch HTML, using API data only');
+      console.error('⚠️ All CORS proxies failed. Cannot fetch problem HTML.');
+      console.log('Returning API metadata only (no problem statement available)');
+      
       return {
         name: problem.name,
         contestId: problem.contestId,
         index: problem.index,
         rating: problem.rating,
         tags: problem.tags,
-        statement: `Problem: ${problem.name}\n\nRating: ${problem.rating}\n\nTags: ${problem.tags.join(', ')}\n\nPlease visit Codeforces for full problem details.`,
-        inputSpec: 'See problem on Codeforces',
-        outputSpec: 'See problem on Codeforces',
+        statement: `⚠️ Unable to fetch full problem details due to network restrictions.\n\nProblem Name: ${problem.name}\nDifficulty Rating: ${problem.rating || 'Not rated'}\nTags: ${problem.tags.join(', ')}\n\nDue to CORS limitations, please visit the link below for the complete problem statement, input/output format, and examples:\n\nhttps://codeforces.com/problemset/problem/${contestId}/${problemIndex}`,
+        inputSpec: 'Visit Codeforces link above for input format',
+        outputSpec: 'Visit Codeforces link above for output format',
         examples: [{
-          input: 'See problem on Codeforces',
-          output: 'See problem on Codeforces'
+          input: 'Visit Codeforces link above',
+          output: 'Visit Codeforces link above'
         }],
-        constraints: `Visit: https://codeforces.com/problemset/problem/${contestId}/${problemIndex}`,
+        constraints: `Full problem: https://codeforces.com/problemset/problem/${contestId}/${problemIndex}`,
         timeLimit: '1 second',
         memoryLimit: '256 megabytes'
       };
@@ -130,6 +142,7 @@ export const fetchCodeforcesProblem = async (contestId, problemIndex) => {
  */
 const parseCodeforcesProblemHTML = (html) => {
   try {
+    console.log('Parsing HTML for problem details...');
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
@@ -137,9 +150,12 @@ const parseCodeforcesProblemHTML = (html) => {
     const statementDiv = doc.querySelector('.problem-statement');
     
     if (!statementDiv) {
-      console.warn('Problem statement div not found');
+      console.error('❌ .problem-statement div not found in HTML');
+      console.log('HTML preview:', html.substring(0, 500));
       return getDefaultProblemData();
     }
+    
+    console.log('✓ Found .problem-statement div');
     
     // Extract time and memory limits
     const timeLimitElement = doc.querySelector('.time-limit');
@@ -157,7 +173,25 @@ const parseCodeforcesProblemHTML = (html) => {
     const statementParagraphs = statementDiv.querySelectorAll('.header + div p, .header ~ div p');
     if (statementParagraphs && statementParagraphs.length > 0) {
       statement = Array.from(statementParagraphs)
-        .map(p => p.textContent.trim())
+        .map(p => {
+          // Get HTML content and process .tex-span elements
+          let html = p.innerHTML;
+          
+          // Replace .tex-span elements with their text content (removing $ delimiters)
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = html;
+          
+          // Find all .tex-span elements and replace with plain text
+          const texSpans = tempDiv.querySelectorAll('.tex-span');
+          texSpans.forEach(span => {
+            let mathText = span.textContent.trim();
+            // Remove $ delimiters if present
+            mathText = mathText.replace(/^\$+|\$+$/g, '');
+            span.replaceWith(mathText);
+          });
+          
+          return tempDiv.textContent.trim();
+        })
         .filter(text => text.length > 0)
         .join('\n\n');
     }
@@ -166,9 +200,24 @@ const parseCodeforcesProblemHTML = (html) => {
     if (!statement) {
       const headerDiv = statementDiv.querySelector('.header');
       if (headerDiv && headerDiv.nextElementSibling) {
-        statement = headerDiv.nextElementSibling.textContent.trim();
+        const contentDiv = headerDiv.nextElementSibling;
+        
+        // Process .tex-span elements
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = contentDiv.innerHTML;
+        const texSpans = tempDiv.querySelectorAll('.tex-span');
+        texSpans.forEach(span => {
+          let mathText = span.textContent.trim();
+          mathText = mathText.replace(/^\$+|\$+$/g, '');
+          span.replaceWith(mathText);
+        });
+        
+        statement = tempDiv.textContent.trim();
       }
     }
+    
+    // Clean up any remaining $ signs
+    statement = statement.replace(/\$+/g, '');
 
     // Extract input specification
     let inputSpec = '';
@@ -176,7 +225,20 @@ const parseCodeforcesProblemHTML = (html) => {
       el => el.textContent.trim() === 'Input'
     );
     if (inputHeader && inputHeader.nextElementSibling) {
-      inputSpec = inputHeader.nextElementSibling.textContent.trim();
+      const inputDiv = inputHeader.nextElementSibling;
+      
+      // Process .tex-span elements
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = inputDiv.innerHTML;
+      const texSpans = tempDiv.querySelectorAll('.tex-span');
+      texSpans.forEach(span => {
+        let mathText = span.textContent.trim();
+        mathText = mathText.replace(/^\$+|\$+$/g, '');
+        span.replaceWith(mathText);
+      });
+      
+      inputSpec = tempDiv.textContent.trim();
+      inputSpec = inputSpec.replace(/\$+/g, '');
     }
 
     // Extract output specification
@@ -185,7 +247,20 @@ const parseCodeforcesProblemHTML = (html) => {
       el => el.textContent.trim() === 'Output'
     );
     if (outputHeader && outputHeader.nextElementSibling) {
-      outputSpec = outputHeader.nextElementSibling.textContent.trim();
+      const outputDiv = outputHeader.nextElementSibling;
+      
+      // Process .tex-span elements
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = outputDiv.innerHTML;
+      const texSpans = tempDiv.querySelectorAll('.tex-span');
+      texSpans.forEach(span => {
+        let mathText = span.textContent.trim();
+        mathText = mathText.replace(/^\$+|\$+$/g, '');
+        span.replaceWith(mathText);
+      });
+      
+      outputSpec = tempDiv.textContent.trim();
+      outputSpec = outputSpec.replace(/\$+/g, '');
     }
 
     // Extract examples
@@ -196,12 +271,16 @@ const parseCodeforcesProblemHTML = (html) => {
       const inputs = sampleTests.querySelectorAll('.input pre');
       const outputs = sampleTests.querySelectorAll('.output pre');
       
+      console.log(`Found ${inputs.length} sample inputs and ${outputs.length} sample outputs`);
+      
       for (let i = 0; i < Math.min(inputs.length, outputs.length); i++) {
         examples.push({
           input: inputs[i].textContent.trim(),
           output: outputs[i].textContent.trim()
         });
       }
+    } else {
+      console.warn('⚠️ No .sample-test section found');
     }
 
     // Extract constraints/notes
@@ -210,20 +289,36 @@ const parseCodeforcesProblemHTML = (html) => {
       el => el.textContent.trim() === 'Note'
     );
     if (noteHeader && noteHeader.nextElementSibling) {
-      constraints = noteHeader.nextElementSibling.textContent.trim();
+      const noteDiv = noteHeader.nextElementSibling;
+      
+      // Process .tex-span elements
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = noteDiv.innerHTML;
+      const texSpans = tempDiv.querySelectorAll('.tex-span');
+      texSpans.forEach(span => {
+        let mathText = span.textContent.trim();
+        mathText = mathText.replace(/^\$+|\$+$/g, '');
+        span.replaceWith(mathText);
+      });
+      
+      constraints = tempDiv.textContent.trim();
+      constraints = constraints.replace(/\$+/g, '');
     }
 
-    return {
+    const result = {
       statement: statement || 'Problem statement could not be parsed.',
-      inputSpec,
-      outputSpec,
-      examples: examples.length > 0 ? examples : [{ input: 'Example not available', output: 'Example not available' }],
-      constraints,
+      inputSpec: inputSpec || 'Not specified',
+      outputSpec: outputSpec || 'Not specified',
+      examples: examples.length > 0 ? examples : [{ input: 'No examples available', output: 'No examples available' }],
+      constraints: constraints || 'No additional notes',
       timeLimit,
       memoryLimit
     };
+    
+    console.log(`✓ Parsed successfully: ${examples.length} examples, statement length: ${statement.length} chars`);
+    return result;
   } catch (error) {
-    console.error('Error parsing HTML:', error);
+    console.error('❌ Error parsing HTML:', error);
     return getDefaultProblemData();
   }
 };
