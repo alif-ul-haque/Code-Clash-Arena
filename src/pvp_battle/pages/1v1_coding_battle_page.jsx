@@ -31,6 +31,7 @@ const OneVOneCodingBattlePage = () => {
     const [currentUserId, setCurrentUserId] = useState(null);
     const [opponentId, setOpponentId] = useState(null);
     const [startTime] = useState(Date.now());
+    const [isEditorMinimized, setIsEditorMinimized] = useState(false);
 
     // Fetch problem from Codeforces
     useEffect(() => {
@@ -292,7 +293,7 @@ const OneVOneCodingBattlePage = () => {
             {/* Main Content */}
             <div className="battle-content">
                 {/* Left Section - Problem */}
-                <div className="problem-section">
+                <div className={`problem-section ${isEditorMinimized ? 'full-width' : ''}`}>
                     {loadingProblem ? (
                         <div className="loading-problem">
                             <h2 className="problem-title">LOADING PROBLEM...</h2>
@@ -365,41 +366,59 @@ const OneVOneCodingBattlePage = () => {
                 </div>
 
                 {/* Right Section - Code Editor */}
-                <div className="editor-section">
-                    <div className="editor-controls">
-                        <select 
-                            className="language-selector"
-                            value={selectedLanguage}
-                            onChange={handleLanguageChange}
-                        >
-                            <option value="PYTHON">PYTHON</option>
-                            <option value="JAVASCRIPT">JAVASCRIPT</option>
-                            <option value="JAVA">JAVA</option>
-                            <option value="C++">C++</option>
-                        </select>
+                {!isEditorMinimized ? (
+                    <div className="editor-section">
+                        <div className="editor-controls">
+                            <select 
+                                className="language-selector"
+                                value={selectedLanguage}
+                                onChange={handleLanguageChange}
+                            >
+                                <option value="PYTHON">PYTHON</option>
+                                <option value="JAVASCRIPT">JAVASCRIPT</option>
+                                <option value="JAVA">JAVA</option>
+                                <option value="C++">C++</option>
+                            </select>
+                            
+                            <button className="submit-btn" onClick={handleSubmit}>SUBMIT</button>
+                            
+                            <button 
+                                className="minimize-btn" 
+                                onClick={() => setIsEditorMinimized(true)}
+                                title="Minimize Editor"
+                            >
+                                ▼
+                            </button>
+                        </div>
                         
-                        <button className="submit-btn" onClick={handleSubmit}>SUBMIT</button>
+                        <textarea 
+                            className="code-editor"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            placeholder={`## WRITE YOUR ${selectedLanguage} CODE\n##FROM HERE`}
+                        ></textarea>
+                        
+                        <div className="editor-footer">
+                            <input 
+                                type="file" 
+                                ref={fileInputRef}
+                                onChange={handleFileUpload}
+                                accept=".py,.js,.java,.cpp,.c"
+                                style={{ display: 'none' }}
+                            />
+                            <button className="upload-btn" onClick={handleUploadClick}>UPLOAD</button>
+                            <span className="language-display">LANGUAGE : {selectedLanguage}</span>
+                        </div>
                     </div>
-                    
-                    <textarea 
-                        className="code-editor"
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        placeholder={`## WRITE YOUR ${selectedLanguage} CODE\n##FROM HERE`}
-                    ></textarea>
-                    
-                    <div className="editor-footer">
-                        <input 
-                            type="file" 
-                            ref={fileInputRef}
-                            onChange={handleFileUpload}
-                            accept=".py,.js,.java,.cpp,.c"
-                            style={{ display: 'none' }}
-                        />
-                        <button className="upload-btn" onClick={handleUploadClick}>UPLOAD</button>
-                        <span className="language-display">LANGUAGE : {selectedLanguage}</span>
-                    </div>
-                </div>
+                ) : (
+                    <button 
+                        className="expand-editor-btn" 
+                        onClick={() => setIsEditorMinimized(false)}
+                        title="Expand Editor"
+                    >
+                        ▲
+                    </button>
+                )}
             </div>
         </div>
     );
