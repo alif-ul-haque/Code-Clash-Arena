@@ -7,8 +7,9 @@ import MailCard from './MailCard.jsx';
 import { loadMailBox } from '../utilities/LoadMailBox.js';
 import { acceptRequest, rejectRequest } from '../utilities/ClanAdd.js';
 import AlertPage from '../../assets/components/AlertPage.jsx';
+import { supabase } from '../../supabaseclient.js';
 
-export default function Social({ isOpen, onClose }) {
+export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     const [activeTab, setActiveTab] = useState('friend');
     const [searchQuery, setSearchQuery] = useState('');
     const [friendRequests, setFriendRequests] = useState(new Set());
@@ -36,6 +37,7 @@ export default function Social({ isOpen, onClose }) {
         });
     };
 
+    // Fetch mails on mount and when modal opens
     useEffect(() => {
         const fetchMails = async () => {
             try {
@@ -50,7 +52,41 @@ export default function Social({ isOpen, onClose }) {
                 setMails([]);
             }
         };
-        fetchMails();
+
+        if (isOpen) {
+            fetchMails();
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        const channel = supabase
+            .channel('clan_requests_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'clan_join_requests'
+                },
+                async (payload) => {
+                    console.log('Clan request changed:', payload);
+                    try {
+                        const { mails: loadedMails, error } = await loadMailBox();
+                        if (!error && loadedMails) {
+                            setMails(loadedMails);
+                        } else {
+                            setMails([]);
+                        }
+                    } catch (error) {
+                        console.error('Error refetching mails:', error);
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     const handleAccept = async (mail) => {
@@ -58,7 +94,6 @@ export default function Social({ isOpen, onClose }) {
             await acceptRequest({ id: mail.id, userId: mail.userId, clanId: mail.clanId });
             setAlertMessage('Request accepted successfully!');
             setShowAlert(true);
-            // Refresh mails after accepting
             const { mails: loadedMails, error } = await loadMailBox();
             if (!error) {
                 setMails(loadedMails);
@@ -74,7 +109,6 @@ export default function Social({ isOpen, onClose }) {
             await rejectRequest(mailId);
             setAlertMessage('Request declined');
             setShowAlert(true);
-            // Refresh mails after declining
             const { mails: loadedMails, error } = await loadMailBox();
             if (!error) {
                 setMails(loadedMails);
@@ -131,7 +165,13 @@ export default function Social({ isOpen, onClose }) {
                             width="12.5rem"
                             fontSize="1.75rem"
                             backgroundColor={activeTab === 'mail' ? '#08A24E' : '#F1CA76'}
-                            onClick={() => setActiveTab('mail')}
+                            onClick={() => {
+                                setActiveTab('mail');
+                                if (onMailsRead && hasNewMails) {
+                                    onMailsRead();
+                                }
+                            }}
+                            showNotification={hasNewMails && activeTab !== 'mail'}
                         />
                     </div>
 

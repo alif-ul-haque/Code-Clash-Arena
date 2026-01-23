@@ -18,7 +18,6 @@ export default function MyClan({ isOpen, onClose, clanDetails = {} }) {
         participants = []
     } = clanDetails;
 
-    // Sort participants by rating in descending order
     const sortedParticipants = [...participants].sort((a, b) => b.rating - a.rating);
 
     useEffect(() => {

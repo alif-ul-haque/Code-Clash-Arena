@@ -14,7 +14,8 @@ export default function Button({
     justifyContent = "center",
     onClick,
     onMouseEnter,
-    onMouseLeave
+    onMouseLeave,
+    showNotification = false
 }) {
     const buttonStyle = {
         backgroundColor: backgroundColor,
@@ -38,9 +39,22 @@ export default function Button({
     }
 
     return (
-        <button className="glow-btn" style={buttonStyle} onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        <button className="glow-btn" style={{ ...buttonStyle, position: 'relative' }} onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             {text && <span style={textStyle}>{text}</span>}
             {showIcon && <span style={iconStyle}><img id="logo" src={icon} /></span>}
+            {showNotification && (
+                <span style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: '#ff0000',
+                    borderRadius: '50%',
+                    border: '2px solid white',
+                    boxShadow: '0 0 10px rgba(255, 0, 0, 0.8)'
+                }}></span>
+            )}
         </button>
     )
 }
