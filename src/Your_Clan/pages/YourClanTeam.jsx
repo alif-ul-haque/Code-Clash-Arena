@@ -14,9 +14,11 @@ export default function YourClanTeam() {
         async function fetchMembers() {
             const { data: user } = await getUserData();
             if (user?.clan_id) {
-                const { members } = await getClanMembers(user.clan_id);
+                const { members } = await getOnlineClanMembers(user.clan_id);
                 setAvailablePlayers(members.map((member, idx) => ({
                     ...member,
+                    // Ensure unique id - use member.id or member.user_id from DB
+                    id: member.id || member.user_id || `member-${idx}`,
                     // fallback avatar if not present
                     avatar: characterImage,
                     // fallback role if not present
@@ -25,7 +27,7 @@ export default function YourClanTeam() {
                     rating: member.rating || 1500,
                     wins: member.wins || 0,
                     losses: member.losses || 0,
-                    name: member.name || member.username || member.cf_handle || member.email || member.id || 'Unknown'
+                    name: member.username || member.cf_handle || 'Unknown'
                 })));
             }
         }
@@ -74,9 +76,9 @@ export default function YourClanTeam() {
                         const isSelected = selectedPlayers.includes(playerId);
                         return (
                             <div 
-                                key={playerId}
+                                key={player.id}
                                 className={`player-row ${isSelected ? 'selected' : ''} ${selectedPlayers.length >= 5 && !isSelected ? 'disabled' : ''}`}
-                                onClick={() => handlePlayerToggle(playerId)}
+                                onClick={() => handlePlayerToggle(player.id)}
                                 style={{ animationDelay: `${index * 0.05}s` }}
                             >
                                 {/* Selection Indicator */}
