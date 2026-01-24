@@ -72,3 +72,17 @@ export async function getClanMembers(clanId) {
     console.log("Fetched clan members:", data);
     return { members: data, error: null };
 }
+
+// Fetch only online clan members
+export async function getOnlineClanMembers(clanId) {
+    const { data, error } = await supabase
+        .from('users')
+        .select('id, username, cf_handle, is_online')
+        .eq('clan_id', clanId)
+        .eq('is_online', true);
+    if (error) {
+        console.error("Error fetching online clan members:", error.message);
+        return { members: [], error };
+    }
+    return { members: data, error: null };
+}
