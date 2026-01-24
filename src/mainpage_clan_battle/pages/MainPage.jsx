@@ -14,7 +14,7 @@ import HomePage from '../../homepage_login_signup/pages/HomePage.jsx'
 import OverlayMenu from '../components/OverlayMenu.jsx'
 import Particles from "react-tsparticles"
 import { loadSlim } from "tsparticles-slim"
-import NoClanMenu from '../components/NoclanMenu.jsx'
+import NoClanMenu from '../components/NoClanMenu.jsx'
 import MyClan from '../components/MyClan.jsx'
 import CardCarousel from '../components/CardCarousel.jsx'
 import IntroCard from '../components/IntroCard.jsx'
