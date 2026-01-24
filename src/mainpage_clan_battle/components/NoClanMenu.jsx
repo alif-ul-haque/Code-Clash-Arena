@@ -1,4 +1,4 @@
-import '../style/NoclanMenu.css';
+import '../style/NoClanMenu.css';
 import { useEffect, useState } from 'react';
 import Button from '../../assets/components/Button.jsx';
 import FindClan from '../components/FindClan.jsx';
