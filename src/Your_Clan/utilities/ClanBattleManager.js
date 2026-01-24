@@ -11,6 +11,20 @@ import getUserData from '../../mainpage_clan_battle/utilities/UserData';
  */
 export async function createClanBattle(clan1Id, clan2Id, clan1Members, clan2Members) {
     try {
+        // First, check if a battle already exists for these two clans
+        const { data: existingBattle } = await supabase
+            .from('clan_battles')
+            .select('battle_id')
+            .or(`and(clan1_id.eq.${clan1Id},clan2_id.eq.${clan2Id}),and(clan1_id.eq.${clan2Id},clan2_id.eq.${clan1Id})`)
+            .in('status', ['preparing', 'in_progress'])
+            .single();
+
+        // If battle already exists, return it
+        if (existingBattle) {
+            console.log('Battle already exists, using existing battle:', existingBattle.battle_id);
+            return { success: true, battleId: existingBattle.battle_id, error: null };
+        }
+
         // Create battle record
         const { data: battle, error: battleError } = await supabase
             .from('clan_battles')
@@ -25,6 +39,19 @@ export async function createClanBattle(clan1Id, clan2Id, clan1Members, clan2Memb
 
         if (battleError) {
             console.error('Error creating battle:', battleError);
+            // Check again if battle was created by other user (race condition)
+            const { data: raceCheckBattle } = await supabase
+                .from('clan_battles')
+                .select('battle_id')
+                .or(`and(clan1_id.eq.${clan1Id},clan2_id.eq.${clan2Id}),and(clan1_id.eq.${clan2Id},clan2_id.eq.${clan1Id})`)
+                .in('status', ['preparing', 'in_progress'])
+                .single();
+            
+            if (raceCheckBattle) {
+                console.log('Battle created by another user, using it:', raceCheckBattle.battle_id);
+                return { success: true, battleId: raceCheckBattle.battle_id, error: null };
+            }
+            
             return { success: false, battleId: null, error: battleError };
         }
 
