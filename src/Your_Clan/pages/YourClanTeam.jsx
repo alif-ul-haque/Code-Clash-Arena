@@ -15,8 +15,11 @@ export default function YourClanTeam() {
             const { data: user } = await getUserData();
             if (user?.clan_id) {
                 const { members } = await getClanMembers(user.clan_id);
+                console.log('Fetched clan members:', members);
                 setAvailablePlayers(members.map((member, idx) => ({
                     ...member,
+                    // Ensure unique id - use member.id or member.user_id from DB
+                    id: member.id || member.user_id || `member-${idx}`,
                     // fallback avatar if not present
                     avatar: characterImage,
                     // fallback role if not present
@@ -36,13 +39,13 @@ export default function YourClanTeam() {
     const handlePlayerToggle = (playerId) => {
         if (selectedPlayers.includes(playerId)) {
             setSelectedPlayers(selectedPlayers.filter(id => id !== playerId));
-        } else if (selectedPlayers.length < 5) {
+        } else if (selectedPlayers.length < 2) {
             setSelectedPlayers([...selectedPlayers, playerId]);
         }
     };
 
     const handleStartBattle = () => {
-        if (selectedPlayers.length === 5) {
+        if (selectedPlayers.length === 2) {
             setIsSearching(true);
             setTimeout(() => {
                 navigate('/your-clan/finding-opponent');
@@ -55,14 +58,14 @@ export default function YourClanTeam() {
             {/* Header with Start Battle Button */}
             <div className="page-header">
                 <button 
-                    className={`start-battle-btn ${selectedPlayers.length === 5 ? 'ready' : 'disabled'} ${isSearching ? 'searching' : ''}`}
+                    className={`start-battle-btn ${selectedPlayers.length === 2 ? 'ready' : 'disabled'} ${isSearching ? 'searching' : ''}`}
                     onClick={handleStartBattle}
-                    disabled={selectedPlayers.length !== 5 || isSearching}
+                    disabled={selectedPlayers.length !== 2 || isSearching}
                 >
                     {isSearching ? 'Finding Opponent...' : 'Start Battle'}
                 </button>
                 <div className="selection-counter">
-                    <span className="counter-text">Selected: {selectedPlayers.length}/5</span>
+                    <span className="counter-text">Selected: {selectedPlayers.length}/2</span>
                 </div>
             </div>
 
@@ -75,7 +78,7 @@ export default function YourClanTeam() {
                         return (
                             <div 
                                 key={player.id}
-                                className={`player-row ${isSelected ? 'selected' : ''} ${selectedPlayers.length >= 5 && !isSelected ? 'disabled' : ''}`}
+                                className={`player-row ${isSelected ? 'selected' : ''} ${selectedPlayers.length >= 2 && !isSelected ? 'disabled' : ''}`}
                                 onClick={() => handlePlayerToggle(player.id)}
                                 style={{ animationDelay: `${index * 0.05}s` }}
                             >
