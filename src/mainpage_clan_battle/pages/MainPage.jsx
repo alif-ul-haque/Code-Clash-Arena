@@ -458,7 +458,7 @@ export default function MainPage() {
                 <div className="menubar">
                     <div className="xpbar">
                         <div className="img-xp">
-                            <p className={`level ${userDetail.displayXp >= 10 ? 'level-two-digit' : ''}`}>{userDetail.displayXp}</p>
+                            <p className={`level ${userDetail.displayXp >= 10 ? 'level-two-digit' : ''}`}>{userDetail.level}</p>
                             <img src={xpImage} alt="XP" className="xp-image" />
                             <XpBar xp={userDetail.xp} maxXp={userDetail.maxXp} username={userDetail.username} />
                         </div>
