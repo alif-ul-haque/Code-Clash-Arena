@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import '../style/1v1_coding_battle_page.css';
 import logo from '../../assets/icons/cca.png';
 import { supabase } from '../../supabaseclient';
+import { fetchCodeforcesProblem } from '../utilities/codeforcesProblemFetcher';
+import MathRenderer from '../components/MathRenderer';
 
 const OneVOneCodingBattlePage = () => {
     const navigate = useNavigate();
@@ -12,6 +14,11 @@ const OneVOneCodingBattlePage = () => {
     const [selectedLanguage, setSelectedLanguage] = useState('PYTHON');
     const [code, setCode] = useState('## WRITE YOUR PYTHON CODE\n##FROM HERE');
     const fileInputRef = useRef(null);
+    
+    // Problem state
+    const [problem, setProblem] = useState(null);
+    const [loadingProblem, setLoadingProblem] = useState(true);
+    const [problemError, setProblemError] = useState(null);
     
     // Battle state tracking
     const [battleState, setBattleState] = useState({
@@ -24,6 +31,63 @@ const OneVOneCodingBattlePage = () => {
     const [currentUserId, setCurrentUserId] = useState(null);
     const [opponentId, setOpponentId] = useState(null);
     const [startTime] = useState(Date.now());
+    const [isEditorMinimized, setIsEditorMinimized] = useState(false);
+
+    // Fetch problem from Codeforces
+    useEffect(() => {
+        const loadProblem = async () => {
+            try {
+                setLoadingProblem(true);
+                setProblemError(null);
+                
+                console.log('Starting problem fetch...');
+                // Fetch problem 2185A from Codeforces
+                const problemData = await fetchCodeforcesProblem(2185, 'A');
+                
+                if (problemData) {
+                    console.log('Problem loaded successfully:', problemData.name);
+                    setProblem(problemData);
+                } else {
+                    throw new Error('No problem data returned');
+                }
+            } catch (error) {
+                console.error('Error loading problem:', error);
+                
+                // Show user-friendly error message
+                const errorMessage = error.message.includes('aborted') 
+                    ? 'Connection timeout. Using fallback problem.'
+                    : 'Failed to load problem from Codeforces. Using fallback.';
+                
+                setProblemError(errorMessage);
+                
+                // Fallback to a working default problem
+                setProblem({
+                    name: 'Two Sum',
+                    contestId: 0,
+                    index: 'A',
+                    rating: 800,
+                    tags: ['arrays', 'hash table'],
+                    statement: 'Given an array of integers nums and an integer target, return the indices of the two numbers that add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.',
+                    inputSpec: 'An array of integers nums and an integer target',
+                    outputSpec: 'Return the indices of the two numbers that add up to target',
+                    examples: [{
+                        input: 'nums = [2,7,11,15], target = 9',
+                        output: '[0,1]'
+                    }, {
+                        input: 'nums = [3,2,4], target = 6',
+                        output: '[1,2]'
+                    }],
+                    constraints: 'The answer is guaranteed to exist.',
+                    timeLimit: '1 second',
+                    memoryLimit: '256 megabytes'
+                });
+            } finally {
+                setLoadingProblem(false);
+            }
+        };
+
+        loadProblem();
+    }, []);
 
     // Fetch user IDs and set up real-time subscription
     useEffect(() => {
@@ -229,66 +293,132 @@ const OneVOneCodingBattlePage = () => {
             {/* Main Content */}
             <div className="battle-content">
                 {/* Left Section - Problem */}
-                <div className="problem-section">
-                    <h2 className="problem-title">TWO SUM</h2>
-                    
-                    <div className="problem-statement">
-                        <h3 className="statement-heading">Problem Statement :</h3>
-                        <p className="statement-text">
-                            Given an array of integers nums and an integer target, return the indices 
-                            of the two numbers that add up to target.
-                        </p>
-                    </div>
-                    
-                    <div className="examples-section">
-                        <h3 className="examples-heading">EXAMPLES :</h3>
-                        <div className="example-box">
-                            <p className="example-text">Input:</p>
-                            <p className="example-text">nums = [2,7,11,15], target = 9</p>
-                            <p className="example-text">Output: [0,1]</p>
+                <div className={`problem-section ${isEditorMinimized ? 'full-width' : ''}`}>
+                    {loadingProblem ? (
+                        <div className="loading-problem">
+                            <h2 className="problem-title">LOADING PROBLEM...</h2>
                         </div>
-                    </div>
+                    ) : problemError ? (
+                        <div className="problem-error">
+                            <h2 className="problem-title">ERROR</h2>
+                            <p className="statement-text">{problemError}</p>
+                        </div>
+                    ) : (
+                        <>
+                            <h2 className="problem-title">{problem?.name?.toUpperCase() || 'PROBLEM'}</h2>
+                            
+                            {problem?.timeLimit && problem?.memoryLimit && (
+                                <div className="problem-limits">
+                                    <span className="limit-text">Time Limit: {problem.timeLimit}</span>
+                                    <span className="limit-text">Memory Limit: {problem.memoryLimit}</span>
+                                </div>
+                            )}
+                            
+                            <div className="problem-statement">
+                                <h3 className="statement-heading">Problem Statement :</h3>
+                                <p className="statement-text">
+                                    <MathRenderer text={problem?.statement || 'Loading...'} />
+                                </p>
+                            </div>
+                            
+                            {problem?.inputSpec && (
+                                <div className="problem-statement">
+                                    <h3 className="statement-heading">Input :</h3>
+                                    <p className="statement-text">
+                                        <MathRenderer text={problem.inputSpec} />
+                                    </p>
+                                </div>
+                            )}
+                            
+                            {problem?.outputSpec && (
+                                <div className="problem-statement">
+                                    <h3 className="statement-heading">Output :</h3>
+                                    <p className="statement-text">
+                                        <MathRenderer text={problem.outputSpec} />
+                                    </p>
+                                </div>
+                            )}
+                            
+                            {problem?.examples && problem.examples.length > 0 && (
+                                <div className="examples-section">
+                                    <h3 className="examples-heading">EXAMPLES :</h3>
+                                    {problem.examples.map((example, index) => (
+                                        <div key={index} className="example-box">
+                                            <p className="example-text">Input:</p>
+                                            <pre className="example-code">{example.input}</pre>
+                                            <p className="example-text">Output:</p>
+                                            <pre className="example-code">{example.output}</pre>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            
+                            {problem?.constraints && (
+                                <div className="problem-statement">
+                                    <h3 className="statement-heading">Note :</h3>
+                                    <div className="statement-text constraints-text">
+                                        <MathRenderer text={problem.constraints} />
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
-
-                {/* Vertical Separator */}
-                <div className="vertical-separator"></div>
 
                 {/* Right Section - Code Editor */}
-                <div className="editor-section">
-                    <div className="editor-controls">
-                        <select 
-                            className="language-selector"
-                            value={selectedLanguage}
-                            onChange={handleLanguageChange}
-                        >
-                            <option value="PYTHON">PYTHON</option>
-                            <option value="JAVASCRIPT">JAVASCRIPT</option>
-                            <option value="JAVA">JAVA</option>
-                            <option value="C++">C++</option>
-                        </select>
+                {!isEditorMinimized ? (
+                    <div className="editor-section">
+                        <div className="editor-controls">
+                            <select 
+                                className="language-selector"
+                                value={selectedLanguage}
+                                onChange={handleLanguageChange}
+                            >
+                                <option value="PYTHON">PYTHON</option>
+                                <option value="JAVASCRIPT">JAVASCRIPT</option>
+                                <option value="JAVA">JAVA</option>
+                                <option value="C++">C++</option>
+                            </select>
+                            
+                            <button className="submit-btn" onClick={handleSubmit}>SUBMIT</button>
+                            
+                            <button 
+                                className="minimize-btn" 
+                                onClick={() => setIsEditorMinimized(true)}
+                                title="Minimize Editor"
+                            >
+                                ▼
+                            </button>
+                        </div>
                         
-                        <button className="submit-btn" onClick={handleSubmit}>SUBMIT</button>
+                        <textarea 
+                            className="code-editor"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            placeholder={`## WRITE YOUR ${selectedLanguage} CODE\n##FROM HERE`}
+                        ></textarea>
+                        
+                        <div className="editor-footer">
+                            <input 
+                                type="file" 
+                                ref={fileInputRef}
+                                onChange={handleFileUpload}
+                                accept=".py,.js,.java,.cpp,.c"
+                                style={{ display: 'none' }}
+                            />
+                            <button className="upload-btn" onClick={handleUploadClick}>UPLOAD</button>
+                            <span className="language-display">LANGUAGE : {selectedLanguage}</span>
+                        </div>
                     </div>
-                    
-                    <textarea 
-                        className="code-editor"
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        placeholder={`## WRITE YOUR ${selectedLanguage} CODE\n##FROM HERE`}
-                    ></textarea>
-                    
-                    <div className="editor-footer">
-                        <input 
-                            type="file" 
-                            ref={fileInputRef}
-                            onChange={handleFileUpload}
-                            accept=".py,.js,.java,.cpp,.c"
-                            style={{ display: 'none' }}
-                        />
-                        <button className="upload-btn" onClick={handleUploadClick}>UPLOAD</button>
-                        <span className="language-display">LANGUAGE : {selectedLanguage}</span>
-                    </div>
-                </div>
+                ) : (
+                    <button 
+                        className="expand-editor-btn" 
+                        onClick={() => setIsEditorMinimized(false)}
+                        title="Expand Editor"
+                    >
+                        ▲
+                    </button>
+                )}
             </div>
         </div>
     );
