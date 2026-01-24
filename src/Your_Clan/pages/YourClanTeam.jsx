@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/YourClanTeam.css';
 import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png';
-import getUserData, { getOnlineClanMembers } from '../../mainpage_clan_battle/utilities/UserData';
+import getUserData, { getClanMembers } from '../../mainpage_clan_battle/utilities/UserData';
 
 export default function YourClanTeam() {
     const navigate = useNavigate();
@@ -14,7 +14,7 @@ export default function YourClanTeam() {
         async function fetchMembers() {
             const { data: user } = await getUserData();
             if (user?.clan_id) {
-                const { members } = await getOnlineClanMembers(user.clan_id);
+                const { members } = await getClanMembers(user.clan_id);
                 setAvailablePlayers(members.map((member, idx) => ({
                     ...member,
                     // fallback avatar if not present
