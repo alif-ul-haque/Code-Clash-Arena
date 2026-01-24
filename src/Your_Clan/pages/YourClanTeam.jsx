@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/YourClanTeam.css';
 import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png';
-import getUserData, { getOnlineClanMembers } from '../../mainpage_clan_battle/utilities/UserData';
+import getUserData, { getClanMembers } from '../../mainpage_clan_battle/utilities/UserData';
 
 export default function YourClanTeam() {
     const navigate = useNavigate();
@@ -14,7 +14,7 @@ export default function YourClanTeam() {
         async function fetchMembers() {
             const { data: user } = await getUserData();
             if (user?.clan_id) {
-                const { members } = await getOnlineClanMembers(user.clan_id);
+                const { members } = await getClanMembers(user.clan_id);
                 setAvailablePlayers(members.map((member, idx) => ({
                     ...member,
                     // fallback avatar if not present
@@ -25,7 +25,7 @@ export default function YourClanTeam() {
                     rating: member.rating || 1500,
                     wins: member.wins || 0,
                     losses: member.losses || 0,
-                    name: member.username || member.cf_handle || 'Unknown'
+                    name: member.name || member.username || member.cf_handle || member.email || member.id || 'Unknown'
                 })));
             }
         }
@@ -35,13 +35,13 @@ export default function YourClanTeam() {
     const handlePlayerToggle = (playerId) => {
         if (selectedPlayers.includes(playerId)) {
             setSelectedPlayers(selectedPlayers.filter(id => id !== playerId));
-        } else if (selectedPlayers.length < 5) {
+        } else if (selectedPlayers.length < 2) {
             setSelectedPlayers([...selectedPlayers, playerId]);
         }
     };
 
     const handleStartBattle = () => {
-        if (selectedPlayers.length === 5) {
+        if (selectedPlayers.length === 2) {
             setIsSearching(true);
             setTimeout(() => {
                 navigate('/your-clan/finding-opponent');
@@ -54,14 +54,14 @@ export default function YourClanTeam() {
             {/* Header with Start Battle Button */}
             <div className="page-header">
                 <button 
-                    className={`start-battle-btn ${selectedPlayers.length === 5 ? 'ready' : 'disabled'} ${isSearching ? 'searching' : ''}`}
+                    className={`start-battle-btn ${selectedPlayers.length === 2 ? 'ready' : 'disabled'} ${isSearching ? 'searching' : ''}`}
                     onClick={handleStartBattle}
-                    disabled={selectedPlayers.length !== 5 || isSearching}
+                    disabled={selectedPlayers.length !== 2 || isSearching}
                 >
                     {isSearching ? 'Finding Opponent...' : 'Start Battle'}
                 </button>
                 <div className="selection-counter">
-                    <span className="counter-text">Selected: {selectedPlayers.length}/5</span>
+                    <span className="counter-text">Selected: {selectedPlayers.length}/2</span>
                 </div>
             </div>
 
@@ -70,12 +70,13 @@ export default function YourClanTeam() {
                 <h2 className="players-title">Select Your Warriors</h2>
                 <div className="players-list">
                     {availablePlayers.map((player, index) => {
-                        const isSelected = selectedPlayers.includes(player.id);
+                        const playerId = player.id || `idx-${index}`;
+                        const isSelected = selectedPlayers.includes(playerId);
                         return (
                             <div 
-                                key={player.id}
+                                key={playerId}
                                 className={`player-row ${isSelected ? 'selected' : ''} ${selectedPlayers.length >= 5 && !isSelected ? 'disabled' : ''}`}
-                                onClick={() => handlePlayerToggle(player.id)}
+                                onClick={() => handlePlayerToggle(playerId)}
                                 style={{ animationDelay: `${index * 0.05}s` }}
                             >
                                 {/* Selection Indicator */}

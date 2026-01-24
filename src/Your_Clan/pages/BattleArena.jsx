@@ -1,9 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/BattleArena.css';
 
+import getUserData, { getClanMembers } from '../../mainpage_clan_battle/utilities/UserData';
+
 export default function BattleArena() {
     const navigate = useNavigate();
+    const [clanMembers, setClanMembers] = useState([]);
+
+    useEffect(() => {
+        async function fetchMembers() {
+            const { data: user } = await getUserData();
+            if (user?.clan_id) {
+                const { members } = await getClanMembers(user.clan_id);
+                setClanMembers(members);
+            }
+        }
+        fetchMembers();
+    }, []);
     
     const problems = [
         {
@@ -73,6 +87,19 @@ export default function BattleArena() {
 
     return (
         <div className="battle-arena-page">
+            {/* Clan Members List */}
+            <div className="clan-members-list">
+                <h2>All Members in Your Clan</h2>
+                {clanMembers.length === 0 ? (
+                    <p>No members found in your clan.</p>
+                ) : (
+                    <ul>
+                        {clanMembers.map((member) => (
+                            <li key={member.id}>{member.username || member.cf_handle || 'Unknown'}</li>
+                        ))}
+                    </ul>
+                )}
+            </div>
             {/* Team Scores */}
             <div className="scores-header">
                 <div className="team-score your-team">
