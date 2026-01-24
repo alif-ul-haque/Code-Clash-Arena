@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../style/YourClanTeam.css';
 import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png';
 import getUserData, { getClanMembers } from '../../mainpage_clan_battle/utilities/UserData';
-import { supabase } from '../../supabaseclient';
+import { joinBattleQueue, getQueueStatus } from '../utilities/ClanBattleMatchmaking';
 
 export default function YourClanTeam() {
     const navigate = useNavigate();
@@ -48,15 +48,19 @@ export default function YourClanTeam() {
     const handleStartBattle = async () => {
         if (selectedPlayers.length === 2) {
             setIsSearching(true);
-            // Set searching flag for current user
-            const { data: user } = await getUserData();
-            await supabase
-                .from('users')
-                .update({ is_searching_for_battle: true })
-                .eq('id', user.id);
-            setTimeout(() => {
-                navigate('/your-clan/finding-opponent');
-            }, 800);
+            
+            // Join the battle queue with selected members
+            const { success, error } = await joinBattleQueue(selectedPlayers);
+            
+            if (success) {
+                setTimeout(() => {
+                    navigate('/your-clan/finding-opponent');
+                }, 800);
+            } else {
+                console.error('Failed to join queue:', error);
+                setIsSearching(false);
+                alert('Failed to join battle queue. Please try again.');
+            }
         }
     };
 

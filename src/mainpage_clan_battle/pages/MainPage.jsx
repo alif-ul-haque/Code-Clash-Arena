@@ -24,6 +24,7 @@ import SocialPage from '../components/Social.jsx';
 import getUserData, { getClanData, countClanMembers, getClanMembers } from '../utilities/UserData.js'
 import { supabase } from '../../supabaseclient.js'
 import { loadMailBox } from '../utilities/LoadMailBox.js'
+import { isUserClanLeader, hasOngoingClanBattle, subscribeToClanBattleChanges } from '../../Your_Clan/utilities/ClanBattleUtils.js'
 
 
 
@@ -39,6 +40,9 @@ export default function MainPage() {
     const [showCarousel, setShowCarousel] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [hasNewMails, setHasNewMails] = useState(false);
+    const [isClanLeader, setIsClanLeader] = useState(false);
+    const [hasActiveBattle, setHasActiveBattle] = useState(false);
+    const [activeBattleId, setActiveBattleId] = useState(null);
 
     const carouselCards = [
         {
@@ -108,6 +112,30 @@ export default function MainPage() {
                     '/battle-history'       // Battle History (index 4)
                 ];
                 navigate(routes[index]);
+            }, 500);
+        }, 800);
+    };
+
+    const handleClanBattleClick = () => {
+        setShowCarousel(true);
+        setCurrentCardIndex(2);
+
+        setTimeout(() => {
+            setIsTransitioning(true);
+
+            setTimeout(() => {
+                // PRIORITY 1: If there's an ongoing battle, go to battle arena (regardless of role)
+                if (hasActiveBattle && activeBattleId) {
+                    navigate('/your-clan/battle-arena');
+                }
+                // PRIORITY 2: If no active battle and user is leader, go to team selection
+                else if (isClanLeader) {
+                    navigate('/your-clan');
+                }
+                // PRIORITY 3: If no active battle and user is not leader, show no battle page
+                else {
+                    navigate('/your-clan/no-battle');
+                }
             }, 500);
         }, 800);
     };
@@ -204,6 +232,37 @@ export default function MainPage() {
         fetchUserData();
 
     }, []);
+
+    // Check if user is clan leader and if there's an ongoing battle
+    useEffect(() => {
+        async function checkClanBattleStatus() {
+            const { isLeader } = await isUserClanLeader();
+            setIsClanLeader(isLeader);
+
+            const { hasOngoingBattle, battleId } = await hasOngoingClanBattle();
+            setHasActiveBattle(hasOngoingBattle);
+            setActiveBattleId(battleId);
+        }
+        checkClanBattleStatus();
+
+        // Subscribe to battle changes
+        let channel = null;
+        async function setupSubscription() {
+            const { data: user } = await getUserData();
+            if (user?.clan_id) {
+                channel = subscribeToClanBattleChanges(user.clan_id, () => {
+                    checkClanBattleStatus();
+                });
+            }
+        }
+        setupSubscription();
+
+        return () => {
+            if (channel) {
+                supabase.removeChannel(channel);
+            }
+        };
+    }, [userDetail.haveClan]);
 
 
     useEffect(() => {
@@ -499,7 +558,8 @@ export default function MainPage() {
                             justifyContent='space-around'
                             onMouseEnter={() => handleCardHover(2)}
                             onMouseLeave={handleCardLeave}
-                            onClick={() => handleCardClick(0)}
+                            onClick={handleClanBattleClick}
+                            showNotification={hasActiveBattle}
                         />
                         <Button
                             text="Attack"

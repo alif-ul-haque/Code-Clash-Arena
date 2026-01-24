@@ -24,6 +24,74 @@ CREATE TABLE public.battle_table_clan (
   CONSTRAINT battle_table_clan_clan_2_id_fkey FOREIGN KEY (clan_2_id) REFERENCES public.clans(clan_id),
   CONSTRAINT battle_table_clan_win_fkey FOREIGN KEY (win) REFERENCES public.clans(clan_id)
 );
+CREATE TABLE public.clan_battle_participants (
+  participant_id uuid NOT NULL DEFAULT gen_random_uuid(),
+  battle_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  clan_id uuid NOT NULL,
+  problems_solved integer DEFAULT 0,
+  total_time integer DEFAULT 0,
+  joined_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT clan_battle_participants_pkey PRIMARY KEY (participant_id),
+  CONSTRAINT clan_battle_participants_battle_id_fkey FOREIGN KEY (battle_id) REFERENCES public.clan_battles(battle_id),
+  CONSTRAINT clan_battle_participants_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT clan_battle_participants_clan_id_fkey FOREIGN KEY (clan_id) REFERENCES public.clans(clan_id)
+);
+CREATE TABLE public.clan_battle_problems (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  battle_id uuid NOT NULL,
+  problem_index integer NOT NULL,
+  problem_title text NOT NULL,
+  problem_description text NOT NULL,
+  difficulty text NOT NULL,
+  test_cases jsonb,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT clan_battle_problems_pkey PRIMARY KEY (id),
+  CONSTRAINT clan_battle_problems_battle_id_fkey FOREIGN KEY (battle_id) REFERENCES public.clan_battles(battle_id)
+);
+CREATE TABLE public.clan_battle_queue (
+  queue_id uuid NOT NULL DEFAULT gen_random_uuid(),
+  clan_id uuid NOT NULL UNIQUE,
+  leader_id uuid NOT NULL,
+  selected_members jsonb NOT NULL,
+  status text DEFAULT 'searching'::text,
+  matched_with_clan_id uuid,
+  queue_time timestamp with time zone DEFAULT now(),
+  CONSTRAINT clan_battle_queue_pkey PRIMARY KEY (queue_id),
+  CONSTRAINT clan_battle_queue_clan_id_fkey FOREIGN KEY (clan_id) REFERENCES public.clans(clan_id),
+  CONSTRAINT clan_battle_queue_leader_id_fkey FOREIGN KEY (leader_id) REFERENCES public.users(id),
+  CONSTRAINT clan_battle_queue_matched_with_clan_id_fkey FOREIGN KEY (matched_with_clan_id) REFERENCES public.clans(clan_id)
+);
+CREATE TABLE public.clan_battle_submissions (
+  submission_id uuid NOT NULL DEFAULT gen_random_uuid(),
+  battle_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  problem_index integer NOT NULL,
+  code text NOT NULL,
+  language text NOT NULL,
+  verdict text DEFAULT 'pending'::text,
+  execution_time integer,
+  submitted_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT clan_battle_submissions_pkey PRIMARY KEY (submission_id),
+  CONSTRAINT clan_battle_submissions_battle_id_fkey FOREIGN KEY (battle_id) REFERENCES public.clan_battles(battle_id),
+  CONSTRAINT clan_battle_submissions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.clan_battles (
+  battle_id uuid NOT NULL DEFAULT gen_random_uuid(),
+  clan1_id uuid NOT NULL,
+  clan2_id uuid NOT NULL,
+  status text NOT NULL DEFAULT 'preparing'::text,
+  winner_clan_id uuid,
+  start_time timestamp with time zone DEFAULT now(),
+  end_time timestamp with time zone,
+  duration_seconds integer DEFAULT 3600,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT clan_battles_pkey PRIMARY KEY (battle_id),
+  CONSTRAINT clan_battles_clan1_id_fkey FOREIGN KEY (clan1_id) REFERENCES public.clans(clan_id),
+  CONSTRAINT clan_battles_clan2_id_fkey FOREIGN KEY (clan2_id) REFERENCES public.clans(clan_id),
+  CONSTRAINT clan_battles_winner_clan_id_fkey FOREIGN KEY (winner_clan_id) REFERENCES public.clans(clan_id)
+);
 CREATE TABLE public.clan_join_requests (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
@@ -55,6 +123,8 @@ CREATE TABLE public.clans (
   max_trophy smallint NOT NULL DEFAULT '0'::smallint,
   war_won smallint NOT NULL DEFAULT '0'::smallint,
   level smallint NOT NULL DEFAULT '1'::smallint,
+  is_searching_for_battle boolean DEFAULT false,
+  searching_updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT clans_pkey PRIMARY KEY (clan_id),
   CONSTRAINT fk_leader FOREIGN KEY (leader_id) REFERENCES public.users(id)
 );
