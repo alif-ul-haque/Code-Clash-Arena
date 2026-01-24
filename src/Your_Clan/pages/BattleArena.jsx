@@ -94,8 +94,10 @@ export default function BattleArena() {
                     <p>No members found in your clan.</p>
                 ) : (
                     <ul>
-                        {clanMembers.map((member) => (
-                            <li key={member.id}>{member.username || member.cf_handle || 'Unknown'}</li>
+                        {clanMembers.map((member, idx) => (
+                            <li key={member.id || member.user_id || idx}>
+                                {member.name || member.username || member.cf_handle || member.email || member.id || 'Unknown'}
+                            </li>
                         ))}
                     </ul>
                 )}

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../supabaseclient';
+import getUserData from '../../mainpage_clan_battle/utilities/UserData';
 import '../style/FindingOpponent.css';
 
 export default function FindingOpponent() {
     const navigate = useNavigate();
     const [dots, setDots] = useState('');
+    const [opponentClan, setOpponentClan] = useState(null);
 
     useEffect(() => {
         // Animated dots
@@ -12,16 +15,34 @@ export default function FindingOpponent() {
             setDots(prev => prev.length >= 3 ? '' : prev + '.');
         }, 500);
 
-        // Navigate to revealing warriors after 4 seconds
-        const timer = setTimeout(() => {
-            navigate('/your-clan/revealing-warriors');
-        }, 4000);
+        // Poll for opponent clan
+        let pollInterval;
+        async function pollForOpponent() {
+            const { data: user } = await getUserData();
+            const myClanId = user.clan_id;
+            const { data: opponents } = await supabase
+                .from('users')
+                .select('clan_id')
+                .eq('is_searching_for_battle', true)
+                .neq('clan_id', myClanId);
+            if (opponents && opponents.length > 0) {
+                setOpponentClan(opponents[0].clan_id);
+            }
+        }
+        pollInterval = setInterval(pollForOpponent, 2000);
 
         return () => {
             clearInterval(dotsInterval);
-            clearTimeout(timer);
+            clearInterval(pollInterval);
         };
     }, [navigate]);
+
+    useEffect(() => {
+        if (opponentClan) {
+            // Navigate to revealing warriors, pass opponentClan as state
+            navigate('/your-clan/revealing-warriors', { state: { opponentClan } });
+        }
+    }, [opponentClan, navigate]);
 
     return (
         <div className="finding-opponent-page">
