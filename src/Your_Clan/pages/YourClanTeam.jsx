@@ -14,7 +14,8 @@ export default function YourClanTeam() {
         async function fetchMembers() {
             const { data: user } = await getUserData();
             if (user?.clan_id) {
-                const { members } = await getOnlineClanMembers(user.clan_id);
+                const { members } = await getClanMembers(user.clan_id);
+                console.log('Fetched clan members:', members);
                 setAvailablePlayers(members.map((member, idx) => ({
                     ...member,
                     // Ensure unique id - use member.id or member.user_id from DB
@@ -27,7 +28,8 @@ export default function YourClanTeam() {
                     rating: member.rating || 1500,
                     wins: member.wins || 0,
                     losses: member.losses || 0,
-                    name: member.username || member.cf_handle || 'Unknown'
+                    // name is already provided by the RPC function
+                    name: member.name || member.cf_handle || 'Unknown'
                 })));
             }
         }
@@ -72,12 +74,11 @@ export default function YourClanTeam() {
                 <h2 className="players-title">Select Your Warriors</h2>
                 <div className="players-list">
                     {availablePlayers.map((player, index) => {
-                        const playerId = player.id || `idx-${index}`;
-                        const isSelected = selectedPlayers.includes(playerId);
+                        const isSelected = selectedPlayers.includes(player.id);
                         return (
                             <div 
                                 key={player.id}
-                                className={`player-row ${isSelected ? 'selected' : ''} ${selectedPlayers.length >= 5 && !isSelected ? 'disabled' : ''}`}
+                                className={`player-row ${isSelected ? 'selected' : ''} ${selectedPlayers.length >= 2 && !isSelected ? 'disabled' : ''}`}
                                 onClick={() => handlePlayerToggle(player.id)}
                                 style={{ animationDelay: `${index * 0.05}s` }}
                             >
