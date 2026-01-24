@@ -25,7 +25,8 @@ export default function YourClanTeam() {
                     rating: member.rating || 1500,
                     wins: member.wins || 0,
                     losses: member.losses || 0,
-                    name: member.username || member.cf_handle || 'Unknown'
+                    // name is already provided by the RPC function
+                    name: member.name || member.cf_handle || 'Unknown'
                 })));
             }
         }
