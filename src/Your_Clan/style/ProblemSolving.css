@@ -272,10 +272,12 @@
 .language-selector {
     position: relative;
     z-index: 1001;
-}
+   
+}   
 
 .language-dropdown {
     position: relative;
+     
 }
 
 .dropdown-btn {
@@ -294,6 +296,7 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     font-family: 'PlayMeGame', sans-serif;
+    
 }
 
 .dropdown-btn:hover {
@@ -306,7 +309,8 @@
 }
 
 .dropdown-options {
-    position: absolute;
+    position: absolute !important;
+    z-index: 9999 !important;
     top: 100%;
     left: 0;
     margin-top: 0.5rem;
@@ -679,6 +683,22 @@
 
 .popup-close-btn:active {
     transform: translateY(-1px) scale(0.98);
+}
+
+/* Ensure dropdown menu is always visible */
+.dropdown-options {
+    position: absolute !important;
+    z-index: 9999 !important;
+}
+
+.language-selector, .language-dropdown {
+    z-index: 9998 !important;
+    position: relative !important;
+}
+
+/* Remove overflow from parents if present */
+.split-container, .code-editor-side, .editor-section, .code-editor-box {
+    overflow: visible !important;
 }
 
 /* Responsive */

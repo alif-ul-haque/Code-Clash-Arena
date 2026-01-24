@@ -1,23 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/YourClanTeam.css';
 import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png';
+import getUserData, { getOnlineClanMembers } from '../../mainpage_clan_battle/utilities/UserData';
 
 export default function YourClanTeam() {
     const navigate = useNavigate();
     const [selectedPlayers, setSelectedPlayers] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
+    const [availablePlayers, setAvailablePlayers] = useState([]);
 
-    const availablePlayers = [
-        { id: 1, name: "rizvee_113", role: "Leader", avatar: characterImage, rating: 1850, wins: 45, losses: 12 },
-        { id: 2, name: "alif_019", role: "Co-Leader", avatar: characterImage, rating: 1720, wins: 38, losses: 15 },
-        { id: 3, name: "Matin005", role: "Member", avatar: characterImage, rating: 1650, wins: 32, losses: 18 },
-        { id: 4, name: "sabit_pro", role: "Member", avatar: characterImage, rating: 1580, wins: 28, losses: 22 },
-        { id: 5, name: "ninja_007", role: "Member", avatar: characterImage, rating: 1520, wins: 25, losses: 20 },
-        { id: 6, name: "code_master", role: "Member", avatar: characterImage, rating: 1480, wins: 22, losses: 25 },
-        { id: 7, name: "bug_crusher", role: "Elder", avatar: characterImage, rating: 1450, wins: 20, losses: 23 },
-        { id: 8, name: "algo_wizard", role: "Member", avatar: characterImage, rating: 1420, wins: 18, losses: 27 },
-    ];
+    useEffect(() => {
+        async function fetchMembers() {
+            const { data: user } = await getUserData();
+            if (user?.clan_id) {
+                const { members } = await getOnlineClanMembers(user.clan_id);
+                setAvailablePlayers(members.map((member, idx) => ({
+                    ...member,
+                    // fallback avatar if not present
+                    avatar: characterImage,
+                    // fallback role if not present
+                    role: member.role || 'Member',
+                    // fallback rating, wins, losses if not present
+                    rating: member.rating || 1500,
+                    wins: member.wins || 0,
+                    losses: member.losses || 0,
+                    name: member.username || member.cf_handle || 'Unknown'
+                })));
+            }
+        }
+        fetchMembers();
+    }, []);
 
     const handlePlayerToggle = (playerId) => {
         if (selectedPlayers.includes(playerId)) {

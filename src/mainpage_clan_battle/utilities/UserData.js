@@ -1,3 +1,20 @@
+// Fetch all members of a clan (regardless of online status)
+export async function getClanMembers(clanId) {
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('clan_id', clanId);
+        if (error) {
+            console.error('Error fetching clan members:', error);
+            return [];
+        }
+        return data;
+    } catch (err) {
+        console.error('Unexpected error in getClanMembers:', err);
+        return [];
+    }
+}
 import { supabase } from "../../supabaseclient";
 
 export default async function getUserData() {
@@ -70,5 +87,19 @@ export async function getClanMembers(clanId) {
         return { members: [], error };
     }
     console.log("Fetched clan members:", data);
+    return { members: data, error: null };
+}
+
+// Fetch only online clan members
+export async function getOnlineClanMembers(clanId) {
+    const { data, error } = await supabase
+        .from('users')
+        .select('id, username, cf_handle, is_online')
+        .eq('clan_id', clanId)
+        .eq('is_online', true);
+    if (error) {
+        console.error("Error fetching online clan members:", error.message);
+        return { members: [], error };
+    }
     return { members: data, error: null };
 }
