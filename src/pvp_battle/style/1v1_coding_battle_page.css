@@ -275,6 +275,35 @@
   min-width: 180px;
 }
 
+.language-selector:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submit-status-message {
+  background-color: #F1CA76;
+  border: 3px solid #000000;
+  border-radius: 10px;
+  padding: 15px 20px;
+  font-family: 'PlayMeGame', sans-serif;
+  font-size: 18px;
+  color: #000000;
+  font-weight: bold;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .submit-btn {
   position: relative;
   background-color: #7FFF7F;
@@ -290,7 +319,13 @@
   transition: transform 0.2s;
 }
 
-.submit-btn:hover {
+.submit-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
 }
 

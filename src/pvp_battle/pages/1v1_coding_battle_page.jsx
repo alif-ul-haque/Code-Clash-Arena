@@ -4,6 +4,13 @@ import '../style/1v1_coding_battle_page.css';
 import logo from '../../assets/icons/cca.png';
 import { supabase } from '../../supabaseclient';
 import { fetchCodeforcesProblem } from '../utilities/codeforcesProblemFetcher';
+import { 
+    checkCodeforcesLogin,
+    submitCodeWithSession,
+    pollForVerdict, 
+    isVerdictAccepted,
+    getVerdictMessage 
+} from '../utilities/codeforcesSubmission';
 import MathRenderer from '../components/MathRenderer';
 
 const OneVOneCodingBattlePage = () => {
@@ -32,6 +39,8 @@ const OneVOneCodingBattlePage = () => {
     const [opponentId, setOpponentId] = useState(null);
     const [startTime] = useState(Date.now());
     const [isEditorMinimized, setIsEditorMinimized] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState('');
 
     // Fetch problem from Codeforces
     useEffect(() => {
@@ -89,7 +98,7 @@ const OneVOneCodingBattlePage = () => {
         loadProblem();
     }, []);
 
-    // Fetch user IDs and set up real-time subscription
+    // Check Codeforces session on mount
     useEffect(() => {
         const setupBattle = async () => {
             try {
@@ -224,48 +233,158 @@ const OneVOneCodingBattlePage = () => {
 
     const handleSubmit = async () => {
         try {
-            // Calculate time taken (in seconds)
-            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+            setIsSubmitting(true);
+            setSubmitMessage('🔍 Checking Codeforces login...');
+            
+            // Check if user is logged into Codeforces (via browser session)
+            const isLoggedIn = await checkCodeforcesLogin(currentUser);
+            
+            if (!isLoggedIn) {
+                setSubmitMessage('❌ Not logged into Codeforces!');
+                alert(
+                    '⚠️ You must be logged into Codeforces first!\n\n' +
+                    'Steps:\n' +
+                    '1. Open Codeforces.com in a new tab\n' +
+                    '2. Log in with your account\n' +
+                    '3. Come back here and try again\n\n' +
+                    'We use your browser session (like vjudge).'
+                );
+                setIsSubmitting(false);
+                return;
+            }
+            
+            // Ask for confirmation before submitting
+            const confirmed = window.confirm(
+                '🚀 Ready to Submit?\n\n' +
+                'Your code will be submitted to Codeforces automatically.\n\n' +
+                `Problem: ${problem.name}\n` +
+                `Language: ${selectedLanguage}\n` +
+                `Lines of code: ${code.split('\n').length}\n\n` +
+                'Click OK to submit now!'
+            );
+            
+            if (!confirmed) {
+                setIsSubmitting(false);
+                setSubmitMessage('');
+                return;
+            }
+            
+            setSubmitMessage('📤 Submitting your code...');
+            
+            // Submit code automatically using browser session
+            try {
+                await submitCodeWithSession(
+                    problem.contestId,
+                    problem.index,
+                    code,
+                    selectedLanguage
+                );
+                
+                setSubmitMessage('✅ Code submitted! Waiting for verdict...');
+                
+            } catch (submitError) {
+                setSubmitMessage('❌ Submission failed!');
+                alert(
+                    '❌ Failed to submit code:\n\n' +
+                    submitError.message + '\n\n' +
+                    'Please make sure you are logged into Codeforces.'
+                );
+                setIsSubmitting(false);
+                return;
+            }
+            
+            // Wait a moment for Codeforces to process
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            setSubmitMessage('⏳ Checking verdict...');
+            
+            // Poll for verdict
+            try {
+                const submission = await pollForVerdict(
+                    currentUser,
+                    problem.contestId,
+                    problem.index,
+                    40, // 40 attempts
+                    3000 // 3 seconds interval
+                );
+                
+                const verdict = submission.verdict;
+                const accepted = isVerdictAccepted(verdict);
+                const verdictMsg = getVerdictMessage(verdict);
+                
+                setSubmitMessage(`Verdict: ${verdictMsg}`);
+                
+                if (accepted) {
+                    // Calculate time taken (in seconds)
+                    const timeTaken = Math.floor((Date.now() - startTime) / 1000);
 
-            // Update participant status - mark problem as solved
-            const { error } = await supabase
-                .from('onevone_participants')
-                .update({
-                    problem_solved: 1,
-                    time_taken: timeTaken
-                })
-                .eq('onevone_battle_id', battleId)
-                .eq('player_id', currentUserId);
+                    // Update participant status - mark problem as solved
+                    const { error } = await supabase
+                        .from('onevone_participants')
+                        .update({
+                            problem_solved: 1,
+                            time_taken: timeTaken
+                        })
+                        .eq('onevone_battle_id', battleId)
+                        .eq('player_id', currentUserId);
 
-            if (error) throw error;
+                    if (error) throw error;
 
-            // Update battle status to completed
-            await supabase
-                .from('onevonebattles')
-                .update({
-                    status: 'completed',
-                    end_time: new Date().toISOString()
-                })
-                .eq('onevone_battle_id', battleId);
+                    // Update battle status to completed
+                    await supabase
+                        .from('onevonebattles')
+                        .update({
+                            status: 'completed',
+                            end_time: new Date().toISOString()
+                        })
+                        .eq('onevone_battle_id', battleId);
 
-            // Update user's trophy count
-            const { data: currentUserData } = await supabase
-                .from('users')
-                .select('rating, xp')
-                .eq('id', currentUserId)
-                .single();
+                    // Update user's trophy count
+                    const { data: currentUserData } = await supabase
+                        .from('users')
+                        .select('rating, xp, problem_solved')
+                        .eq('id', currentUserId)
+                        .single();
 
-            await supabase
-                .from('users')
-                .update({
-                    rating: (currentUserData.rating || 0) + 115,
-                    xp: (currentUserData.xp || 0) + 5
-                })
-                .eq('id', currentUserId);
+                    await supabase
+                        .from('users')
+                        .update({
+                            rating: (currentUserData.rating || 0) + 115,
+                            xp: (currentUserData.xp || 0) + 5,
+                            problem_solved: (currentUserData.problem_solved || 0) + 1
+                        })
+                        .eq('id', currentUserId);
+                    
+                    alert(`🎉 Accepted! You won the battle!\n\nTime: ${submission.timeConsumedMillis}ms\nMemory: ${Math.round(submission.memoryConsumedBytes / 1024)}KB`);
+                    
+                    // Navigate to result page after short delay
+                    setTimeout(() => {
+                        navigate('/submit-page-real', {
+                            state: {
+                                battleId,
+                                won: true,
+                                opponent: opponent.cf_handle,
+                                trophyChange: '+115',
+                                verdict: verdictMsg
+                            }
+                        });
+                    }, 2000);
+                } else {
+                    alert(`❌ ${verdictMsg}\n\nYour solution was not accepted. Keep trying!`);
+                    setIsSubmitting(false);
+                }
+            } catch (verdictError) {
+                console.error('Error getting verdict:', verdictError);
+                setSubmitMessage('⚠️ Could not verify submission. Please check Codeforces.');
+                alert('Could not automatically verify your submission.\n\nPlease check your submission status on Codeforces and try again if needed.');
+                setIsSubmitting(false);
+            }
 
         } catch (err) {
             console.error('Error submitting solution:', err);
+            setSubmitMessage('❌ Submission failed');
             alert('Failed to submit. Please try again.');
+            setIsSubmitting(false);
         }
     };
 
@@ -373,6 +492,7 @@ const OneVOneCodingBattlePage = () => {
                                 className="language-selector"
                                 value={selectedLanguage}
                                 onChange={handleLanguageChange}
+                                disabled={isSubmitting}
                             >
                                 <option value="PYTHON">PYTHON</option>
                                 <option value="JAVASCRIPT">JAVASCRIPT</option>
@@ -380,33 +500,53 @@ const OneVOneCodingBattlePage = () => {
                                 <option value="C++">C++</option>
                             </select>
                             
-                            <button className="submit-btn" onClick={handleSubmit}>SUBMIT</button>
+                            <button 
+                                className="submit-btn" 
+                                onClick={handleSubmit}
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
+                            </button>
                             
                             <button 
                                 className="minimize-btn" 
                                 onClick={() => setIsEditorMinimized(true)}
                                 title="Minimize Editor"
+                                disabled={isSubmitting}
                             >
                                 ▼
                             </button>
                         </div>
                         
+                        {submitMessage && (
+                            <div className="submit-status-message">
+                                {submitMessage}
+                            </div>
+                        )}
+                        
                         <textarea 
                             className="code-editor"
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
-                            placeholder={`## WRITE YOUR ${selectedLanguage} CODE\n##FROM HERE`}
-                        ></textarea>
+                            placeholder="Write your code here..."
+                            disabled={isSubmitting}
+                        />
                         
                         <div className="editor-footer">
-                            <input 
-                                type="file" 
+                            <input
+                                type="file"
                                 ref={fileInputRef}
                                 onChange={handleFileUpload}
                                 accept=".py,.js,.java,.cpp,.c"
                                 style={{ display: 'none' }}
                             />
-                            <button className="upload-btn" onClick={handleUploadClick}>UPLOAD</button>
+                            <button 
+                                className="upload-btn" 
+                                onClick={handleUploadClick}
+                                disabled={isSubmitting}
+                            >
+                                UPLOAD
+                            </button>
                             <span className="language-display">LANGUAGE : {selectedLanguage}</span>
                         </div>
                     </div>
