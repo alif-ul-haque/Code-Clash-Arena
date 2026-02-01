@@ -480,3 +480,152 @@
 .expand-editor-btn:hover {
   transform: translateY(-50%) scale(1.1);
 }
+
+/* Custom Modal Styles */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-in;
+}
+
+.custom-modal {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border: 3px solid #F1CA76;
+  border-radius: 20px;
+  padding: 0;
+  min-width: 450px;
+  max-width: 600px;
+  box-shadow: 0 20px 60px rgba(241, 202, 118, 0.4);
+  animation: slideUp 0.3s ease-out;
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #F1CA76 0%, #D4A853 100%);
+  padding: 25px 30px;
+  border-radius: 17px 17px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.modal-emoji {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.modal-title {
+  font-family: 'Protest Strike', Arial, sans-serif;
+  font-size: 28px;
+  color: #000;
+  margin: 0;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 30px;
+  color: #fff;
+}
+
+.modal-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 0 0 20px 0;
+  color: #F1CA76;
+}
+
+.modal-text-small {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  margin: 20px 0 0 0;
+  color: #aaa;
+}
+
+.modal-info {
+  background: rgba(241, 202, 118, 0.1);
+  border: 2px solid #F1CA76;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.modal-info p {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 13px;
+  margin: 10px 0;
+  color: #fff;
+  line-height: 1.6;
+}
+
+.modal-info strong {
+  color: #F1CA76;
+}
+
+.modal-footer {
+  padding: 0 30px 30px 30px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.modal-btn {
+  font-family: 'Protest Strike', Arial, sans-serif;
+  font-size: 18px;
+  padding: 12px 35px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.modal-btn-cancel {
+  background-color: #555;
+  color: #fff;
+}
+
+.modal-btn-cancel:hover {
+  background-color: #666;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+}
+
+.modal-btn-submit {
+  background: linear-gradient(135deg, #F1CA76 0%, #D4A853 100%);
+  color: #000;
+}
+
+.modal-btn-submit:hover {
+  background: linear-gradient(135deg, #D4A853 0%, #F1CA76 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(241, 202, 118, 0.5);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

@@ -41,6 +41,11 @@ const OneVOneCodingBattlePage = () => {
     const [isEditorMinimized, setIsEditorMinimized] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitMessage, setSubmitMessage] = useState('');
+    
+    // Custom modal states
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showResultModal, setShowResultModal] = useState(false);
+    const [resultModalData, setResultModalData] = useState({ title: '', message: '', emoji: '' });
 
     // Fetch problem from Codeforces
     useEffect(() => {
@@ -241,33 +246,36 @@ const OneVOneCodingBattlePage = () => {
             
             if (!isLoggedIn) {
                 setSubmitMessage('❌ Not logged into Codeforces!');
-                alert(
-                    '⚠️ You must be logged into Codeforces first!\n\n' +
-                    'Steps:\n' +
-                    '1. Open Codeforces.com in a new tab\n' +
-                    '2. Log in with your account\n' +
-                    '3. Come back here and try again\n\n' +
-                    'We use your browser session (like vjudge).'
-                );
+                setResultModalData({
+                    emoji: '⚠️',
+                    title: 'Codeforces Login Required',
+                    message: 'You must be logged into Codeforces first!\n\nSteps:\n1. Open Codeforces.com in a new tab\n2. Log in with your account\n3. Come back here and try again\n\nWe use your browser session (like vjudge).'
+                });
+                setShowResultModal(true);
                 setIsSubmitting(false);
                 return;
             }
             
             // Ask for confirmation before submitting
-            const confirmed = window.confirm(
-                '🚀 Ready to Submit?\n\n' +
-                'Your code will be submitted to Codeforces automatically.\n\n' +
-                `Problem: ${problem.name}\n` +
-                `Language: ${selectedLanguage}\n` +
-                `Lines of code: ${code.split('\n').length}\n\n` +
-                'Click OK to submit now!'
-            );
-            
-            if (!confirmed) {
-                setIsSubmitting(false);
-                setSubmitMessage('');
-                return;
-            }
+            setShowConfirmModal(true);
+            return; // Wait for modal response
+        } catch (err) {
+            console.error('Error submitting solution:', err);
+            setSubmitMessage('❌ Submission failed');
+            setResultModalData({
+                emoji: '❌',
+                title: 'Submission Failed',
+                message: 'Failed to submit. Please try again.'
+            });
+            setShowResultModal(true);
+            setIsSubmitting(false);
+        }
+    };
+    
+    // Handle actual submission after confirmation
+    const proceedWithSubmission = async () => {
+        try {
+            setShowConfirmModal(false);
             
             setSubmitMessage('📤 Submitting your code...');
             
@@ -284,11 +292,12 @@ const OneVOneCodingBattlePage = () => {
                 
             } catch (submitError) {
                 setSubmitMessage('❌ Submission failed!');
-                alert(
-                    '❌ Failed to submit code:\n\n' +
-                    submitError.message + '\n\n' +
-                    'Please make sure you are logged into Codeforces.'
-                );
+                setResultModalData({
+                    emoji: '❌',
+                    title: 'Submission Failed',
+                    message: 'Failed to submit code:\n\n' + submitError.message + '\n\nPlease make sure you are logged into Codeforces.'
+                });
+                setShowResultModal(true);
                 setIsSubmitting(false);
                 return;
             }
@@ -355,7 +364,12 @@ const OneVOneCodingBattlePage = () => {
                         })
                         .eq('id', currentUserId);
                     
-                    alert(`🎉 Accepted! You won the battle!\n\nTime: ${submission.timeConsumedMillis}ms\nMemory: ${Math.round(submission.memoryConsumedBytes / 1024)}KB`);
+                    setResultModalData({
+                        emoji: '🎉',
+                        title: 'Accepted! You Won!',
+                        message: `Congratulations! You won the battle!\n\nTime: ${submission.timeConsumedMillis}ms\nMemory: ${Math.round(submission.memoryConsumedBytes / 1024)}KB`
+                    });
+                    setShowResultModal(true);
                     
                     // Navigate to result page after short delay
                     setTimeout(() => {
@@ -370,20 +384,35 @@ const OneVOneCodingBattlePage = () => {
                         });
                     }, 2000);
                 } else {
-                    alert(`❌ ${verdictMsg}\n\nYour solution was not accepted. Keep trying!`);
+                    setResultModalData({
+                        emoji: '❌',
+                        title: verdictMsg,
+                        message: 'Your solution was not accepted. Keep trying!'
+                    });
+                    setShowResultModal(true);
                     setIsSubmitting(false);
                 }
             } catch (verdictError) {
                 console.error('Error getting verdict:', verdictError);
                 setSubmitMessage('⚠️ Could not verify submission. Please check Codeforces.');
-                alert('Could not automatically verify your submission.\n\nPlease check your submission status on Codeforces and try again if needed.');
+                setResultModalData({
+                    emoji: '⚠️',
+                    title: 'Verification Failed',
+                    message: 'Could not automatically verify your submission.\n\nPlease check your submission status on Codeforces and try again if needed.'
+                });
+                setShowResultModal(true);
                 setIsSubmitting(false);
             }
 
         } catch (err) {
             console.error('Error submitting solution:', err);
             setSubmitMessage('❌ Submission failed');
-            alert('Failed to submit. Please try again.');
+            setResultModalData({
+                emoji: '❌',
+                title: 'Submission Failed',
+                message: 'Failed to submit. Please try again.'
+            });
+            setShowResultModal(true);
             setIsSubmitting(false);
         }
     };
@@ -560,6 +589,68 @@ const OneVOneCodingBattlePage = () => {
                     </button>
                 )}
             </div>
+            
+            {/* Custom Confirmation Modal */}
+            {showConfirmModal && (
+                <div className="custom-modal-overlay">
+                    <div className="custom-modal">
+                        <div className="modal-header">
+                            <span className="modal-emoji">🚀</span>
+                            <h2 className="modal-title">Ready to Submit?</h2>
+                        </div>
+                        <div className="modal-body">
+                            <p className="modal-text">Your code will be submitted to Codeforces automatically.</p>
+                            <div className="modal-info">
+                                <p><strong>Problem:</strong> {problem?.name}</p>
+                                <p><strong>Language:</strong> {selectedLanguage}</p>
+                                <p><strong>Lines of code:</strong> {code.split('\n').length}</p>
+                            </div>
+                            <p className="modal-text-small">Click SUBMIT to proceed!</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button 
+                                className="modal-btn modal-btn-cancel"
+                                onClick={() => {
+                                    setShowConfirmModal(false);
+                                    setIsSubmitting(false);
+                                    setSubmitMessage('');
+                                }}
+                            >
+                                CANCEL
+                            </button>
+                            <button 
+                                className="modal-btn modal-btn-submit"
+                                onClick={proceedWithSubmission}
+                            >
+                                SUBMIT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Custom Result Modal */}
+            {showResultModal && (
+                <div className="custom-modal-overlay">
+                    <div className="custom-modal">
+                        <div className="modal-header">
+                            <span className="modal-emoji">{resultModalData.emoji}</span>
+                            <h2 className="modal-title">{resultModalData.title}</h2>
+                        </div>
+                        <div className="modal-body">
+                            <p className="modal-text" style={{ whiteSpace: 'pre-line' }}>{resultModalData.message}</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button 
+                                className="modal-btn modal-btn-submit"
+                                onClick={() => setShowResultModal(false)}
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
