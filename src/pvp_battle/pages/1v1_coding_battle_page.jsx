@@ -46,6 +46,8 @@ const OneVOneCodingBattlePage = () => {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showResultModal, setShowResultModal] = useState(false);
     const [resultModalData, setResultModalData] = useState({ title: '', message: '', emoji: '' });
+    const [popupWindow, setPopupWindow] = useState(null);
+    const [submissionTimestamp, setSubmissionTimestamp] = useState(null);
 
     // Fetch problem from Codeforces
     useEffect(() => {
@@ -277,46 +279,148 @@ const OneVOneCodingBattlePage = () => {
         try {
             setShowConfirmModal(false);
             
-            setSubmitMessage('📤 Submitting your code...');
+            // Capture the current timestamp (in seconds) before submission
+            const timestamp = Math.floor(Date.now() / 1000);
+            setSubmissionTimestamp(timestamp);
+            console.log(`Submission timestamp: ${timestamp} (${new Date(timestamp * 1000).toISOString()})`);
             
-            // Submit code automatically using browser session
+            setSubmitMessage('📤 Opening Codeforces...');
+            
+            // Submit code (opens Codeforces with pre-filled form)
             try {
-                await submitCodeWithSession(
+                const result = await submitCodeWithSession(
                     problem.contestId,
                     problem.index,
                     code,
                     selectedLanguage
                 );
                 
-                setSubmitMessage('✅ Code submitted! Waiting for verdict...');
+                // Store popup reference for monitoring
+                setPopupWindow(result.popupWindow);
+                
+                // Show simplified instructions to user
+                setResultModalData({
+                    emoji: '�',
+                    title: 'Code Copied to Clipboard!',
+                    message: `Codeforces popup opened!\n\n✅ Your code is copied to clipboard\n✅ Problem: ${problem.contestId}${problem.index}\n✅ Language: ${selectedLanguage}\n\n📌 Steps:\n1. Select language in popup\n2. Paste your code (Ctrl+V)\n3. Click Submit\n\nThe popup will auto-close 3s after submission!`
+                });
+                setShowResultModal(true);
+                setSubmitMessage('⏳ Waiting for you to paste and submit...');
+                
+                // Start monitoring the popup for submission
+                startPopupMonitoring(result.popupWindow, timestamp);
                 
             } catch (submitError) {
                 setSubmitMessage('❌ Submission failed!');
                 setResultModalData({
                     emoji: '❌',
                     title: 'Submission Failed',
-                    message: 'Failed to submit code:\n\n' + submitError.message + '\n\nPlease make sure you are logged into Codeforces.'
+                    message: 'Failed to open Codeforces:\n\n' + submitError.message
                 });
                 setShowResultModal(true);
                 setIsSubmitting(false);
                 return;
             }
-            
-            // Wait a moment for Codeforces to process
-            await new Promise(resolve => setTimeout(resolve, 3000));
+
+        } catch (err) {
+            console.error('Error submitting solution:', err);
+            setSubmitMessage('❌ Submission failed');
+            setResultModalData({
+                emoji: '❌',
+                title: 'Submission Failed',
+                message: 'Failed to submit. Please try again.'
+            });
+            setShowResultModal(true);
+            setIsSubmitting(false);
+        }
+    };
+    
+    // Monitor popup for submission and auto-close
+    const startPopupMonitoring = (popup, timestamp) => {
+        if (!popup) return;
+        
+        let checkCount = 0;
+        const maxChecks = 120; // Monitor for up to 2 minutes (120 * 1 second)
+        
+        const initialPath = "/submit"; // Submit page keyword
+        
+        const monitorInterval = setInterval(() => {
+            try {
+                checkCount++;
+                
+                // Check if popup is manually closed
+                if (popup.closed) {
+                    console.log('Popup was closed manually');
+                    clearInterval(monitorInterval);
+                    setShowResultModal(false);
+                    setSubmitMessage('✅ Checking verdict...');
+                    handleCheckVerdict(timestamp);
+                    return;
+                }
+                
+                // Try reading URL to detect submission
+                const currentUrl = popup.location.href;
+                
+                // If user clicked Submit → Codeforces redirects away from submit page
+                if (!currentUrl.includes(initialPath)) {
+                    console.log('Submit detected! URL changed to:', currentUrl);
+                    console.log('Closing popup in 3 seconds...');
+                    
+                    clearInterval(monitorInterval);
+                    
+                    setSubmitMessage('✅ Submitted! Closing popup in 3s...');
+                    
+                    setTimeout(() => {
+                        if (!popup.closed) popup.close();
+                        setPopupWindow(null);
+                        
+                        setShowResultModal(false);
+                        setSubmitMessage('✅ Checking verdict...');
+                        handleCheckVerdict(timestamp);
+                    }, 3000); // 3 seconds delay after Submit
+                    
+                    return;
+                }
+                
+                // Safety timeout after max checks
+                if (checkCount > maxChecks) {
+                    console.log('Popup monitoring timeout - closing popup');
+                    clearInterval(monitorInterval);
+                    if (!popup.closed) popup.close();
+                    setShowResultModal(false);
+                    handleCheckVerdict(timestamp);
+                }
+                
+            } catch (err) {
+                // Cross-origin reading fails due to CORS - this is expected
+                // Just wait and try again on next interval
+                console.log('Waiting for submission... (CORS blocked URL check)');
+            }
+        }, 1000); // Check every second
+    };
+    
+    // Handle verdict check after manual submission
+    const handleCheckVerdict = async (timestamp = null) => {
+        try {
+            setShowResultModal(false);
+            // Use provided timestamp or calculate from 30 seconds ago
+            const submissionTimestamp = timestamp || (Math.floor(Date.now() / 1000) - 30);
             
             setSubmitMessage('⏳ Checking verdict...');
             
-            // Poll for verdict
+            // Poll for verdict - only check submissions created after submissionTimestamp
             try {
+                console.log('Starting verdict polling...');
                 const submission = await pollForVerdict(
                     currentUser,
                     problem.contestId,
                     problem.index,
                     40, // 40 attempts
-                    3000 // 3 seconds interval
+                    3000, // 3 seconds interval
+                    submissionTimestamp // Only check submissions after this timestamp
                 );
                 
+                console.log('Verdict received:', submission);
                 const verdict = submission.verdict;
                 const accepted = isVerdictAccepted(verdict);
                 const verdictMsg = getVerdictMessage(verdict);
@@ -643,7 +747,19 @@ const OneVOneCodingBattlePage = () => {
                         <div className="modal-footer">
                             <button 
                                 className="modal-btn modal-btn-submit"
-                                onClick={() => setShowResultModal(false)}
+                                onClick={() => {
+                                    // If this is the popup modal and user manually closes it
+                                    if (resultModalData.title === 'Code Copied to Clipboard!') {
+                                        // Close popup if still open
+                                        if (popupWindow && !popupWindow.closed) {
+                                            popupWindow.close();
+                                        }
+                                        setShowResultModal(false);
+                                        // Let the monitoring handle verdict check
+                                    } else {
+                                        setShowResultModal(false);
+                                    }
+                                }}
                             >
                                 OK
                             </button>

@@ -4,7 +4,7 @@
  */
 
 /**
- * Submit code to Codeforces using browser session cookies (like vjudge)
+ * Submit code to Codeforces by copying to clipboard and opening submit page
  * @param {number} contestId - Contest ID
  * @param {string} problemIndex - Problem index (A, B, C, etc.)
  * @param {string} sourceCode - Code to submit
@@ -12,7 +12,7 @@
  * @returns {Promise<{success: boolean, message: string}>}
  */
 export const submitCodeWithSession = async (contestId, problemIndex, sourceCode, language) => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
             // Language mapping to Codeforces program type IDs
             const languageMap = {
@@ -25,80 +25,49 @@ export const submitCodeWithSession = async (contestId, problemIndex, sourceCode,
                 'JS': '55'
             };
 
-            const programTypeId = languageMap[language.toUpperCase()] || '31';
-
-            // Create hidden iframe for submission
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.name = 'cf-submit-frame';
-            document.body.appendChild(iframe);
-
-            // Create form to submit to Codeforces
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `https://codeforces.com/problemset/submit?csrf_token=${Date.now()}`;
-            form.target = 'cf-submit-frame';
-            form.style.display = 'none';
-
-            // Add form fields
-            const fields = {
-                'action': 'submitSolutionFormSubmitted',
-                'submittedProblemIndex': problemIndex,
-                'contestId': contestId.toString(),
-                'programTypeId': programTypeId,
-                'source': sourceCode,
-                'tabSize': '4',
-                'sourceFile': ''
+            const languageNames = {
+                'PYTHON': 'Python 3',
+                'C++': 'GNU G++17',
+                'JAVA': 'Java 11',
+                'JAVASCRIPT': 'Node.js'
             };
 
-            Object.keys(fields).forEach(key => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = fields[key];
-                form.appendChild(input);
+            const programTypeId = languageMap[language.toUpperCase()];
+            const langDisplay = languageNames[language.toUpperCase()] || language;
+            
+            if (!programTypeId) {
+                reject(new Error(`Unsupported language: ${language}`));
+                return;
+            }
+            
+            // Copy code to clipboard for easy pasting
+            try {
+                await navigator.clipboard.writeText(sourceCode);
+                console.log('✓ Code copied to clipboard');
+            } catch (clipboardErr) {
+                console.warn('Could not copy to clipboard:', clipboardErr);
+            }
+            
+            // Open Codeforces submission page directly
+            const submitUrl = `https://codeforces.com/problemset/submit/${contestId}/${problemIndex}`;
+            const submitWindow = window.open(submitUrl, 'cf_submit', 'width=1200,height=900,scrollbars=yes');
+            
+            if (!submitWindow) {
+                reject(new Error('Popup blocked! Please allow popups for this site.'));
+                return;
+            }
+
+            console.log('Opened Codeforces submission page');
+            
+            // Show notification and return popup reference
+            resolve({
+                success: true,
+                message: `Opening Codeforces submit page...\n\n✓ Code copied to clipboard!\n✓ Language: ${langDisplay}\n\nJust paste (Ctrl+V) and submit!`,
+                popupWindow: submitWindow
             });
 
-            document.body.appendChild(form);
-
-            // Listen for iframe load (submission complete)
-            let submitted = false;
-            iframe.onload = () => {
-                if (!submitted) {
-                    submitted = true;
-                    // Clean up
-                    setTimeout(() => {
-                        document.body.removeChild(iframe);
-                        document.body.removeChild(form);
-                    }, 1000);
-                    
-                    resolve({
-                        success: true,
-                        message: 'Code submitted successfully!'
-                    });
-                }
-            };
-
-            // Handle errors
-            iframe.onerror = () => {
-                document.body.removeChild(iframe);
-                document.body.removeChild(form);
-                reject(new Error('Submission failed. Please check your Codeforces login.'));
-            };
-
-            // Submit form automatically
-            form.submit();
-
-            // Timeout after 10 seconds
-            setTimeout(() => {
-                if (!submitted) {
-                    document.body.removeChild(iframe);
-                    document.body.removeChild(form);
-                    reject(new Error('Submission timeout. Please try again.'));
-                }
-            }, 10000);
-
         } catch (error) {
+            console.error('Submission error:', error);
             reject(error);
         }
     });
@@ -165,12 +134,13 @@ const languageMapping = {
  * @param {string} cfHandle - Codeforces handle
  * @param {number} contestId - Contest ID
  * @param {string} problemIndex - Problem index
+ * @param {number} afterTimestamp - Only return submissions created after this timestamp (seconds)
  * @returns {Promise<Object|null>} Latest submission or null
  */
-export const getLatestSubmission = async (cfHandle, contestId, problemIndex) => {
+export const getLatestSubmission = async (cfHandle, contestId, problemIndex, afterTimestamp = 0) => {
   try {
     const response = await fetch(
-      `https://codeforces.com/api/user.status?handle=${cfHandle}&from=1&count=10`
+      `https://codeforces.com/api/user.status?handle=${cfHandle}&from=1&count=30`
     );
     const data = await response.json();
     
@@ -178,12 +148,26 @@ export const getLatestSubmission = async (cfHandle, contestId, problemIndex) => 
       throw new Error('Failed to fetch submissions');
     }
     
-    // Find submission for this problem
-    const submission = data.result.find(
-      s => s.problem.contestId === contestId && s.problem.index === problemIndex
+    console.log(`Checking submissions after timestamp: ${afterTimestamp} (${new Date(afterTimestamp * 1000).toISOString()})`);
+    
+    // Filter all submissions for this problem created after the timestamp
+    const matchingSubmissions = data.result.filter(
+      s => s.problem.contestId === contestId && 
+           s.problem.index === problemIndex &&
+           s.creationTimeSeconds > afterTimestamp
     );
     
-    return submission || null;
+    if (matchingSubmissions.length > 0) {
+      console.log(`Found ${matchingSubmissions.length} matching submissions`);
+      // Sort by creation time (newest first) and return the most recent
+      matchingSubmissions.sort((a, b) => b.creationTimeSeconds - a.creationTimeSeconds);
+      const latest = matchingSubmissions[0];
+      console.log(`Latest submission: ID ${latest.id}, created at ${new Date(latest.creationTimeSeconds * 1000).toISOString()}, verdict: ${latest.verdict || 'PENDING'}`);
+      return latest;
+    }
+    
+    console.log('No matching submissions found yet');
+    return null;
   } catch (error) {
     console.error('Error fetching latest submission:', error);
     return null;
@@ -197,6 +181,7 @@ export const getLatestSubmission = async (cfHandle, contestId, problemIndex) => 
  * @param {string} problemIndex - Problem index
  * @param {number} maxAttempts - Maximum polling attempts
  * @param {number} interval - Polling interval in ms
+ * @param {number} afterTimestamp - Only check submissions created after this timestamp (seconds)
  * @returns {Promise<Object>} Submission with verdict
  */
 export const pollForVerdict = async (
@@ -204,7 +189,8 @@ export const pollForVerdict = async (
   contestId, 
   problemIndex, 
   maxAttempts = 30, 
-  interval = 3000
+  interval = 3000,
+  afterTimestamp = 0
 ) => {
   let attempts = 0;
   
@@ -213,7 +199,7 @@ export const pollForVerdict = async (
       attempts++;
       
       try {
-        const submission = await getLatestSubmission(cfHandle, contestId, problemIndex);
+        const submission = await getLatestSubmission(cfHandle, contestId, problemIndex, afterTimestamp);
         
         if (!submission) {
           if (attempts >= maxAttempts) {
