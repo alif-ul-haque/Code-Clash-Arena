@@ -9,6 +9,7 @@ import { loadMailBox } from '../utilities/LoadMailBox.js';
 import { acceptRequest, rejectRequest } from '../utilities/ClanAdd.js';
 import AlertPage from '../../assets/components/AlertPage.jsx';
 import { supabase } from '../../supabaseclient.js';
+import { viewNonFriends } from '../utilities/Friend_request.js';
 
 export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     const [activeTab, setActiveTab] = useState('friend');
@@ -55,8 +56,18 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
             }
         };
 
+        const fetchNonFriends = async () => {
+            const { data, error } = await viewNonFriends();
+            if (error) {
+                console.error("Error fetching non-friends:", error.message);
+                return;
+            }
+            console.log("Non-friends data:", data);
+        }
+
         if (isOpen) {
             fetchMails();
+            fetchNonFriends();
         }
     }, [isOpen]);
 
