@@ -23,7 +23,25 @@ export default function BattleArena() {
     useEffect(() => {
         async function initiateBattle() {
             try {
-                const { hasOngoingBattle, battleId: activeBattleId } = await hasOngoingClanBattle();
+                // Retry logic: Try multiple times to find the battle (for synchronization)
+                let attempts = 0;
+                const maxAttempts = 10;
+                let hasOngoingBattle = false;
+                let activeBattleId = null;
+                
+                while (attempts < maxAttempts && !hasOngoingBattle) {
+                    const result = await hasOngoingClanBattle();
+                    hasOngoingBattle = result.hasOngoingBattle;
+                    activeBattleId = result.battleId;
+                    
+                    if (!hasOngoingBattle && attempts < maxAttempts - 1) {
+                        // Wait 1 second before retrying
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        attempts++;
+                    } else {
+                        break;
+                    }
+                }
                 
                 if (hasOngoingBattle && activeBattleId) {
                     setBattleId(activeBattleId);
@@ -104,15 +122,17 @@ export default function BattleArena() {
                         console.error('Failed to start battle:', error);
                     }
                 } else {
-                    console.warn('No ongoing battle found');
+                    console.warn('No ongoing battle found, redirecting...');
+                    navigate('/your-clan');
                 }
             } catch (error) {
                 console.error('Error initiating battle:', error);
+                navigate('/your-clan');
             }
         }
         
         initiateBattle();
-    }, []);
+    }, [navigate]);
 
     // Countdown timer
     useEffect(() => {
@@ -214,11 +234,6 @@ export default function BattleArena() {
             solvingBy: []
         }
     ];
-
-    const teamScore = {
-        yourClan: 50,
-        enemyClan: 0
-    };
 
     const handleProblemClick = (problemId) => {
         navigate(`/your-clan/problem/${problemId}`);

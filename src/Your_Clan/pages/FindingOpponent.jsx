@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/FindingOpponent.css';
 import { findMatch, leaveBattleQueue, subscribeToMatchmaking } from '../utilities/ClanBattleMatchmaking';
@@ -10,6 +10,119 @@ export default function FindingOpponent() {
     const navigate = useNavigate();
     const [dots, setDots] = useState('');
     const [isCreatingBattle, setIsCreatingBattle] = useState(false);
+    const [waitingMessage, setWaitingMessage] = useState('');
+    const isProcessingBattle = useRef(false);
+
+    // Define handleMatchFound before useEffect to avoid hoisting issues
+    const handleMatchFound = useCallback(async (opponentClanId) => {
+        try {
+            // Mark that we're processing the battle to prevent cleanup
+            isProcessingBattle.current = true;
+            
+            // Get current user and queue data
+            const { data: user } = await getUserData();
+            
+            // Get both clans' queue data to get selected members
+            const { data: myQueue } = await supabase
+                .from('clan_battle_queue')
+                .select('selected_members')
+                .eq('clan_id', user.clan_id)
+                .single();
+
+            const { data: opponentQueue } = await supabase
+                .from('clan_battle_queue')
+                .select('selected_members')
+                .eq('clan_id', opponentClanId)
+                .single();
+
+            if (!myQueue || !opponentQueue) {
+                console.error('Queue data not found');
+                isProcessingBattle.current = false;
+                navigate('/your-clan');
+                return;
+            }
+
+            // Determine which clan should create the battle (use string comparison to ensure only one creates)
+            const shouldCreate = user.clan_id < opponentClanId;
+            
+            let battleId = null;
+            
+            if (shouldCreate) {
+                console.log('This clan will create the battle');
+                setWaitingMessage('Creating battle...');
+                // Create the battle
+                const { success, battleId: createdBattleId, error } = await createClanBattle(
+                    user.clan_id,
+                    opponentClanId,
+                    myQueue.selected_members,
+                    opponentQueue.selected_members
+                );
+
+                if (success && createdBattleId) {
+                    battleId = createdBattleId;
+                } else {
+                    console.error('Failed to create battle:', error);
+                    alert('Failed to create battle. Please try again.');
+                    navigate('/your-clan');
+                    return;
+                }
+            } else {
+                console.log('Waiting for opponent clan to create the battle...');
+                setWaitingMessage('Waiting for opponent to prepare battlefield...');
+                
+                // Wait for the battle to be created by the opponent
+                let attempts = 0;
+                const maxAttempts = 15; // Wait up to 15 seconds
+                
+                while (attempts < maxAttempts && !battleId) {
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                    
+                    // Update waiting message every 3 seconds
+                    if (attempts % 3 === 0) {
+                        setWaitingMessage(`Synchronizing with opponent... (${attempts}s)`);
+                    }
+                    
+                    // Check if battle exists
+                    const { data: existingBattle } = await supabase
+                        .from('clan_battles')
+                        .select('battle_id')
+                        .or(`and(clan1_id.eq.${user.clan_id},clan2_id.eq.${opponentClanId}),and(clan1_id.eq.${opponentClanId},clan2_id.eq.${user.clan_id})`)
+                        .in('status', ['preparing', 'in_progress'])
+                        .single();
+                    
+                    if (existingBattle) {
+                        battleId = existingBattle.battle_id;
+                        console.log('Battle found:', battleId);
+                        setWaitingMessage('Battle ready!');
+                        break;
+                    }
+                    
+                    attempts++;
+                }
+                
+                if (!battleId) {
+                    console.error('Battle was not created in time');
+                    isProcessingBattle.current = false;
+                    alert('Failed to join battle. Please try again.');
+                    navigate('/your-clan');
+                    return;
+                }
+            }
+
+            if (battleId) {
+                // Navigate to revealing warriors with battle data
+                navigate('/your-clan/revealing-warriors', { 
+                    state: { 
+                        battleId,
+                        opponentClanId 
+                    } 
+                });
+            }
+        } catch (error) {
+            console.error('Error in handleMatchFound:', error);
+            navigate('/your-clan');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         // Animated dots
@@ -57,61 +170,15 @@ export default function FindingOpponent() {
             clearInterval(dotsInterval);
             clearInterval(pollInterval);
             supabase.removeChannel(channel);
-            // Leave queue if user navigates away
-            leaveBattleQueue();
-        };
-    }, [navigate, isCreatingBattle]);
-
-    async function handleMatchFound(opponentClanId) {
-        try {
-            // Get current user and queue data
-            const { data: user } = await getUserData();
-            
-            // Get both clans' queue data to get selected members
-            const { data: myQueue } = await supabase
-                .from('clan_battle_queue')
-                .select('selected_members')
-                .eq('clan_id', user.clan_id)
-                .single();
-
-            const { data: opponentQueue } = await supabase
-                .from('clan_battle_queue')
-                .select('selected_members')
-                .eq('clan_id', opponentClanId)
-                .single();
-
-            if (!myQueue || !opponentQueue) {
-                console.error('Queue data not found');
-                navigate('/your-clan');
-                return;
-            }
-
-            // Create the battle
-            const { success, battleId, error } = await createClanBattle(
-                user.clan_id,
-                opponentClanId,
-                myQueue.selected_members,
-                opponentQueue.selected_members
-            );
-
-            if (success && battleId) {
-                // Navigate to revealing warriors with battle data
-                navigate('/your-clan/revealing-warriors', { 
-                    state: { 
-                        battleId,
-                        opponentClanId 
-                    } 
-                });
+            // Only leave queue if we're not in the middle of processing a battle
+            if (!isProcessingBattle.current) {
+                console.log('Leaving queue (cleanup)');
+                leaveBattleQueue();
             } else {
-                console.error('Failed to create battle:', error);
-                alert('Failed to create battle. Please try again.');
-                navigate('/your-clan');
+                console.log('Skipping queue cleanup - battle is being processed');
             }
-        } catch (error) {
-            console.error('Error in handleMatchFound:', error);
-            navigate('/your-clan');
-        }
-    }
+        };
+    }, [navigate, isCreatingBattle, handleMatchFound]);
 
     return (
         <div className="finding-opponent-page">
@@ -126,7 +193,7 @@ export default function FindingOpponent() {
                     {isCreatingBattle ? 'Match Found! Creating Battle' : `Finding Your Opponent${dots}`}
                 </h1>
                 <p className="finding-subtitle">
-                    {isCreatingBattle ? 'Preparing the battlefield...' : 'Searching for worthy adversaries'}
+                    {isCreatingBattle ? (waitingMessage || 'Preparing the battlefield...') : 'Searching for worthy adversaries'}
                 </p>
 
                 <div className="scan-lines">

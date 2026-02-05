@@ -15,8 +15,12 @@ export default function RevealingWarriors() {
         async function fetchClans() {
             const { data: user } = await getUserData();
             const myClanId = user.clan_id;
-            const opponentClanId = location.state?.opponentClan;
-            if (!myClanId || !opponentClanId) return;
+            const opponentClanId = location.state?.opponentClanId;
+            if (!myClanId || !opponentClanId) {
+                console.error('Missing clan IDs:', { myClanId, opponentClanId });
+                navigate('/your-clan');
+                return;
+            }
 
             // Fetch my clan data and members
             const { data: myClanData } = await getClanData(myClanId);
@@ -45,7 +49,7 @@ export default function RevealingWarriors() {
             });
         }
         fetchClans();
-    }, [location.state]);
+    }, [location.state, navigate]);
 
     useEffect(() => {
         // Reveal animation after 1 second
@@ -53,16 +57,22 @@ export default function RevealingWarriors() {
             setRevealed(true);
         }, 1000);
 
-        // Navigate to battle arena after 4 seconds
+        // Navigate to battle arena after 4 seconds with battle data
         const navigationTimer = setTimeout(() => {
-            navigate('/your-clan/battle-arena');
+            const battleId = location.state?.battleId;
+            navigate('/your-clan/battle-arena', {
+                state: {
+                    battleId,
+                    fromRevealing: true
+                }
+            });
         }, 4500);
 
         return () => {
             clearTimeout(revealTimer);
             clearTimeout(navigationTimer);
         };
-    }, [navigate]);
+    }, [navigate, location.state?.battleId]);
 
     return (
         <div className="revealing-warriors-page">
