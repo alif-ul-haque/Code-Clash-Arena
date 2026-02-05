@@ -11,8 +11,8 @@ export default function PlayerCard({
     return (
         <div className="player-card-friend">
             <div className="player-info-friend">
-                <h3 className="player-name-friend">{player.name}</h3>
-                <p className="player-clan">{player.clanName}</p>
+                <h3 className="player-name-friend">{player.cf_handle}</h3>
+                <p className="player-clan">{player.clan_name ? player.clan_name : "Not in a clan"}</p>
             </div>
             <div className="player-rating">
                 <span className="rating-value">{player.rating}</span>

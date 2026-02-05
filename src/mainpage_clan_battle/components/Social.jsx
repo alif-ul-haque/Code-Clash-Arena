@@ -19,14 +19,14 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [alertType, setAlertType] = useState('success');
+    const [players, setPlayers] = useState([
+        {
+            name: "",
+            clanName: "",
+            rating: 0
+        }
+    ]);
 
-    const dummyPlayers = [
-        { id: 1, name: "Alice_99", clanName: "Code Warriors", rating: 1800 },
-        { id: 2, name: "Bob_Smith", clanName: "Bug Hunters", rating: 1650 },
-        { id: 3, name: "Charlie_Dev", clanName: "Syntax Squad", rating: 1500 },
-        { id: 4, name: "Diana_Code", clanName: "Debug Masters", rating: 1900 },
-        { id: 5, name: "Eve_Hacker", clanName: "Code Ninjas", rating: 1400 },
-    ];
 
     const toggleFriendRequest = (playerId) => {
         setFriendRequests(prev => {
@@ -63,6 +63,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                 return;
             }
             console.log("Non-friends data:", data);
+            setPlayers(data || []);
         }
 
         if (isOpen) {
@@ -235,12 +236,12 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                                 </div>
 
                                 <div className="players-list">
-                                    {dummyPlayers.map((player) => (
+                                    {players.map((player, index) => (
                                         <PlayerCard
-                                            key={player.id}
+                                            key={index}
                                             player={player}
-                                            hasFriendRequest={friendRequests.has(player.id)}
-                                            onToggleFriendRequest={() => toggleFriendRequest(player.id)}
+                                            hasFriendRequest={friendRequests.has(index)}
+                                            onToggleFriendRequest={() => toggleFriendRequest(index)}
                                         />
                                     ))}
                                 </div>
