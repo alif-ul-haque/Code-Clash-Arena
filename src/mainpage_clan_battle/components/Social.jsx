@@ -9,7 +9,7 @@ import { loadMailBox } from '../utilities/LoadMailBox.js';
 import { acceptRequest, rejectRequest } from '../utilities/ClanAdd.js';
 import AlertPage from '../../assets/components/AlertPage.jsx';
 import { supabase } from '../../supabaseclient.js';
-import { viewNonFriends } from '../utilities/Friend_request.js';
+import { viewNonFriends , hasFriendRequest} from '../utilities/Friend_request.js';
 
 export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     const [activeTab, setActiveTab] = useState('friend');
@@ -19,13 +19,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [alertType, setAlertType] = useState('success');
-    const [players, setPlayers] = useState([
-        {
-            name: "",
-            clanName: "",
-            rating: 0
-        }
-    ]);
+    const [players, setPlayers] = useState([]);
 
 
     const toggleFriendRequest = (playerId) => {
@@ -64,6 +58,15 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
             }
             console.log("Non-friends data:", data);
             setPlayers(data || []);
+
+            const requestsSet = new Set();
+            for (const player of data || []) {
+                const { result } = await hasFriendRequest(player.id);
+                if (result) {
+                    requestsSet.add(player.id);
+                }
+            }
+            setFriendRequests(requestsSet);
         }
 
         if (isOpen) {
@@ -236,12 +239,12 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                                 </div>
 
                                 <div className="players-list">
-                                    {players.map((player, index) => (
+                                    {players.map((player) => (
                                         <PlayerCard
-                                            key={index}
+                                            key={player.id}
                                             player={player}
-                                            hasFriendRequest={friendRequests.has(index)}
-                                            onToggleFriendRequest={() => toggleFriendRequest(index)}
+                                            hasFriendRequest={friendRequests.has(player.id)}
+                                            onToggleFriendRequest={() => toggleFriendRequest(player.id)}
                                         />
                                     ))}
                                 </div>
