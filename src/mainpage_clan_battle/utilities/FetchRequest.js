@@ -20,8 +20,7 @@ export async function getPendingClanRequests() {
             users!user_id(cf_handle, email)
     `)
         .eq('status', 'pending')
-        .eq('clans.leader_id', userId)
-        .maybeSingle();
+        .eq('clans.leader_id', userId);
     if (requestsError) {
         console.error("Error fetching pending requests:", requestsError);
         return { requests: null, error: requestsError };
@@ -38,18 +37,20 @@ export async function getPendingFriendRequest() {
         return { requests: null, error };
     }
     const userId = data.id;
-    const { data: frndRequestData, error: frndRequestError } = await supabase
+    const { data: friendRequestData, error: friendRequestError } = await supabase
         .from('friend_request')
-        .select(` from_user,
+        .select(`
+            from_user,
+            created_at,
             users!friend_request_from_user_fkey (
               cf_handle
             )`)
-        .eq('to_user', userId)
-        .maybeSingle();
-    if (frndRequestError) {
-        console.error("Error fetching pending friend requests:", frndRequestError);
-        return { requests: null, error: frndRequestError };
+        .eq('to_user', userId);
+    if (friendRequestError) {
+        console.error("Error fetching pending friend requests:", friendRequestError);
+        return { requests: null, error: friendRequestError };
     }
-    return { requests: frndRequestData, error: null };
+    console.log("Fetched pending friend requests:", friendRequestData);
+    return { requests: friendRequestData, error: null };
 }
 
