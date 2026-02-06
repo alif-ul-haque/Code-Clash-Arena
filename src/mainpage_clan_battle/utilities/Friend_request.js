@@ -51,3 +51,22 @@ export async function sendFriendRequest(playerId) {
     }
     return { error: null };
 }
+
+export async function cancelFriendRequest(playerId) {
+    const { data: currentUserData, error: userError } = await getUserData();
+    if (userError) {
+        console.error("Error retrieving current user data:", userError.message);
+        return { data: null, error: userError };
+    }
+    const currentUserId = currentUserData.id;
+    const { error } = await supabase
+        .from('friend_request')
+        .delete()
+        .eq('from_user', currentUserId)
+        .eq('to_user', playerId);
+    if (error) {
+        console.error("Error canceling friend request:", error.message);
+        return { error };
+    }
+    return { error: null };
+}

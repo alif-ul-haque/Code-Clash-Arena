@@ -2,7 +2,7 @@ import '../style/PlayerCard.css';
 import Button from '../../assets/components/Button.jsx';
 import trophyIcon from '../../assets/icons/trophy.png';
 import addFriend from '../../assets/icons/user.png';
-import { sendFriendRequest } from '../utilities/Friend_request.js';
+import { sendFriendRequest , cancelFriendRequest} from '../utilities/Friend_request.js';
 
 export default function PlayerCard({
     player,
@@ -49,8 +49,15 @@ export default function PlayerCard({
                         width="10rem"
                         fontSize='1rem'
                         borderRadius='0.625rem'
-                        onClick={() => {
-                            onToggleFriendRequest();
+                        onClick={async () => {
+                            const { error } = await cancelFriendRequest(player.id);
+                            if (error) {
+                                console.error("Error canceling friend request:", error.message);
+                            }
+                            else {
+                                onToggleFriendRequest();
+                                console.log("Friend request canceled successfully");
+                            }
                         }}
                     />
                 )}
