@@ -2,6 +2,7 @@ import '../style/PlayerCard.css';
 import Button from '../../assets/components/Button.jsx';
 import trophyIcon from '../../assets/icons/trophy.png';
 import addFriend from '../../assets/icons/user.png';
+import { sendFriendRequest } from '../utilities/Friend_request.js';
 
 export default function PlayerCard({
     player,
@@ -29,7 +30,16 @@ export default function PlayerCard({
                         width="3.1rem"
                         fontSize='1rem'
                         borderRadius='0.625rem'
-                        onClick={onToggleFriendRequest}
+                        onClick={async () => {
+                            onToggleFriendRequest();
+                            const { error } = await sendFriendRequest(player.id);
+                            if (error) {
+                                console.error("Error sending friend request:", error.message);
+                            }
+                            else {
+                                console.log("Friend request sent successfully");
+                            }
+                        }}
                     />
                 ) : (
                     <Button
@@ -39,7 +49,9 @@ export default function PlayerCard({
                         width="10rem"
                         fontSize='1rem'
                         borderRadius='0.625rem'
-                        onClick={onToggleFriendRequest}
+                        onClick={() => {
+                            onToggleFriendRequest();
+                        }}
                     />
                 )}
             </div>
