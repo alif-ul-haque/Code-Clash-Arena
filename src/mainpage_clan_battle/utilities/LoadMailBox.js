@@ -1,8 +1,9 @@
-import { getPendingClanRequests } from "./FetchRequest";
+import { getPendingClanRequests , getPendingFriendRequest } from "./FetchRequest";
 
 export async function loadMailBox() {
     let mails = [];
     const { requests: clanRequest, error: clanRequestError } = await getPendingClanRequests();
+    const { requests: friendRequest, error: friendRequestError } = await getPendingFriendRequest();
 
     if (clanRequestError) {
         console.error("Error loading mailbox:", clanRequestError);

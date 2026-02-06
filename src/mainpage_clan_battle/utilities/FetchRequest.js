@@ -30,3 +30,26 @@ export async function getPendingClanRequests() {
     return { requests: requestsData, error: null };
 }
 
+export async function getPendingFriendRequest() {
+    const { data, error } = await getUserData();
+
+    if (error) {
+        console.error("Error getting user data:", error);
+        return { requests: null, error };
+    }
+    const userId = data.id;
+    const { data: frndRequestData, error: frndRequestError } = await supabase
+        .from('friend_request')
+        .select(` from_user,
+            users!friend_request_from_user_fkey (
+              cf_handle
+            )`)
+        .eq('to_user', userId)
+        .maybeSingle();
+    if (frndRequestError) {
+        console.error("Error fetching pending friend requests:", frndRequestError);
+        return { requests: null, error: frndRequestError };
+    }
+    return { requests: frndRequestData, error: null };
+}
+
