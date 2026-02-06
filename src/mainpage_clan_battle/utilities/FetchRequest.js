@@ -41,6 +41,7 @@ export async function getPendingFriendRequest() {
         .from('friend_request')
         .select(`
             from_user,
+            to_user,
             created_at,
             users!friend_request_from_user_fkey (
               cf_handle

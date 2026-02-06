@@ -20,7 +20,7 @@ export async function loadMailBox() {
             from: fr.users.cf_handle,
             message: 'Has sent you a friend request.',
             time: fr.created_at,
-            userId: fr.from_user,
+            userId: fr.to_user,
             clanId: null
         }));
     }

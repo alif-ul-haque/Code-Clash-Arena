@@ -6,10 +6,11 @@ import closeIcon from '../../assets/icons/x-mark.png';
 import PlayerCard from './PlayerCard.jsx';
 import MailCard from './MailCard.jsx';
 import { loadMailBox } from '../utilities/LoadMailBox.js';
-import { acceptRequest, rejectRequest } from '../utilities/ClanAdd.js';
+import { acceptClanRequest, rejectClanRequest } from '../utilities/ClanAdd.js';
 import AlertPage from '../../assets/components/AlertPage.jsx';
 import { supabase } from '../../supabaseclient.js';
-import { viewNonFriends , hasFriendRequest} from '../utilities/Friend_request.js';
+import { viewNonFriends, hasFriendRequest } from '../utilities/Friend_request.js';
+import { acceptFriendRequest } from '../utilities/FriendAdd.js';
 
 export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     const [activeTab, setActiveTab] = useState('friend');
@@ -108,8 +109,13 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
 
     const handleAccept = async (mail) => {
         try {
-            await acceptRequest({ id: mail.id, userId: mail.userId, clanId: mail.clanId });
-            setAlertMessage('Request accepted successfully!');
+            if (mail.type === 'friend') {
+                await acceptFriendRequest({ id: mail.id, userId: mail.userId });
+                setAlertMessage('Friend request accepted successfully!');
+            } else if (mail.type === 'clan') {
+                await acceptClanRequest({ id: mail.id, userId: mail.userId, clanId: mail.clanId });
+                setAlertMessage('Clan join request accepted successfully!');
+            }
             setShowAlert(true);
             const { mails: loadedMails, error } = await loadMailBox();
             if (!error) {
@@ -124,7 +130,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
 
     const handleDecline = async (mailId) => {
         try {
-            await rejectRequest(mailId);
+            await rejectClanRequest(mailId);
             setAlertMessage('Request declined');
             setShowAlert(true);
             const { mails: loadedMails, error } = await loadMailBox();

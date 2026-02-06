@@ -1,6 +1,6 @@
 import { supabase } from "../../supabaseclient";
 
-export async function acceptRequest(request) {
+export async function acceptClanRequest(request) {
     const { error } = await supabase
         .from('clan_join_requests')
         .update({ status: 'accepted' })
@@ -36,7 +36,7 @@ export async function acceptRequest(request) {
     return { success: true, error: null };
 }
 
-export async function rejectRequest(requestId) {
+export async function rejectClanRequest(requestId) {
     const { error } = await supabase
         .from('clan_join_requests')
         .update({ status: 'rejected' })
