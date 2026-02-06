@@ -38,6 +38,9 @@
     position: relative;
     z-index: 1;
     line-height: 1;
+    flex: 1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .player-name-friend {
