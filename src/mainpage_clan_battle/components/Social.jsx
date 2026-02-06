@@ -10,7 +10,7 @@ import { acceptClanRequest, rejectClanRequest } from '../utilities/ClanAdd.js';
 import AlertPage from '../../assets/components/AlertPage.jsx';
 import { supabase } from '../../supabaseclient.js';
 import { viewNonFriends, hasFriendRequest } from '../utilities/Friend_request.js';
-import { acceptFriendRequest } from '../utilities/FriendAdd.js';
+import { acceptFriendRequest , cancelFriendRequest} from '../utilities/FriendAdd.js';
 
 export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     const [activeTab, setActiveTab] = useState('friend');
@@ -128,10 +128,15 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
         }
     };
 
-    const handleDecline = async (mailId) => {
+    const handleDecline = async (mail) => {
         try {
-            await rejectClanRequest(mailId);
-            setAlertMessage('Request declined');
+            if (mail.type === 'friend') {
+                await cancelFriendRequest({ id: mail.id, userId: mail.userId });
+                setAlertMessage('Friend request declined successfully!');
+            } else if (mail.type === 'clan') {
+                await rejectClanRequest(mail.id);
+                setAlertMessage('Clan join request declined successfully!');
+            }
             setShowAlert(true);
             const { mails: loadedMails, error } = await loadMailBox();
             if (!error) {
@@ -139,7 +144,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
             }
         } catch (error) {
             setAlertType('error');
-            setAlertMessage('Failed to decline request');
+            setAlertMessage('Failed to accept request');
             setShowAlert(true);
         }
     };
@@ -264,7 +269,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                                             key={index}
                                             mail={mail}
                                             onAccept={() => handleAccept(mail)}
-                                            onDecline={() => handleDecline(mail.id)}
+                                            onDecline={() => handleDecline(mail)}
                                         />
                                     ))}
                                 </div>

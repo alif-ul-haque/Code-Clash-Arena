@@ -1,4 +1,5 @@
 import { getPendingClanRequests, getPendingFriendRequest } from "./FetchRequest";
+import timeAgo from "./TimeFormat";
 
 export async function loadMailBox() {
     let mails = [];
@@ -19,7 +20,7 @@ export async function loadMailBox() {
             type: 'friend',
             from: fr.users.cf_handle,
             message: 'Has sent you a friend request.',
-            time: fr.created_at,
+            time:timeAgo( fr.created_at),
             userId: fr.to_user,
             clanId: null
         }));
@@ -38,7 +39,7 @@ export async function loadMailBox() {
                 type: 'clan',
                 from: cr.users.cf_handle,
                 message: 'Has requested to join your clan.',
-                time: cr.created_at,
+                time: timeAgo(cr.created_at),
                 userId: cr.user_id,
                 clanId: cr.clan_id
             }))

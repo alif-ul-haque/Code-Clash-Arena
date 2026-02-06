@@ -23,3 +23,16 @@ export async function acceptFriendRequest(request) {
     }
     return { success: true, error: null };
 }
+
+export async function cancelFriendRequest(request) {
+    const { error } = await supabase
+        .from('friend_request')
+        .delete()
+        .eq('from_user', request.id)
+        .eq('to_user', request.userId);
+    if (error) {
+        console.error("Error canceling friend request:", error);
+        return { success: false, error };
+    }
+    return { success: true, error: null };
+}
