@@ -46,7 +46,7 @@ export default function YourClanTeam() {
     };
 
     const handleStartBattle = async () => {
-        if (selectedPlayers.length === 1) {
+        if (selectedPlayers.length === 2) {
             setIsSearching(true);
             
             // Join the battle queue with selected members
@@ -69,9 +69,9 @@ export default function YourClanTeam() {
             {/* Header with Start Battle Button */}
             <div className="page-header">
                 <button 
-                    className={`start-battle-btn ${selectedPlayers.length === 1 ? 'ready' : 'disabled'} ${isSearching ? 'searching' : ''}`}
+                    className={`start-battle-btn ${selectedPlayers.length === 2 ? 'ready' : 'disabled'} ${isSearching ? 'searching' : ''}`}
                     onClick={handleStartBattle}
-                    disabled={selectedPlayers.length !== 1 || isSearching}
+                    disabled={selectedPlayers.length !== 2 || isSearching}
                 >
                     {isSearching ? 'Finding Opponent...' : 'Start Battle'}
                 </button>
