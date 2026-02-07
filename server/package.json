@@ -1,0 +1,19 @@
+{
+  "name": "codeforces-submit-server",
+  "version": "1.0.0",
+  "description": "Backend server for automatic Codeforces submission",
+  "main": "codeforcesSubmitServer.js",
+  "scripts": {
+    "start": "node codeforcesSubmitServer.js",
+    "dev": "nodemon codeforcesSubmitServer.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0",
+    "form-data": "^4.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

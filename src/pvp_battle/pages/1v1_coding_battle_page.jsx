@@ -4,6 +4,13 @@ import '../style/1v1_coding_battle_page.css';
 import logo from '../../assets/icons/cca.png';
 import { supabase } from '../../supabaseclient';
 import { fetchCodeforcesProblem } from '../utilities/codeforcesProblemFetcher';
+import { 
+    checkCodeforcesLogin,
+    submitCodeWithSession,
+    pollForVerdict, 
+    isVerdictAccepted,
+    getVerdictMessage 
+} from '../utilities/codeforcesSubmission';
 import MathRenderer from '../components/MathRenderer';
 
 const OneVOneCodingBattlePage = () => {
@@ -32,6 +39,15 @@ const OneVOneCodingBattlePage = () => {
     const [opponentId, setOpponentId] = useState(null);
     const [startTime] = useState(Date.now());
     const [isEditorMinimized, setIsEditorMinimized] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState('');
+    
+    // Custom modal states
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showResultModal, setShowResultModal] = useState(false);
+    const [resultModalData, setResultModalData] = useState({ title: '', message: '', emoji: '' });
+    const [popupWindow, setPopupWindow] = useState(null);
+    const [submissionTimestamp, setSubmissionTimestamp] = useState(null);
 
     // Fetch problem from Codeforces
     useEffect(() => {
@@ -89,7 +105,7 @@ const OneVOneCodingBattlePage = () => {
         loadProblem();
     }, []);
 
-    // Fetch user IDs and set up real-time subscription
+    // Check Codeforces session on mount
     useEffect(() => {
         const setupBattle = async () => {
             try {
@@ -224,48 +240,284 @@ const OneVOneCodingBattlePage = () => {
 
     const handleSubmit = async () => {
         try {
-            // Calculate time taken (in seconds)
-            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-
-            // Update participant status - mark problem as solved
-            const { error } = await supabase
-                .from('onevone_participants')
-                .update({
-                    problem_solved: 1,
-                    time_taken: timeTaken
-                })
-                .eq('onevone_battle_id', battleId)
-                .eq('player_id', currentUserId);
-
-            if (error) throw error;
-
-            // Update battle status to completed
-            await supabase
-                .from('onevonebattles')
-                .update({
-                    status: 'completed',
-                    end_time: new Date().toISOString()
-                })
-                .eq('onevone_battle_id', battleId);
-
-            // Update user's trophy count
-            const { data: currentUserData } = await supabase
-                .from('users')
-                .select('rating, xp')
-                .eq('id', currentUserId)
-                .single();
-
-            await supabase
-                .from('users')
-                .update({
-                    rating: (currentUserData.rating || 0) + 115,
-                    xp: (currentUserData.xp || 0) + 5
-                })
-                .eq('id', currentUserId);
+            setIsSubmitting(true);
+            setSubmitMessage('🔍 Checking Codeforces login...');
+            
+            // Check if user is logged into Codeforces (via browser session)
+            const isLoggedIn = await checkCodeforcesLogin(currentUser);
+            
+            if (!isLoggedIn) {
+                setSubmitMessage('❌ Not logged into Codeforces!');
+                setResultModalData({
+                    emoji: '⚠️',
+                    title: 'Codeforces Login Required',
+                    message: 'You must be logged into Codeforces first!\n\nSteps:\n1. Open Codeforces.com in a new tab\n2. Log in with your account\n3. Come back here and try again\n\nWe use your browser session (like vjudge).'
+                });
+                setShowResultModal(true);
+                setIsSubmitting(false);
+                return;
+            }
+            
+            // Ask for confirmation before submitting
+            setShowConfirmModal(true);
+            return; // Wait for modal response
+        } catch (err) {
+            console.error('Error submitting solution:', err);
+            setSubmitMessage('❌ Submission failed');
+            setResultModalData({
+                emoji: '❌',
+                title: 'Submission Failed',
+                message: 'Failed to submit. Please try again.'
+            });
+            setShowResultModal(true);
+            setIsSubmitting(false);
+        }
+    };
+    
+    // Handle actual submission after confirmation
+    const proceedWithSubmission = async () => {
+        try {
+            setShowConfirmModal(false);
+            
+            // Capture the current timestamp (in seconds) before submission
+            const timestamp = Math.floor(Date.now() / 1000);
+            setSubmissionTimestamp(timestamp);
+            console.log(`Submission timestamp: ${timestamp} (${new Date(timestamp * 1000).toISOString()})`);
+            
+            setSubmitMessage('📤 Opening Codeforces...');
+            
+            // Submit code (opens Codeforces with pre-filled form)
+            try {
+                const result = await submitCodeWithSession(
+                    problem.contestId,
+                    problem.index,
+                    code,
+                    selectedLanguage
+                );
+                
+                // Store popup reference for monitoring
+                setPopupWindow(result.popupWindow);
+                
+                // Show simplified instructions to user
+                setResultModalData({
+                    emoji: '�',
+                    title: 'Code Copied to Clipboard!',
+                    message: `Codeforces popup opened!\n\n✅ Your code is copied to clipboard\n✅ Problem: ${problem.contestId}${problem.index}\n✅ Language: ${selectedLanguage}\n\n📌 Steps:\n1. Select language in popup\n2. Paste your code (Ctrl+V)\n3. Click Submit\n\nThe popup will auto-close 3s after submission!`
+                });
+                setShowResultModal(true);
+                setSubmitMessage('⏳ Waiting for you to paste and submit...');
+                
+                // Start monitoring the popup for submission
+                startPopupMonitoring(result.popupWindow, timestamp);
+                
+            } catch (submitError) {
+                setSubmitMessage('❌ Submission failed!');
+                setResultModalData({
+                    emoji: '❌',
+                    title: 'Submission Failed',
+                    message: 'Failed to open Codeforces:\n\n' + submitError.message
+                });
+                setShowResultModal(true);
+                setIsSubmitting(false);
+                return;
+            }
 
         } catch (err) {
             console.error('Error submitting solution:', err);
-            alert('Failed to submit. Please try again.');
+            setSubmitMessage('❌ Submission failed');
+            setResultModalData({
+                emoji: '❌',
+                title: 'Submission Failed',
+                message: 'Failed to submit. Please try again.'
+            });
+            setShowResultModal(true);
+            setIsSubmitting(false);
+        }
+    };
+    
+    // Monitor popup for submission and auto-close
+    const startPopupMonitoring = (popup, timestamp) => {
+        if (!popup) return;
+        
+        let checkCount = 0;
+        const maxChecks = 120; // Monitor for up to 2 minutes (120 * 1 second)
+        
+        const initialPath = "/submit"; // Submit page keyword
+        
+        const monitorInterval = setInterval(() => {
+            try {
+                checkCount++;
+                
+                // Check if popup is manually closed
+                if (popup.closed) {
+                    console.log('Popup was closed manually');
+                    clearInterval(monitorInterval);
+                    setShowResultModal(false);
+                    setSubmitMessage('✅ Checking verdict...');
+                    handleCheckVerdict(timestamp);
+                    return;
+                }
+                
+                // Try reading URL to detect submission
+                const currentUrl = popup.location.href;
+                
+                // If user clicked Submit → Codeforces redirects away from submit page
+                if (!currentUrl.includes(initialPath)) {
+                    console.log('Submit detected! URL changed to:', currentUrl);
+                    console.log('Closing popup in 3 seconds...');
+                    
+                    clearInterval(monitorInterval);
+                    
+                    setSubmitMessage('✅ Submitted! Closing popup in 3s...');
+                    
+                    setTimeout(() => {
+                        if (!popup.closed) popup.close();
+                        setPopupWindow(null);
+                        
+                        setShowResultModal(false);
+                        setSubmitMessage('✅ Checking verdict...');
+                        handleCheckVerdict(timestamp);
+                    }, 3000); // 3 seconds delay after Submit
+                    
+                    return;
+                }
+                
+                // Safety timeout after max checks
+                if (checkCount > maxChecks) {
+                    console.log('Popup monitoring timeout - closing popup');
+                    clearInterval(monitorInterval);
+                    if (!popup.closed) popup.close();
+                    setShowResultModal(false);
+                    handleCheckVerdict(timestamp);
+                }
+                
+            } catch (err) {
+                // Cross-origin reading fails due to CORS - this is expected
+                // Just wait and try again on next interval
+                console.log('Waiting for submission... (CORS blocked URL check)');
+            }
+        }, 1000); // Check every second
+    };
+    
+    // Handle verdict check after manual submission
+    const handleCheckVerdict = async (timestamp = null) => {
+        try {
+            setShowResultModal(false);
+            // Use provided timestamp or calculate from 30 seconds ago
+            const submissionTimestamp = timestamp || (Math.floor(Date.now() / 1000) - 30);
+            
+            setSubmitMessage('⏳ Checking verdict...');
+            
+            // Poll for verdict - only check submissions created after submissionTimestamp
+            try {
+                console.log('Starting verdict polling...');
+                const submission = await pollForVerdict(
+                    currentUser,
+                    problem.contestId,
+                    problem.index,
+                    40, // 40 attempts
+                    3000, // 3 seconds interval
+                    submissionTimestamp // Only check submissions after this timestamp
+                );
+                
+                console.log('Verdict received:', submission);
+                const verdict = submission.verdict;
+                const accepted = isVerdictAccepted(verdict);
+                const verdictMsg = getVerdictMessage(verdict);
+                
+                setSubmitMessage(`Verdict: ${verdictMsg}`);
+                
+                if (accepted) {
+                    // Calculate time taken (in seconds)
+                    const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+
+                    // Update participant status - mark problem as solved
+                    const { error } = await supabase
+                        .from('onevone_participants')
+                        .update({
+                            problem_solved: 1,
+                            time_taken: timeTaken
+                        })
+                        .eq('onevone_battle_id', battleId)
+                        .eq('player_id', currentUserId);
+
+                    if (error) throw error;
+
+                    // Update battle status to completed
+                    await supabase
+                        .from('onevonebattles')
+                        .update({
+                            status: 'completed',
+                            end_time: new Date().toISOString()
+                        })
+                        .eq('onevone_battle_id', battleId);
+
+                    // Update user's trophy count
+                    const { data: currentUserData } = await supabase
+                        .from('users')
+                        .select('rating, xp, problem_solved')
+                        .eq('id', currentUserId)
+                        .single();
+
+                    await supabase
+                        .from('users')
+                        .update({
+                            rating: (currentUserData.rating || 0) + 115,
+                            xp: (currentUserData.xp || 0) + 5,
+                            problem_solved: (currentUserData.problem_solved || 0) + 1
+                        })
+                        .eq('id', currentUserId);
+                    
+                    setResultModalData({
+                        emoji: '🎉',
+                        title: 'Accepted! You Won!',
+                        message: `Congratulations! You won the battle!\n\nTime: ${submission.timeConsumedMillis}ms\nMemory: ${Math.round(submission.memoryConsumedBytes / 1024)}KB`
+                    });
+                    setShowResultModal(true);
+                    
+                    // Navigate to result page after short delay
+                    setTimeout(() => {
+                        navigate('/submit-page-real', {
+                            state: {
+                                battleId,
+                                won: true,
+                                opponent: opponent.cf_handle,
+                                trophyChange: '+115',
+                                verdict: verdictMsg
+                            }
+                        });
+                    }, 2000);
+                } else {
+                    setResultModalData({
+                        emoji: '❌',
+                        title: verdictMsg,
+                        message: 'Your solution was not accepted. Keep trying!'
+                    });
+                    setShowResultModal(true);
+                    setIsSubmitting(false);
+                }
+            } catch (verdictError) {
+                console.error('Error getting verdict:', verdictError);
+                setSubmitMessage('⚠️ Could not verify submission. Please check Codeforces.');
+                setResultModalData({
+                    emoji: '⚠️',
+                    title: 'Verification Failed',
+                    message: 'Could not automatically verify your submission.\n\nPlease check your submission status on Codeforces and try again if needed.'
+                });
+                setShowResultModal(true);
+                setIsSubmitting(false);
+            }
+
+        } catch (err) {
+            console.error('Error submitting solution:', err);
+            setSubmitMessage('❌ Submission failed');
+            setResultModalData({
+                emoji: '❌',
+                title: 'Submission Failed',
+                message: 'Failed to submit. Please try again.'
+            });
+            setShowResultModal(true);
+            setIsSubmitting(false);
         }
     };
 
@@ -373,6 +625,7 @@ const OneVOneCodingBattlePage = () => {
                                 className="language-selector"
                                 value={selectedLanguage}
                                 onChange={handleLanguageChange}
+                                disabled={isSubmitting}
                             >
                                 <option value="PYTHON">PYTHON</option>
                                 <option value="JAVASCRIPT">JAVASCRIPT</option>
@@ -380,33 +633,53 @@ const OneVOneCodingBattlePage = () => {
                                 <option value="C++">C++</option>
                             </select>
                             
-                            <button className="submit-btn" onClick={handleSubmit}>SUBMIT</button>
+                            <button 
+                                className="submit-btn" 
+                                onClick={handleSubmit}
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
+                            </button>
                             
                             <button 
                                 className="minimize-btn" 
                                 onClick={() => setIsEditorMinimized(true)}
                                 title="Minimize Editor"
+                                disabled={isSubmitting}
                             >
                                 ▼
                             </button>
                         </div>
                         
+                        {submitMessage && (
+                            <div className="submit-status-message">
+                                {submitMessage}
+                            </div>
+                        )}
+                        
                         <textarea 
                             className="code-editor"
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
-                            placeholder={`## WRITE YOUR ${selectedLanguage} CODE\n##FROM HERE`}
-                        ></textarea>
+                            placeholder="Write your code here..."
+                            disabled={isSubmitting}
+                        />
                         
                         <div className="editor-footer">
-                            <input 
-                                type="file" 
+                            <input
+                                type="file"
                                 ref={fileInputRef}
                                 onChange={handleFileUpload}
                                 accept=".py,.js,.java,.cpp,.c"
                                 style={{ display: 'none' }}
                             />
-                            <button className="upload-btn" onClick={handleUploadClick}>UPLOAD</button>
+                            <button 
+                                className="upload-btn" 
+                                onClick={handleUploadClick}
+                                disabled={isSubmitting}
+                            >
+                                UPLOAD
+                            </button>
                             <span className="language-display">LANGUAGE : {selectedLanguage}</span>
                         </div>
                     </div>
@@ -420,6 +693,80 @@ const OneVOneCodingBattlePage = () => {
                     </button>
                 )}
             </div>
+            
+            {/* Custom Confirmation Modal */}
+            {showConfirmModal && (
+                <div className="custom-modal-overlay">
+                    <div className="custom-modal">
+                        <div className="modal-header">
+                            <span className="modal-emoji">🚀</span>
+                            <h2 className="modal-title">Ready to Submit?</h2>
+                        </div>
+                        <div className="modal-body">
+                            <p className="modal-text">Your code will be submitted to Codeforces automatically.</p>
+                            <div className="modal-info">
+                                <p><strong>Problem:</strong> {problem?.name}</p>
+                                <p><strong>Language:</strong> {selectedLanguage}</p>
+                                <p><strong>Lines of code:</strong> {code.split('\n').length}</p>
+                            </div>
+                            <p className="modal-text-small">Click SUBMIT to proceed!</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button 
+                                className="modal-btn modal-btn-cancel"
+                                onClick={() => {
+                                    setShowConfirmModal(false);
+                                    setIsSubmitting(false);
+                                    setSubmitMessage('');
+                                }}
+                            >
+                                CANCEL
+                            </button>
+                            <button 
+                                className="modal-btn modal-btn-submit"
+                                onClick={proceedWithSubmission}
+                            >
+                                SUBMIT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Custom Result Modal */}
+            {showResultModal && (
+                <div className="custom-modal-overlay">
+                    <div className="custom-modal">
+                        <div className="modal-header">
+                            <span className="modal-emoji">{resultModalData.emoji}</span>
+                            <h2 className="modal-title">{resultModalData.title}</h2>
+                        </div>
+                        <div className="modal-body">
+                            <p className="modal-text" style={{ whiteSpace: 'pre-line' }}>{resultModalData.message}</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button 
+                                className="modal-btn modal-btn-submit"
+                                onClick={() => {
+                                    // If this is the popup modal and user manually closes it
+                                    if (resultModalData.title === 'Code Copied to Clipboard!') {
+                                        // Close popup if still open
+                                        if (popupWindow && !popupWindow.closed) {
+                                            popupWindow.close();
+                                        }
+                                        setShowResultModal(false);
+                                        // Let the monitoring handle verdict check
+                                    } else {
+                                        setShowResultModal(false);
+                                    }
+                                }}
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
