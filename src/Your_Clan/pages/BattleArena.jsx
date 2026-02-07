@@ -4,7 +4,7 @@ import '../style/BattleArena.css';
 
 import getUserData from '../../mainpage_clan_battle/utilities/UserData';
 import { hasOngoingClanBattle } from '../utilities/ClanBattleUtils';
-import { startBattle, getBattle, getBattleParticipants } from '../utilities/ClanBattleManager';
+import { startBattle, getBattle, getBattleParticipants, completeBattle } from '../utilities/ClanBattleManager';
 import { supabase } from '../../supabaseclient';
 import clockIcon from '../../assets/icons/clock.png';
 
@@ -12,18 +12,38 @@ export default function BattleArena() {
     const navigate = useNavigate();
     const [participants, setParticipants] = useState([]);
     const [battleId, setBattleId] = useState(null);
-    const [timeLeft, setTimeLeft] = useState(3600); // 1 hour in seconds
+    const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
     const [battleEnded, setBattleEnded] = useState(false);
     const [myClanName, setMyClanName] = useState('Your Clan');
     const [opponentClanName, setOpponentClanName] = useState('Opponent Clan');
     const [myClanScore, setMyClanScore] = useState(0);
     const [opponentClanScore, setOpponentClanScore] = useState(0);
+    const [battleStartTime, setBattleStartTime] = useState(null);
+    const [battleDuration, setBattleDuration] = useState(120);
 
     // Fetch battle participants and start battle
     useEffect(() => {
         async function initiateBattle() {
             try {
-                const { hasOngoingBattle, battleId: activeBattleId } = await hasOngoingClanBattle();
+                // Retry logic: Try multiple times to find the battle (for synchronization)
+                let attempts = 0;
+                const maxAttempts = 10;
+                let hasOngoingBattle = false;
+                let activeBattleId = null;
+                
+                while (attempts < maxAttempts && !hasOngoingBattle) {
+                    const result = await hasOngoingClanBattle();
+                    hasOngoingBattle = result.hasOngoingBattle;
+                    activeBattleId = result.battleId;
+                    
+                    if (!hasOngoingBattle && attempts < maxAttempts - 1) {
+                        // Wait 1 second before retrying
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        attempts++;
+                    } else {
+                        break;
+                    }
+                }
                 
                 if (hasOngoingBattle && activeBattleId) {
                     setBattleId(activeBattleId);
@@ -38,6 +58,8 @@ export default function BattleArena() {
                         const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
                         const remainingSeconds = Math.max(0, battle.duration_seconds - elapsedSeconds);
                         setTimeLeft(remainingSeconds);
+                        setBattleStartTime(startTime);
+                        setBattleDuration(battle.duration_seconds);
                         
                         // Check if battle already ended
                         if (remainingSeconds <= 0) {
@@ -84,11 +106,12 @@ export default function BattleArena() {
                         let opponentScore = 0;
 
                         battleParticipants.forEach(participant => {
-                            const score = participant.problems_solved * 100; // 100 points per problem
+                            // total_time now stores points instead of actual time
+                            const points = participant.total_time || 0;
                             if (participant.clan_id === userClanId) {
-                                myScore += score;
+                                myScore += points;
                             } else {
-                                opponentScore += score;
+                                opponentScore += points;
                             }
                         });
 
@@ -104,60 +127,111 @@ export default function BattleArena() {
                         console.error('Failed to start battle:', error);
                     }
                 } else {
-                    console.warn('No ongoing battle found');
+                    console.warn('No ongoing battle found, redirecting...');
+                    navigate('/your-clan');
                 }
             } catch (error) {
                 console.error('Error initiating battle:', error);
+                navigate('/your-clan');
             }
         }
         
         initiateBattle();
-    }, []);
+    }, [navigate]);
 
-    // Countdown timer
+    // Subscribe to participant changes for real-time score updates
     useEffect(() => {
-        if (battleEnded || timeLeft <= 0) return;
+        if (!battleId) return;
+
+        const channel = supabase
+            .channel(`battle_participants_${battleId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'clan_battle_participants',
+                    filter: `battle_id=eq.${battleId}`
+                },
+                async () => {
+                    // Refresh participants and recalculate scores
+                    const { participants: updatedParticipants } = await getBattleParticipants(battleId);
+                    setParticipants(updatedParticipants || []);
+
+                    if (updatedParticipants && updatedParticipants.length > 0) {
+                        const { data: user } = await getUserData();
+                        const userClanId = user?.clan_id;
+
+                        let myScore = 0;
+                        let opponentScore = 0;
+
+                        updatedParticipants.forEach(participant => {
+                            const points = participant.total_time || 0;
+                            if (participant.clan_id === userClanId) {
+                                myScore += points;
+                            } else {
+                                opponentScore += points;
+                            }
+                        });
+
+                        setMyClanScore(myScore);
+                        setOpponentClanScore(opponentScore);
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [battleId]);
+
+    // Countdown timer - synchronized across tabs using server time
+    useEffect(() => {
+        if (battleEnded || !battleStartTime) return;
 
         const timer = setInterval(() => {
-            setTimeLeft((prevTime) => {
-                if (prevTime <= 1) {
-                    clearInterval(timer);
-                    setBattleEnded(true);
-                    return 0;
-                }
-                return prevTime - 1;
-            });
+            const now = new Date();
+            const elapsedSeconds = Math.floor((now - battleStartTime) / 1000);
+            const remaining = Math.max(0, battleDuration - elapsedSeconds);
+            
+            setTimeLeft(remaining);
+            
+            if (remaining <= 0) {
+                setBattleEnded(true);
+            }
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [timeLeft, battleEnded]);
+    }, [battleStartTime, battleDuration, battleEnded]);
 
     // Complete battle when timer ends
     useEffect(() => {
-        async function completeBattle() {
+        const handleBattleEnd = async () => {
             if (!battleEnded || !battleId) return;
 
             try {
-                // Call the SQL function to complete the battle
-                const { error } = await supabase.rpc('complete_clan_battle', {
-                    p_battle_id: battleId
-                });
+                console.log('Battle ended, completing battle...');
+                
+                // Call completeBattle function
+                const { winnerId, error } = await completeBattle(battleId);
 
                 if (error) {
                     console.error('Error completing battle:', error);
                 } else {
-                    console.log('Battle completed successfully');
-                    // Navigate to results page after a short delay
-                    setTimeout(() => {
-                        navigate('/main-page');
-                    }, 3000);
+                    console.log('Battle completed successfully. Winner:', winnerId || 'Draw');
                 }
-            } catch (error) {
-                console.error('Error in completeBattle:', error);
-            }
-        }
 
-        completeBattle();
+                // Navigate to main page after a short delay
+                setTimeout(() => {
+                    navigate('/main');
+                }, 3000);
+            } catch (error) {
+                console.error('Error in handleBattleEnd:', error);
+            }
+        };
+
+        handleBattleEnd();
     }, [battleEnded, battleId, navigate]);
 
     // Format time as MM:SS
@@ -215,11 +289,6 @@ export default function BattleArena() {
         }
     ];
 
-    const teamScore = {
-        yourClan: 50,
-        enemyClan: 0
-    };
-
     const handleProblemClick = (problemId) => {
         navigate(`/your-clan/problem/${problemId}`);
     };
@@ -235,6 +304,16 @@ export default function BattleArena() {
 
     return (
         <div className="battle-arena-page">
+            {/* Navigation Button */}
+            <div className="battle-arena-nav">
+                <button 
+                    className="main-page-btn"
+                    onClick={() => navigate('/main')}
+                >
+                    ← Main Page
+                </button>
+            </div>
+
             {/* Timer Display */}
             <div className="timer-container">
                 <img src={clockIcon} alt="clock" className="clock-icon" />

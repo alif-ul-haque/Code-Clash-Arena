@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../style/YourClanTeam.css';
 import characterImage from '../../assets/images/Lovepik_com-450060883-cartoon character image of a gaming boy.png';
 import getUserData, { getClanMembers } from '../../mainpage_clan_battle/utilities/UserData';
-import { joinBattleQueue, getQueueStatus } from '../utilities/ClanBattleMatchmaking';
+import { joinBattleQueue } from '../utilities/ClanBattleMatchmaking';
 
 export default function YourClanTeam() {
     const navigate = useNavigate();
