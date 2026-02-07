@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import '../style/ProblemSolving.css';
 import ccaLogo from '../../assets/icons/cca.png';
 import bgImage from '../../assets/images/10002.png';
+import { submitSolution, getBattle, completeBattle } from '../utilities/ClanBattleManager';
+import { hasOngoingClanBattle } from '../utilities/ClanBattleUtils';
 
 export default function ProblemSolving() {
     const { problemId } = useParams();
@@ -13,8 +15,15 @@ export default function ProblemSolving() {
     const [selectedLanguage, setSelectedLanguage] = useState('PYTHON');
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(3600); // 60 minutes in seconds
-    const [initialTime] = useState(3600);
+    const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
+    const [initialTime] = useState(120);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState(null);
+    const [earnedPoints, setEarnedPoints] = useState(0);
+    const [battleId, setBattleId] = useState(null);
+    const [battleStartTime, setBattleStartTime] = useState(null);
+    const [battleDuration, setBattleDuration] = useState(120);
+    const [battleEnded, setBattleEnded] = useState(false);
     const containerRef = useRef(null);
     const fileInputRef = useRef(null);
 
@@ -36,22 +45,78 @@ export default function ProblemSolving() {
 
     const problem = problemData[problemId] || problemData[1];
 
-    // Timer countdown
+    // Fetch battle ID and start time on mount
     useEffect(() => {
-        if (timeLeft <= 0) return;
+        async function fetchBattleId() {
+            const { hasOngoingBattle, battleId: activeBattleId } = await hasOngoingClanBattle();
+            if (hasOngoingBattle && activeBattleId) {
+                setBattleId(activeBattleId);
+                
+                // Get battle details for synchronized timer
+                const { battle } = await getBattle(activeBattleId);
+                if (battle && battle.start_time) {
+                    const startTime = new Date(battle.start_time);
+                    setBattleStartTime(startTime);
+                    setBattleDuration(battle.duration_seconds);
+                    
+                    // Calculate initial time left
+                    const currentTime = new Date();
+                    const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+                    const remainingSeconds = Math.max(0, battle.duration_seconds - elapsedSeconds);
+                    setTimeLeft(remainingSeconds);
+                }
+            }
+        }
+        fetchBattleId();
+    }, []);
+
+    // Timer countdown - synchronized across tabs
+    useEffect(() => {
+        if (!battleStartTime || timeLeft <= 0) return;
 
         const timer = setInterval(() => {
-            setTimeLeft((prev) => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    return 0;
-                }
-                return prev - 1;
-            });
+            const now = new Date();
+            const elapsedSeconds = Math.floor((now - battleStartTime) / 1000);
+            const remaining = Math.max(0, battleDuration - elapsedSeconds);
+            setTimeLeft(remaining);
+            
+            if (remaining <= 0) {
+                setBattleEnded(true);
+                clearInterval(timer);
+            }
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [timeLeft]);
+    }, [battleStartTime, battleDuration]);
+
+    // Complete battle when timer ends
+    useEffect(() => {
+        const handleBattleEnd = async () => {
+            if (!battleEnded || !battleId) return;
+
+            try {
+                console.log('Battle ended, completing battle...');
+                
+                // Call completeBattle function
+                const { winnerId, error } = await completeBattle(battleId);
+
+                if (error) {
+                    console.error('Error completing battle:', error);
+                } else {
+                    console.log('Battle completed successfully. Winner:', winnerId || 'Draw');
+                }
+
+                // Navigate to main page after a short delay
+                setTimeout(() => {
+                    navigate('/main');
+                }, 3000);
+            } catch (error) {
+                console.error('Error in handleBattleEnd:', error);
+            }
+        };
+
+        handleBattleEnd();
+    }, [battleEnded, battleId, navigate]);
 
     // Format time as MM:SS
     const formatTime = () => {
@@ -92,13 +157,48 @@ export default function ProblemSolving() {
         setIsDragging(false);
     };
 
-    const handleSubmit = () => {
-        console.log('Submitting code:', code);
-        setShowSuccessPopup(true);
+    const handleSubmit = async () => {
+        if (isSubmitting) return;
+        
+        setIsSubmitting(true);
+        setSubmitError(null);
+
+        try {
+            if (!battleId) {
+                setSubmitError('No active battle found');
+                setIsSubmitting(false);
+                return;
+            }
+
+            // Problem IDs are 1-based in URL, convert to 0-based index
+            const problemIndex = parseInt(problemId) - 1;
+
+            const { success, points, error } = await submitSolution(
+                battleId,
+                problemIndex,
+                code,
+                selectedLanguage
+            );
+
+            if (success) {
+                setEarnedPoints(points);
+                setShowSuccessPopup(true);
+            } else {
+                setSubmitError(error || 'Failed to submit solution');
+                alert(error || 'Failed to submit solution');
+            }
+        } catch (error) {
+            console.error('Submission error:', error);
+            setSubmitError('An error occurred during submission');
+            alert('An error occurred during submission');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleClosePopup = () => {
         setShowSuccessPopup(false);
+        navigate('/your-clan/battle-arena');
     };
 
     const handleFileUpload = (event) => {
@@ -185,8 +285,8 @@ export default function ProblemSolving() {
                 {/* Resizable Divider */}
                 <div 
                     className="resize-divider"
-                    onMouseDown={handleMouseDown}
-                >
+                    onMouseDown={handleMouseDown} disabled={isSubmitting}>
+                            {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
                     <div className="divider-handle">
                         <div className="handle-circle">
                             <div className="handle-icon">⬌</div>
@@ -262,6 +362,10 @@ export default function ProblemSolving() {
                         </p>
                         <div className="success-details">
                             <div className="detail-item">
+                                <span className="detail-label">Points Earned:</span>
+                                <span className="detail-value">{earnedPoints}</span>
+                            </div>
+                            <div className="detail-item">
                                 <span className="detail-label">Language:</span>
                                 <span className="detail-value">{selectedLanguage}</span>
                             </div>
@@ -273,6 +377,25 @@ export default function ProblemSolving() {
                         <button className="popup-close-btn" onClick={handleClosePopup}>
                             CONTINUE BATTLE
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Battle Ended Overlay */}
+            {battleEnded && (
+                <div className="success-popup-overlay">
+                    <div className="success-popup">
+                        <div className="popup-glow"></div>
+                        <h2 className="success-title">Battle Ended!</h2>
+                        <p className="success-message">
+                            Time's up! The battle has concluded.
+                            Calculating results and determining the victor...
+                        </p>
+                        <div className="success-details">
+                            <div className="detail-item">
+                                <span className="detail-label">Redirecting to Main Page</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

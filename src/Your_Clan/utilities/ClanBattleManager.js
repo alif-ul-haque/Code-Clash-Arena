@@ -32,7 +32,7 @@ export async function createClanBattle(clan1Id, clan2Id, clan1Members, clan2Memb
                 clan1_id: clan1Id,
                 clan2_id: clan2Id,
                 status: 'preparing',
-                duration_seconds: 3600 // 1 hour
+                duration_seconds: 120 // 2 minutes
             })
             .select()
             .single();
@@ -304,3 +304,227 @@ export function subscribeToBattleEvents(battleId, callback) {
 
     return channel;
 }
+
+/**
+ * Submit a solution for a problem
+ * @param {string} battleId - Battle ID
+ * @param {number} problemIndex - Problem index (0-4)
+ * @param {string} code - User's code
+ * @param {string} language - Programming language
+ * @returns {Promise<{success: boolean, points: number, error: any}>}
+ */
+export async function submitSolution(battleId, problemIndex, code, language) {
+    try {
+        // Get current user
+        const { data: user, error: userError } = await getUserData();
+        if (userError || !user) {
+            return { success: false, points: 0, error: userError || 'User not found' };
+        }
+
+        // Check if user hasn't solved a problem yet (one problem per player rule)
+        const { data: participant, error: participantError } = await supabase
+            .from('clan_battle_participants')
+            .select('problems_solved')
+            .eq('battle_id', battleId)
+            .eq('user_id', user.id)
+            .single();
+
+        if (participantError) {
+            return { success: false, points: 0, error: 'Participant not found' };
+        }
+
+        if (participant.problems_solved >= 1) {
+            return { success: false, points: 0, error: 'You can only solve one problem per battle' };
+        }
+
+        // Get battle start time to calculate elapsed time
+        const { data: battle, error: battleError } = await supabase
+            .from('clan_battles')
+            .select('start_time')
+            .eq('battle_id', battleId)
+            .single();
+
+        if (battleError || !battle) {
+            return { success: false, points: 0, error: 'Battle not found' };
+        }
+
+        const startTime = new Date(battle.start_time);
+        const currentTime = new Date();
+        const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+
+        // Calculate points based on problem difficulty and time
+        const points = calculatePoints(problemIndex, elapsedSeconds);
+
+        // Create submission record (auto-accepted for now)
+        const { error: submissionError } = await supabase
+            .from('clan_battle_submissions')
+            .insert({
+                battle_id: battleId,
+                user_id: user.id,
+                problem_index: problemIndex,
+                code: code,
+                language: language,
+                verdict: 'accepted'
+            });
+
+        if (submissionError) {
+            console.error('Error creating submission:', submissionError);
+            return { success: false, points: 0, error: submissionError };
+        }
+
+        // Update participant: increment problems_solved and add points
+        const { error: updateError } = await supabase
+            .from('clan_battle_participants')
+            .update({
+                problems_solved: 1,
+                total_time: points
+            })
+            .eq('battle_id', battleId)
+            .eq('user_id', user.id);
+
+        if (updateError) {
+            console.error('Error updating participant:', updateError);
+            return { success: false, points: 0, error: updateError };
+        }
+
+        return { success: true, points: points, error: null };
+    } catch (error) {
+        console.error('Error in submitSolution:', error);
+        return { success: false, points: 0, error };
+    }
+}
+
+/**
+ * Calculate points based on problem difficulty and elapsed time
+ * Top problems are easier, bottom problems are harder
+ * Points decrease over time (5 minutes = 300 seconds)
+ * @param {number} problemIndex - Problem index (0-4)
+ * @param {number} elapsedSeconds - Time elapsed since battle start
+ * @returns {number} Points awarded
+ */
+function calculatePoints(problemIndex, elapsedSeconds) {
+    // Base points by problem index (0=easiest at top, 4=hardest at bottom)
+    const basePoints = {
+        0: 50,   // Easy
+        1: 75,   // Easy-Medium
+        2: 100,  // Medium
+        3: 125,  // Medium-Hard
+        4: 150   // Hard
+    };
+
+    const base = basePoints[problemIndex] || 100;
+
+    // Time factor: points decrease linearly over 5 minutes (300 seconds)
+    // At 0s: 100% points, at 300s: 50% points
+    const maxTime = 300; // 5 minutes
+    const minMultiplier = 0.5; // Minimum 50% of base points
+    const timeMultiplier = Math.max(minMultiplier, 1 - (elapsedSeconds / maxTime) * (1 - minMultiplier));
+
+    const finalPoints = Math.round(base * timeMultiplier);
+    
+    console.log(`Problem ${problemIndex}: Base=${base}, Elapsed=${elapsedSeconds}s, Multiplier=${timeMultiplier.toFixed(2)}, Final=${finalPoints}`);
+    
+    return finalPoints;
+}
+
+/**
+ * Complete the battle and determine winner
+ * @param {string} battleId - Battle ID
+ * @returns {Promise<{success: boolean, winnerId: string|null, error: any}>}
+ */
+export async function completeBattle(battleId) {
+    try {
+        // Get all participants grouped by clan
+        const { data: participants, error: participantsError } = await supabase
+            .from('clan_battle_participants')
+            .select('clan_id, problems_solved, total_time')
+            .eq('battle_id', battleId);
+
+        if (participantsError || !participants) {
+            return { success: false, winnerId: null, error: participantsError };
+        }
+
+        // Calculate clan scores
+        const clanScores = {};
+        participants.forEach(p => {
+            if (!clanScores[p.clan_id]) {
+                clanScores[p.clan_id] = {
+                    problemsSolved: 0,
+                    totalPoints: 0
+                };
+            }
+            clanScores[p.clan_id].problemsSolved += p.problems_solved;
+            clanScores[p.clan_id].totalPoints += p.total_time; // total_time stores points
+        });
+
+        // Determine winner
+        let winnerId = null;
+        const clans = Object.keys(clanScores);
+        
+        if (clans.length === 2) {
+            const [clan1, clan2] = clans;
+            const score1 = clanScores[clan1];
+            const score2 = clanScores[clan2];
+
+            // Winner by problems solved first, then by points
+            if (score1.problemsSolved > score2.problemsSolved) {
+                winnerId = clan1;
+            } else if (score2.problemsSolved > score1.problemsSolved) {
+                winnerId = clan2;
+            } else {
+                // Equal problems solved, compare points
+                if (score1.totalPoints > score2.totalPoints) {
+                    winnerId = clan1;
+                } else if (score2.totalPoints > score1.totalPoints) {
+                    winnerId = clan2;
+                }
+                // If still equal, it's a draw (winnerId stays null)
+            }
+        }
+
+        // Update battle status and winner
+        const { error: updateError } = await supabase
+            .from('clan_battles')
+            .update({
+                status: 'completed',
+                winner_clan_id: winnerId,
+                end_time: new Date().toISOString()
+            })
+            .eq('battle_id', battleId);
+
+        if (updateError) {
+            console.error('Error updating battle:', updateError);
+            return { success: false, winnerId: null, error: updateError };
+        }
+
+        // Update winner clan's war_won count
+        if (winnerId) {
+            const { error: clanUpdateError } = await supabase.rpc('increment_clan_wins', {
+                p_clan_id: winnerId
+            });
+
+            // If RPC doesn't exist, do it manually
+            if (clanUpdateError) {
+                console.warn('RPC not found, updating manually');
+                const { data: clan } = await supabase
+                    .from('clans')
+                    .select('war_won')
+                    .eq('clan_id', winnerId)
+                    .single();
+
+                if (clan) {
+                    await supabase
+                        .from('clans')
+                        .update({ war_won: (clan.war_won || 0) + 1 })
+                        .eq('clan_id', winnerId);
+                }
+            }
+        }
+
+        return { success: true, winnerId, error: null };
+    } catch (error) {
+        console.error('Error in completeBattle:', error);
+        return { success: false, winnerId: null, error };
+    }
+}
+
