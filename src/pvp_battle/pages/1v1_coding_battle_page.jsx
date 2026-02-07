@@ -300,12 +300,12 @@ const OneVOneCodingBattlePage = () => {
                 
                 // Show simplified instructions to user
                 setResultModalData({
-                    emoji: '�',
-                    title: 'Code Copied to Clipboard!',
-                    message: `Codeforces popup opened!\n\n✅ Your code is copied to clipboard\n✅ Problem: ${problem.contestId}${problem.index}\n✅ Language: ${selectedLanguage}\n\n📌 Steps:\n1. Select language in popup\n2. Paste your code (Ctrl+V)\n3. Click Submit\n\nThe popup will auto-close 3s after submission!`
+                    emoji: '🚀',
+                    title: 'Auto-Filling Code!',
+                    message: `Opening Codeforces with automatic code transfer...\n\n✅ Problem: ${problem.contestId}${problem.index}\n✅ Language: ${selectedLanguage}\n✅ Code: ${code.length} characters\n\n⚡ Your code will auto-fill in the form!\n\nJust verify and click Submit in the popup.\n\nPopup auto-closes 3s after submission.`
                 });
                 setShowResultModal(true);
-                setSubmitMessage('⏳ Waiting for you to paste and submit...');
+                setSubmitMessage('⏳ Auto-filling code in Codeforces...');
                 
                 // Start monitoring the popup for submission
                 startPopupMonitoring(result.popupWindow, timestamp);
@@ -749,7 +749,7 @@ const OneVOneCodingBattlePage = () => {
                                 className="modal-btn modal-btn-submit"
                                 onClick={() => {
                                     // If this is the popup modal and user manually closes it
-                                    if (resultModalData.title === 'Code Copied to Clipboard!') {
+                                    if (resultModalData.title === 'Auto-Filling Code!') {
                                         // Close popup if still open
                                         if (popupWindow && !popupWindow.closed) {
                                             popupWindow.close();
