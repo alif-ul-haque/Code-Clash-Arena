@@ -16,13 +16,41 @@ export const submitCodeWithSession = async (contestId, problemIndex, sourceCode,
         try {
             // Language mapping to Codeforces program type IDs
             const languageMap = {
-                'PYTHON': '31',      // Python 3.8.10
-                'PYTHON3': '31',
-                'C++': '54',         // GNU G++17 7.3.0
-                'CPP': '54',
-                'JAVA': '60',        // Java 11.0.6
-                'JAVASCRIPT': '55',  // Node.js 12.6.3
-                'JS': '55'
+                'PYTHON': {
+                    id: '31',           // Python 3.8.10
+                    alternateIds: ['31', '7', '41'],  // Python 3 variants
+                    namePatterns: ['Python 3', 'Python3', 'PyPy']
+                },
+                'PYTHON3': {
+                    id: '31',
+                    alternateIds: ['31', '7', '41'],
+                    namePatterns: ['Python 3', 'Python3', 'PyPy']
+                },
+                'C++': {
+                    id: '54',           // GNU G++17 7.3.0
+                    alternateIds: ['54', '50', '52', '61', '73'],  // C++ variants
+                    namePatterns: ['GNU G++17', 'GNU G++', 'C++17', 'C++14', 'C++20']
+                },
+                'CPP': {
+                    id: '54',
+                    alternateIds: ['54', '50', '52', '61', '73'],
+                    namePatterns: ['GNU G++17', 'GNU G++', 'C++17', 'C++14', 'C++20']
+                },
+                'JAVA': {
+                    id: '60',           // Java 11.0.6
+                    alternateIds: ['60', '36', '87'],  // Java variants
+                    namePatterns: ['Java 11', 'Java 8', 'Java']
+                },
+                'JAVASCRIPT': {
+                    id: '55',           // Node.js 12.6.3
+                    alternateIds: ['55', '34'],  // JavaScript/Node variants
+                    namePatterns: ['Node.js', 'JavaScript', 'JS']
+                },
+                'JS': {
+                    id: '55',
+                    alternateIds: ['55', '34'],
+                    namePatterns: ['Node.js', 'JavaScript', 'JS']
+                }
             };
 
             const languageNames = {
@@ -32,17 +60,19 @@ export const submitCodeWithSession = async (contestId, problemIndex, sourceCode,
                 'JAVASCRIPT': 'Node.js'
             };
 
-            const programTypeId = languageMap[language.toUpperCase()];
+            const languageConfig = languageMap[language.toUpperCase()];
             const langDisplay = languageNames[language.toUpperCase()] || language;
             
-            if (!programTypeId) {
+            if (!languageConfig) {
                 reject(new Error(`Unsupported language: ${language}`));
                 return;
             }
             
-            // Store code in sessionStorage so we can access it from the popup
+            // Store code and language info in sessionStorage
             sessionStorage.setItem('cf_submit_code', sourceCode);
-            sessionStorage.setItem('cf_submit_language', programTypeId);
+            sessionStorage.setItem('cf_submit_language_id', languageConfig.id);
+            sessionStorage.setItem('cf_submit_language_alternates', JSON.stringify(languageConfig.alternateIds));
+            sessionStorage.setItem('cf_submit_language_patterns', JSON.stringify(languageConfig.namePatterns));
             sessionStorage.setItem('cf_submit_problem', `${contestId}${problemIndex}`);
             
             console.log('✓ Code saved to browser storage');
@@ -66,9 +96,11 @@ export const submitCodeWithSession = async (contestId, problemIndex, sourceCode,
                         (function() {
                             console.log('🔄 Auto-fill script loaded');
                             
-                            // Get the stored code from sessionStorage
+                            // Get the stored code and language info from sessionStorage
                             const storedCode = sessionStorage.getItem('cf_submit_code');
-                            const storedLanguage = sessionStorage.getItem('cf_submit_language');
+                            const primaryLangId = sessionStorage.getItem('cf_submit_language_id');
+                            const alternateLangIds = JSON.parse(sessionStorage.getItem('cf_submit_language_alternates') || '[]');
+                            const langPatterns = JSON.parse(sessionStorage.getItem('cf_submit_language_patterns') || '[]');
                             
                             if (!storedCode) {
                                 console.warn('No code found in storage');
@@ -76,16 +108,55 @@ export const submitCodeWithSession = async (contestId, problemIndex, sourceCode,
                             }
                             
                             console.log('✓ Found code in storage, length:', storedCode.length);
+                            console.log('✓ Language config - Primary ID:', primaryLangId, 'Alternates:', alternateLangIds, 'Patterns:', langPatterns);
+                            
+                            // Smart language selection function
+                            function selectLanguage(langSelect) {
+                                if (!langSelect) return false;
+                                
+                                // Method 1: Try primary language ID
+                                if (primaryLangId) {
+                                    for (let option of langSelect.options) {
+                                        if (option.value === primaryLangId) {
+                                            langSelect.value = primaryLangId;
+                                            console.log('✓ Language selected by primary ID:', primaryLangId, '→', option.text);
+                                            return true;
+                                        }
+                                    }
+                                }
+                                
+                                // Method 2: Try alternate IDs
+                                for (let altId of alternateLangIds) {
+                                    for (let option of langSelect.options) {
+                                        if (option.value === altId) {
+                                            langSelect.value = altId;
+                                            console.log('✓ Language selected by alternate ID:', altId, '→', option.text);
+                                            return true;
+                                        }
+                                    }
+                                }
+                                
+                                // Method 3: Try matching by text pattern
+                                for (let pattern of langPatterns) {
+                                    for (let option of langSelect.options) {
+                                        if (option.text.includes(pattern)) {
+                                            langSelect.value = option.value;
+                                            console.log('✓ Language selected by pattern:', pattern, '→', option.text);
+                                            return true;
+                                        }
+                                    }
+                                }
+                                
+                                console.warn('⚠️ Could not auto-select language. Please select manually.');
+                                return false;
+                            }
                             
                             // Function to fill the form
                             function fillForm() {
                                 try {
                                     // Find and set language dropdown
                                     const langSelect = document.querySelector('select[name="programTypeId"]');
-                                    if (langSelect && storedLanguage) {
-                                        langSelect.value = storedLanguage;
-                                        console.log('✓ Language selected:', storedLanguage);
-                                    }
+                                    const langSelected = selectLanguage(langSelect);
                                     
                                     // Find the source code textarea
                                     const sourceTextarea = document.querySelector('textarea[name="sourceCode"]');
@@ -103,7 +174,14 @@ export const submitCodeWithSession = async (contestId, problemIndex, sourceCode,
                                         // Show success indicator
                                         const indicator = document.createElement('div');
                                         indicator.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #4CAF50; color: white; padding: 20px 30px; border-radius: 10px; z-index: 999999; font-family: Arial; font-size: 18px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.5s ease;';
-                                        indicator.innerHTML = '✅ Your Code is Auto-Filled!<br><small style="font-size: 14px; font-weight: normal;">Just click Submit below</small>';
+                                        
+                                        if (langSelected) {
+                                            indicator.innerHTML = '✅ Code & Language Auto-Filled!<br><small style="font-size: 14px; font-weight: normal;">Just click Submit below</small>';
+                                        } else {
+                                            indicator.innerHTML = '✅ Code Auto-Filled!<br><small style="font-size: 14px; font-weight: normal;">⚠️ Please select language manually</small>';
+                                            indicator.style.background = '#FF9800'; // Orange for partial success
+                                        }
+                                        
                                         document.body.appendChild(indicator);
                                         
                                         // Add animation
@@ -120,7 +198,9 @@ export const submitCodeWithSession = async (contestId, problemIndex, sourceCode,
                                         
                                         // Clear storage after successful fill
                                         sessionStorage.removeItem('cf_submit_code');
-                                        sessionStorage.removeItem('cf_submit_language');
+                                        sessionStorage.removeItem('cf_submit_language_id');
+                                        sessionStorage.removeItem('cf_submit_language_alternates');
+                                        sessionStorage.removeItem('cf_submit_language_patterns');
                                         sessionStorage.removeItem('cf_submit_problem');
                                         
                                         return true;
