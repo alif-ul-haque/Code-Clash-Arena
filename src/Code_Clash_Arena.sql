@@ -1,6 +1,26 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.matchmaking_queue (
+  queue_id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL UNIQUE,
+  cf_handle character varying NOT NULL,
+  rating integer NOT NULL DEFAULT 0,
+  status text NOT NULL DEFAULT 'searching',
+  battle_id uuid,
+  joined_at timestamp with time zone NOT NULL DEFAULT now(),
+  matched_at timestamp with time zone,
+  CONSTRAINT matchmaking_queue_pkey PRIMARY KEY (queue_id),
+  CONSTRAINT matchmaking_queue_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT matchmaking_queue_battle_id_fkey FOREIGN KEY (battle_id) REFERENCES public.onevonebattles(onevone_battle_id)
+);
+
+-- Index for faster status-based queries
+CREATE INDEX idx_matchmaking_queue_status ON public.matchmaking_queue(status);
+
+-- Index for faster user lookups
+CREATE INDEX idx_matchmaking_queue_user_id ON public.matchmaking_queue(user_id);
+
 CREATE TABLE public.battle_table_clan (
   battle_id uuid NOT NULL DEFAULT gen_random_uuid() UNIQUE,
   clan_1_id uuid NOT NULL,
@@ -107,3 +127,19 @@ CREATE TABLE public.users (
   CONSTRAINT users_pkey PRIMARY KEY (id),
   CONSTRAINT users_clan_id_fkey FOREIGN KEY (clan_id) REFERENCES public.clans(clan_id)
 );
+
+-- Remove duplicates
+DELETE FROM matchmaking_queue
+WHERE queue_id NOT IN (
+    SELECT queue_id FROM (
+        SELECT queue_id, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY joined_at DESC) as rn
+        FROM matchmaking_queue
+    ) t WHERE t.rn = 1
+);
+
+-- Add UNIQUE constraint
+ALTER TABLE matchmaking_queue ADD CONSTRAINT matchmaking_queue_user_id_unique UNIQUE (user_id);
+
+-- Add indexes for performance
+CREATE INDEX idx_matchmaking_queue_status ON matchmaking_queue(status);
+CREATE INDEX idx_matchmaking_queue_user_id ON matchmaking_queue(user_id);

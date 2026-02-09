@@ -104,7 +104,23 @@ function PlayModePage() {
                     <p className="battle-description">challenge a local opponent</p>
                 </div>
 
-                <div className="battle-card" onClick={() => navigate('/1v1-global')} style={{cursor: 'pointer'}}>
+                <div className="battle-card" onClick={() => {
+                    const currentUser = localStorage.getItem('loggedInUser');
+                    if (!currentUser) {
+                        alert('Please log in first');
+                        navigate('/login');
+                        return;
+                    }
+                    // Store in localStorage for global page to access
+                    localStorage.setItem('currentUser', currentUser);
+                    // Navigate with state
+                    navigate('/1v1-global', {
+                        state: {
+                            currentUser: currentUser,
+                            playerRating: userData.rating
+                        }
+                    });
+                }} style={{cursor: 'pointer'}}>
                     <h2 className="battle-title">GLOBAL BATTLE</h2>
                     <p className="battle-description">Find a worthy opponent worldwide</p>
                 </div>
