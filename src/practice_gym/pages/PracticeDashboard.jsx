@@ -10,6 +10,7 @@ import ExitConfirmationPage from './ExitConfirmationPage.jsx'
 import TimerSetupPage from './TimerSetupPage.jsx'
 import Particles from "react-tsparticles"
 import { loadSlim } from "tsparticles-slim"
+import { supabase } from '../../supabaseclient'
 import { 
   codeforcesAPI, 
   calculateUserStats, 
@@ -34,7 +35,8 @@ const Dashboard = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Codeforces data states
-  const [cfHandle] = useState('alif_uL_haQue'); // Hardcoded username for now
+  const [cfHandle, setCfHandle] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [userStats, setUserStats] = useState({
     rating: 0,
     dayStreak: 0,
@@ -141,8 +143,58 @@ const Dashboard = () => {
     detectRetina: true,
   };
 
-  // Fetch Codeforces data on component mount
+  // Fetch user data from database on mount
   useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Get authenticated user
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        
+        if (authError || !user) {
+          setError('You must be logged in to access Practice Mode');
+          setLoading(false);
+          return;
+        }
+        
+        // Fetch user data from users table
+        const { data: dbUser, error: dbError } = await supabase
+          .from('users')
+          .select('cf_handle, level, xp, id, email')
+          .eq('email', user.email)
+          .maybeSingle();
+        
+        if (dbError || !dbUser) {
+          setError('Failed to load user data from database');
+          setLoading(false);
+          return;
+        }
+        
+        if (!dbUser.cf_handle) {
+          setError('Please set your Codeforces handle in your profile settings');
+          setLoading(false);
+          return;
+        }
+        
+        setUserData(dbUser);
+        setCfHandle(dbUser.cf_handle);
+        
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        setError('Failed to load user data: ' + err.message);
+        setLoading(false);
+      }
+    };
+    
+    fetchUserData();
+  }, []);
+  
+  // Fetch Codeforces data when cfHandle is available
+  useEffect(() => {
+    if (!cfHandle) return;
+    
     const fetchCodeforcesData = async () => {
       try {
         setLoading(true);
@@ -284,6 +336,14 @@ const Dashboard = () => {
     setShowSuccess(true);
   };
 
+  const handleXPUpdate = (newXP) => {
+    // Update userData with new XP value
+    setUserData(prev => ({
+      ...prev,
+      xp: newXP
+    }));
+  };
+
   const toggleTag = (tag) => {
     setSelectedTags(prev => {
       if (prev.includes(tag)) {
@@ -309,7 +369,9 @@ const Dashboard = () => {
         <div className="dashboard-bg"></div>
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p className="loading-text">Loading Codeforces data...</p>
+          <p className="loading-text">
+            {!cfHandle ? 'Loading user data...' : 'Loading Codeforces data...'}
+          </p>
         </div>
       </div>
     );
@@ -317,13 +379,20 @@ const Dashboard = () => {
 
   // Error state
   if (error) {
+    const isCfHandleError = error.includes('Codeforces handle');
+    const isAuthError = error.includes('logged in');
+    
     return (
       <div className="dashboard">
         <div className="dashboard-bg"></div>
         <div className="error-container">
           <h2 className="error-title">⚠️ Error</h2>
           <p className="error-text">{error}</p>
-          <p className="error-hint">Please check your internet connection or try again later.</p>
+          <p className="error-hint">
+            {isCfHandleError && 'Go to your profile and add your Codeforces handle to use this feature.'}
+            {isAuthError && 'Please log in to access the Practice Mode.'}
+            {!isCfHandleError && !isAuthError && 'Please check your internet connection or try again later.'}
+          </p>
           <button className="btn exit" onClick={() => navigate('/main')}>Go Back</button>
         </div>
       </div>
@@ -357,7 +426,10 @@ const Dashboard = () => {
   if (showAIHelp) {
     return <AIAssistancePage 
       problem={selectedProblem} 
-      onBack={() => setShowAIHelp(false)} 
+      userCode={userCode}
+      userData={userData}
+      onBack={() => setShowAIHelp(false)}
+      onXPUpdate={handleXPUpdate}
     />;
   }
 
@@ -370,6 +442,7 @@ const Dashboard = () => {
       onHelp={() => setShowAIHelp(true)}
       code={userCode}
       onCodeChange={setUserCode}
+      cfHandle={cfHandle}
     />;
   }
 
@@ -425,6 +498,20 @@ const Dashboard = () => {
           <span className="label">DAY STREAK:</span>
           <span className="value">{userStats.dayStreak}</span>
         </div>
+
+        {userData && (
+          <>
+            <div className="stat">
+              <span className="label">LEVEL:</span>
+              <span className="value">{userData.level || 1}</span>
+            </div>
+
+            <div className="stat">
+              <span className="label">XP:</span>
+              <span className="value">{userData.xp || 0}</span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Filter Section */}
