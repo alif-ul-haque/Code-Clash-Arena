@@ -143,3 +143,14 @@ ALTER TABLE matchmaking_queue ADD CONSTRAINT matchmaking_queue_user_id_unique UN
 -- Add indexes for performance
 CREATE INDEX idx_matchmaking_queue_status ON matchmaking_queue(status);
 CREATE INDEX idx_matchmaking_queue_user_id ON matchmaking_queue(user_id);
+
+
+ALTER TABLE onevonebattles
+ADD COLUMN IF NOT EXISTS problem_name TEXT,
+ADD COLUMN IF NOT EXISTS problem_contest_id INTEGER,
+ADD COLUMN IF NOT EXISTS problem_index TEXT,
+ADD COLUMN IF NOT EXISTS problem_rating INTEGER,
+ADD COLUMN IF NOT EXISTS problem_tags TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_onevonebattles_problem 
+ON onevonebattles(problem_contest_id, problem_index);

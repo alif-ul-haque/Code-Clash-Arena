@@ -205,20 +205,30 @@ const OneVOneGlobalPage = () => {
                                 matchmakingTimeout = null;
                             }
 
-                            // Create battle
+                            // Create battle (MUST include rating for problem selection!)
                             console.log('🔨 Creating battle...');
+                            console.log('Player 1 (me):', { id: userData.id, handle: userData.cf_handle, rating: playerRating });
+                            console.log('Player 2 (opponent):', { id: opponent.user_id, handle: opponent.cf_handle, rating: opponent.rating });
+                            
                             const battle = await createGlobalBattle(
-                                { user_id: userData.id, cf_handle: userData.cf_handle },
-                                { user_id: opponent.user_id, cf_handle: opponent.cf_handle }
+                                { user_id: userData.id, cf_handle: userData.cf_handle, rating: playerRating },
+                                { user_id: opponent.user_id, cf_handle: opponent.cf_handle, rating: opponent.rating }
                             );
 
                             console.log('✅ Battle created! ID:', battle.onevone_battle_id);
+                            console.log('✅ Problem selected:', battle.problem_name, `(${battle.problem_contest_id}${battle.problem_index})`);
                             
                             // Navigate immediately for the player who created the battle
                             await navigateToBattle(battle.onevone_battle_id);
                         }
                     } catch (error) {
-                        console.error('Error in matchmaking interval:', error);
+                        console.error('❌ Error in matchmaking interval:', error);
+                        console.error('Error details:', error.message, error.stack);
+                        
+                        // If this is a critical error (not just "no opponent found"), show it to user
+                        if (error.message && !error.message.includes('No problems found')) {
+                            setSearchStatus(`Error: ${error.message.substring(0, 40)}...`);
+                        }
                         // Don't stop searching on error, just log it
                     }
                 }, 1000); // Check every 1 second for faster detection

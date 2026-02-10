@@ -108,6 +108,108 @@ export const findBestMatch = async (userId, playerRating) => {
 };
 
 /**
+ * UNIVERSAL PROBLEM SELECTION - Selects ONE problem for BOTH players
+ * Same logic as before: based on average rating, filters unsolved problems
+ * @param {string} cfHandle1 - First player's CF handle
+ * @param {string} cfHandle2 - Second player's CF handle
+ * @param {number} avgRating - Average rating of both players
+ * @returns {Promise<Object>} Selected problem
+ */
+const selectProblemForBattle = async (cfHandle1, cfHandle2, avgRating) => {
+    try {
+        console.log(`🎯 UNIVERSAL SELECTION: Picking ONE problem for avg rating ${avgRating}`);
+        
+        // Calculate difficulty range based on average rating (SAME LOGIC AS BEFORE)
+        const targetRating = Math.max(800, Math.min(2400, avgRating));
+        const minRating = targetRating - 200;
+        const maxRating = targetRating + 200;
+        console.log(`📊 Difficulty range: ${minRating} - ${maxRating}`);
+        
+        // Fetch problems from Codeforces
+        const response = await fetch('https://codeforces.com/api/problemset.problems');
+        const data = await response.json();
+        
+        if (data.status !== 'OK') {
+            throw new Error('Failed to fetch problems from Codeforces');
+        }
+        
+        // Filter problems by rating range and type
+        const validProblems = data.result.problems.filter(
+            p => p.rating >= minRating && 
+                 p.rating <= maxRating && 
+                 p.contestId && 
+                 p.index &&
+                 p.type === 'PROGRAMMING'
+        );
+        
+        if (validProblems.length === 0) {
+            throw new Error('No problems found in rating range');
+        }
+        
+        console.log(`📝 Found ${validProblems.length} problems in range ${minRating}-${maxRating}`);
+        
+        // Fetch submissions for BOTH players (SAME LOGIC AS BEFORE)
+        const [player1Submissions, player2Submissions] = await Promise.all([
+            fetch(`https://codeforces.com/api/user.status?handle=${cfHandle1}&from=1&count=10000`)
+                .then(r => r.json())
+                .catch(() => ({ status: 'FAILED', result: [] })),
+            fetch(`https://codeforces.com/api/user.status?handle=${cfHandle2}&from=1&count=10000`)
+                .then(r => r.json())
+                .catch(() => ({ status: 'FAILED', result: [] }))
+        ]);
+        
+        // Get solved problem IDs for both players
+        const player1Solved = new Set();
+        const player2Solved = new Set();
+        
+        if (player1Submissions.status === 'OK') {
+            player1Submissions.result
+                .filter(s => s.verdict === 'OK')
+                .forEach(s => {
+                    const key = `${s.problem.contestId}-${s.problem.index}`;
+                    player1Solved.add(key);
+                });
+        }
+        
+        if (player2Submissions.status === 'OK') {
+            player2Submissions.result
+                .filter(s => s.verdict === 'OK')
+                .forEach(s => {
+                    const key = `${s.problem.contestId}-${s.problem.index}`;
+                    player2Solved.add(key);
+                });
+        }
+        
+        console.log(`✓ ${cfHandle1} solved: ${player1Solved.size}, ${cfHandle2} solved: ${player2Solved.size}`);
+        
+        // Filter problems that NEITHER player has solved (SAME LOGIC AS BEFORE)
+        const unsolvedProblems = validProblems.filter(p => {
+            const key = `${p.contestId}-${p.index}`;
+            return !player1Solved.has(key) && !player2Solved.has(key);
+        });
+        
+        let selectedProblem;
+        
+        if (unsolvedProblems.length === 0) {
+            console.log('⚠️ No unsolved problems, using any valid problem');
+            selectedProblem = validProblems[Math.floor(Math.random() * validProblems.length)];
+        } else {
+            console.log(`✓ Found ${unsolvedProblems.length} unsolved problems`);
+            // ONE RANDOM SELECTION for BOTH players
+            selectedProblem = unsolvedProblems[Math.floor(Math.random() * unsolvedProblems.length)];
+        }
+        
+        console.log(`🎲 SELECTED UNIVERSALLY: ${selectedProblem.name} (${selectedProblem.contestId}${selectedProblem.index}, rating: ${selectedProblem.rating})`);
+        console.log(`✅ This SAME problem will be given to BOTH players`);
+        
+        return selectedProblem;
+    } catch (error) {
+        console.error('Error selecting problem:', error);
+        throw error;
+    }
+};
+
+/**
  * Create global battle between two players
  * @param {Object} player1 - First player data
  * @param {Object} player2 - Second player data
@@ -148,7 +250,12 @@ export const createGlobalBattle = async (player1, player2) => {
             return existingBattle;
         }
 
-        // Create battle
+        // SELECT ONE PROBLEM UNIVERSALLY (before creating battle)
+        console.log('🎲 Selecting ONE problem for BOTH players...');
+        const avgRating = Math.round((player1.rating + player2.rating) / 2);
+        const selectedProblem = await selectProblemForBattle(player1.cf_handle, player2.cf_handle, avgRating);
+        
+        // Create battle WITH THE SELECTED PROBLEM
         const { data: battle, error: battleError } = await supabase
             .from('onevonebattles')
             .insert({
@@ -157,7 +264,13 @@ export const createGlobalBattle = async (player1, player2) => {
                 problem_count: 1,
                 status: 'active',
                 trophy_reward: 10,
-                start_time: new Date().toISOString()
+                start_time: new Date().toISOString(),
+                // Store problem details so BOTH players get the SAME problem
+                problem_name: selectedProblem.name,
+                problem_contest_id: selectedProblem.contestId,
+                problem_index: selectedProblem.index,
+                problem_rating: selectedProblem.rating,
+                problem_tags: JSON.stringify(selectedProblem.tags || [])
             })
             .select()
             .single();
@@ -167,7 +280,7 @@ export const createGlobalBattle = async (player1, player2) => {
             throw battleError;
         }
 
-        console.log('✓ Battle created:', battle.onevone_battle_id);
+        console.log('✓ Battle created:', battle.onevone_battle_id, 'with problem:', selectedProblem.name);
 
         // Add participants
         const { error: participantsError } = await supabase

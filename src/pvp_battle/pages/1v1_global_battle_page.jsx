@@ -49,82 +49,67 @@ const OneVOneGlobalBattlePage = () => {
     const [popupWindow, setPopupWindow] = useState(null);
     const [submissionTimestamp, setSubmissionTimestamp] = useState(null);
 
-    // Fetch problem based on average rating and unsolved by both players
+    // Fetch the SAME problem that was selected during matchmaking (stored in database)
     useEffect(() => {
         const loadProblem = async () => {
+            if (!battleId) {
+                setProblemError('Missing battle ID');
+                setLoadingProblem(false);
+                return;
+            }
+
             try {
                 setLoadingProblem(true);
                 setProblemError(null);
                 
-                console.log('🔍 Fetching problem for global battle...');
-                console.log('Players:', currentUser, 'vs', opponent?.cf_handle);
+                console.log('📖 Fetching problem from battle record:', battleId);
                 
-                // Get both players' ratings and submission history
-                const [player1Rating, player2Rating, player1Submissions, player2Submissions, allProblems] = await Promise.all([
-                    supabase.from('users').select('rating').eq('cf_handle', currentUser).single().then(res => res.data?.rating || 1200),
-                    supabase.from('users').select('rating').eq('cf_handle', opponent?.cf_handle).single().then(res => res.data?.rating || 1200),
-                    codeforcesAPI.getUserStatus(currentUser).catch(() => []),
-                    codeforcesAPI.getUserStatus(opponent?.cf_handle).catch(() => []),
-                    codeforcesAPI.getProblems().catch(() => ({ problems: [], problemStatistics: [] }))
-                ]);
+                // Fetch the problem that was ALREADY SELECTED during matchmaking
+                // This ensures BOTH players get the SAME problem
+                const { data: battleData, error: battleError } = await supabase
+                    .from('onevonebattles')
+                    .select('problem_name, problem_contest_id, problem_index, problem_rating, problem_tags')
+                    .eq('onevone_battle_id', battleId)
+                    .single();
                 
-                const averageRating = Math.round((player1Rating + player2Rating) / 2);
-                console.log(`📊 Player ratings: ${player1Rating}, ${player2Rating} | Average: ${averageRating}`);
-                
-                // Get solved problems for both players
-                const player1Solved = calculateUserStats(player1Submissions).solvedSet;
-                const player2Solved = calculateUserStats(player2Submissions).solvedSet;
-                console.log(`✓ Player 1 solved: ${player1Solved.size} problems`);
-                console.log(`✓ Player 2 solved: ${player2Solved.size} problems`);
-                
-                // Determine difficulty range based on average rating
-                const targetRating = Math.max(800, Math.min(2400, averageRating));
-                const minRating = targetRating - 200;
-                const maxRating = targetRating + 200;
-                console.log(`🎯 Target difficulty: ${minRating} - ${maxRating}`);
-                
-                // Filter problems that neither player has solved
-                const { problems } = allProblems;
-                const availableProblems = problems.filter(p => {
-                    const problemId = `${p.contestId}-${p.index}`;
-                    const notSolvedByEither = !player1Solved.has(problemId) && !player2Solved.has(problemId);
-                    const hasRating = p.rating && p.rating >= minRating && p.rating <= maxRating;
-                    const isProgramming = p.type === 'PROGRAMMING';
-                    return notSolvedByEither && hasRating && isProgramming;
-                });
-                
-                console.log(`📝 Found ${availableProblems.length} unsolved problems in difficulty range`);
-                
-                if (availableProblems.length === 0) {
-                    console.warn('No unsolved problems found, expanding search...');
-                    // Fallback: just use rating range, ignore solved status
-                    const fallbackProblems = problems.filter(p => 
-                        p.rating && p.rating >= minRating && p.rating <= maxRating && p.type === 'PROGRAMMING'
-                    );
-                    if (fallbackProblems.length > 0) {
-                        const randomProblem = fallbackProblems[Math.floor(Math.random() * fallbackProblems.length)];
-                        const problemData = await fetchCodeforcesProblem(randomProblem.contestId, randomProblem.index);
-                        setProblem(problemData);
-                    } else {
-                        throw new Error('No problems found in rating range');
-                    }
-                } else {
-                    // Select random problem from available unsolved problems
-                    const randomProblem = availableProblems[Math.floor(Math.random() * availableProblems.length)];
-                    console.log(`🎲 Selected: ${randomProblem.contestId}${randomProblem.index} - ${randomProblem.name} (${randomProblem.rating})`);
-                    
-                    const problemData = await fetchCodeforcesProblem(randomProblem.contestId, randomProblem.index);
-                    if (problemData) {
-                        setProblem(problemData);
-                    } else {
-                        setProblemError('Failed to load problem details');
-                    }
+                if (battleError) {
+                    console.error('Error fetching battle:', battleError);
+                    throw new Error('Failed to load battle data');
                 }
-            } catch (error) {
-                console.error('Error loading problem:', error);
-                setProblemError('Failed to load problem from Codeforces');
                 
-                // Fallback problem
+                if (!battleData.problem_name || !battleData.problem_contest_id || !battleData.problem_index) {
+                    throw new Error('Problem not assigned to this battle');
+                }
+                
+                console.log(`✅ SAME problem for BOTH players: ${battleData.problem_name} (${battleData.problem_contest_id}${battleData.problem_index})`);
+                console.log(`📊 Problem rating: ${battleData.problem_rating}`);
+                
+                // Fetch full problem details from Codeforces API
+                const problemData = await fetchCodeforcesProblem(
+                    battleData.problem_contest_id,
+                    battleData.problem_index
+                );
+                
+                if (problemData) {
+                    setProblem(problemData);
+                    console.log('✓ Problem loaded successfully');
+                } else {
+                    // Fallback to stored data if Codeforces API fails
+                    console.log('⚠️ Using stored problem data (Codeforces API failed)');
+                    setProblem({
+                        name: battleData.problem_name,
+                        contestId: battleData.problem_contest_id,
+                        index: battleData.problem_index,
+                        rating: battleData.problem_rating,
+                        tags: JSON.parse(battleData.problem_tags || '[]')
+                    });
+                }
+                
+            } catch (error) {
+                console.error('❌ Error loading problem:', error);
+                setProblemError('Failed to load problem: ' + error.message);
+                
+                // Fallback problem only as last resort
                 setProblem({
                     name: 'Sum of Two Numbers',
                     contestId: 0,
@@ -148,7 +133,7 @@ const OneVOneGlobalBattlePage = () => {
         };
 
         loadProblem();
-    }, []);
+    }, [battleId]);
 
     // Setup battle and real-time updates
     useEffect(() => {
