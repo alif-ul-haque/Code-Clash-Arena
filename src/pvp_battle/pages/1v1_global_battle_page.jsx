@@ -46,6 +46,7 @@ const OneVOneGlobalBattlePage = () => {
     const [isEditorMinimized, setIsEditorMinimized] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitMessage, setSubmitMessage] = useState('');
+    const [hasNavigated, setHasNavigated] = useState(false);
     
     // Custom modal states
     const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -220,16 +221,26 @@ const OneVOneGlobalBattlePage = () => {
 
                 // If someone won, navigate to result page
                 if (myData?.problem_solved > 0 || opponentData?.problem_solved > 0) {
+                    if (hasNavigated) return; // Prevent double navigation (winner already navigating from modal)
+                    
+                    setHasNavigated(true);
+                    console.log('🏁 Battle finished! Navigating to results...');
+                    
+                    const iWon = myData?.problem_solved > 0;
+                    
+                    // Small delay for smooth transition
                     setTimeout(() => {
-                        navigate('/battle-result', {
+                        navigate('/global-battle-result', {
                             state: {
-                                winner: myData?.problem_solved > 0 ? 'you' : 'opponent',
-                                yourTime: myData?.time_taken,
-                                opponentTime: opponentData?.time_taken,
-                                opponent: opponent
+                                winner: iWon ? 'you' : 'opponent',
+                                currentUserId: currentUserId,
+                                opponentId: opponentId,
+                                currentUserHandle: currentUser,
+                                opponentHandle: opponent?.cf_handle,
+                                battleId: battleId
                             }
                         });
-                    }, 2000);
+                    }, 1000);
                 }
             }
         } catch (err) {
@@ -468,13 +479,69 @@ const OneVOneGlobalBattlePage = () => {
                         const ratingChange = outcome.ratings.winner.change;
                         const xpChange = outcome.xp.winner.change;
                         
+                        // Store rating changes in database for both players to see
+                        console.log('💾 Storing rating changes in database...');
+                        console.log('Winner change:', outcome.ratings.winner.change);
+                        console.log('Loser change:', outcome.ratings.loser.change);
+                        
+                        const { data: winnerUpdate, error: winnerError } = await supabase
+                            .from('onevone_participants')
+                            .update({
+                                rating_change: outcome.ratings.winner.change,
+                                xp_change: outcome.xp.winner.change
+                            })
+                            .eq('onevone_battle_id', battleId)
+                            .eq('player_id', currentUserId)
+                            .select();
+                        
+                        if (winnerError) {
+                            console.error('❌ Failed to store winner rating change:', winnerError);
+                            console.error('Error details:', winnerError.message);
+                        } else {
+                            console.log('✅ Winner rating change stored:', winnerUpdate);
+                        }
+                        
+                        const { data: loserUpdate, error: loserError } = await supabase
+                            .from('onevone_participants')
+                            .update({
+                                rating_change: outcome.ratings.loser.change,
+                                xp_change: outcome.xp.loser.change
+                            })
+                            .eq('onevone_battle_id', battleId)
+                            .eq('player_id', opponentId)
+                            .select();
+                        
+                        if (loserError) {
+                            console.error('❌ Failed to store loser rating change:', loserError);
+                            console.error('Error details:', loserError.message);
+                        } else {
+                            console.log('✅ Loser rating change stored:', loserUpdate);
+                        }
+                        
                         setSubmitMessage('✅ Accepted!');
                         setResultModalData({
                             emoji: '🎉',
                             title: 'Accepted!',
-                            message: `Congratulations! Your solution was accepted!\n\nVerdict: ${verdictMsg}\nTime: ${timeTaken}s\n\n🏆 Rating: ${outcome.ratings.winner.oldRating} → ${outcome.ratings.winner.newRating} (${ratingChange >= 0 ? '+' : ''}${ratingChange})\n💎 XP: +${xpChange.toFixed(2)}\n\nWaiting for opponent...`
+                            message: `Congratulations! Your solution was accepted!\n\nVerdict: ${verdictMsg}\nTime: ${timeTaken}s\n\n🏆 Rating: ${ratingChange >= 0 ? '+' : ''}${ratingChange}\n💎 XP: +${xpChange.toFixed(2)}\n\nNavigating to results...`
                         });
                         setShowResultModal(true);
+                        
+                        // Mark that we're about to navigate (prevents double navigation from realtime updates)
+                        setHasNavigated(true);
+                        
+                        // Navigate to results page after showing modal briefly
+                        setTimeout(() => {
+                            navigate('/global-battle-result', {
+                                state: {
+                                    winner: 'you',
+                                    currentUserId: currentUserId,
+                                    opponentId: opponentId,
+                                    currentUserHandle: currentUser,
+                                    opponentHandle: opponent?.cf_handle,
+                                    battleId: battleId
+                                }
+                            });
+                        }, 2500);
                     } catch (ratingError) {
                         console.error('Failed to update ratings/XP:', ratingError);
                         // Still show success, just without rating info

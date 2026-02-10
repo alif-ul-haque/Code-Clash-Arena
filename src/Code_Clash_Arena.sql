@@ -154,3 +154,7 @@ ADD COLUMN IF NOT EXISTS problem_tags TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_onevonebattles_problem 
 ON onevonebattles(problem_contest_id, problem_index);
+
+ALTER TABLE onevone_participants
+ADD COLUMN IF NOT EXISTS rating_change INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS xp_change DECIMAL(10,2) DEFAULT 0.0;

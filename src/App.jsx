@@ -23,6 +23,7 @@ import SubmitPageReal from './pvp_battle/pages/submit_page_real.jsx'
 import OneVOneCodingTimeRushMode from './pvp_battle/pages/1v1_coding_timeRush_mode.jsx' 
 import SubmitPageTimeMode from './pvp_battle/pages/submit_page_time_mode.jsx'
 import OneVOneGlobalBattlePage from './pvp_battle/pages/1v1_global_battle_page.jsx'
+import GlobalBattleResultPage from './pvp_battle/pages/GlobalBattleResultPage.jsx'
 
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
         <Route path="/submit-page-real" element={<SubmitPageReal />} />
         <Route path="/1v1-coding-timeRush-mode" element={<OneVOneCodingTimeRushMode />} />
         <Route path="/1v1-global-battle" element={<OneVOneGlobalBattlePage />} />
+        <Route path="/global-battle-result" element={<GlobalBattleResultPage />} />
         <Route path="/submit-page-time-mode" element={<SubmitPageTimeMode />} />
         <Route path="/practice" element={<PracticeDashboard />} />
         <Route path="/battle-history" element={<BattleHistoryPage />} />
