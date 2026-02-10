@@ -13,6 +13,11 @@ import {
 } from '../utilities/codeforcesSubmission';
 import MathRenderer from '../components/MathRenderer';
 import { codeforcesAPI, calculateUserStats } from '../../practice_gym/utilities/codeforcesAPI';
+import { 
+    processMatchOutcome, 
+    addSubmissionXP,
+    processQuit 
+} from '../utilities/ratingSystem';
 
 const OneVOneGlobalBattlePage = () => {
     const navigate = useNavigate();
@@ -417,6 +422,14 @@ const OneVOneGlobalBattlePage = () => {
             
             setSubmitMessage('⏳ Checking verdict...');
             
+            // Add submission XP (+0.5 XP for each submission)
+            try {
+                await addSubmissionXP(currentUserId);
+                console.log('✅ Submission XP added (+0.5)');
+            } catch (xpError) {
+                console.error('Failed to add submission XP:', xpError);
+            }
+            
             try {
                 console.log('Starting verdict polling...');
                 const submission = await pollForVerdict(
@@ -432,7 +445,7 @@ const OneVOneGlobalBattlePage = () => {
                 const verdictMsg = getVerdictMessage(submission.verdict);
                 
                 if (accepted) {
-                    // Update database
+                    // Update database - mark as solved
                     const timeTaken = Math.floor((Date.now() - submissionTimestamp * 1000) / 1000);
                     
                     await supabase
@@ -444,14 +457,37 @@ const OneVOneGlobalBattlePage = () => {
                         .eq('onevone_battle_id', battleId)
                         .eq('player_id', currentUserId);
                     
-                    setSubmitMessage('✅ Accepted!');
-                    setResultModalData({
-                        emoji: '🎉',
-                        title: 'Accepted!',
-                        message: `Congratulations! Your solution was accepted!\n\nVerdict: ${verdictMsg}\nTime: ${timeTaken}s\n\nWaiting for opponent...`
-                    });
-                    setShowResultModal(true);
+                    // UPDATE RATINGS AND XP!
+                    console.log('🏆 Player won! Updating ratings and XP...');
+                    try {
+                        const outcome = await processMatchOutcome(currentUserId, opponentId);
+                        
+                        console.log('📊 Rating changes:', outcome.ratings);
+                        console.log('💎 XP changes:', outcome.xp);
+                        
+                        const ratingChange = outcome.ratings.winner.change;
+                        const xpChange = outcome.xp.winner.change;
+                        
+                        setSubmitMessage('✅ Accepted!');
+                        setResultModalData({
+                            emoji: '🎉',
+                            title: 'Accepted!',
+                            message: `Congratulations! Your solution was accepted!\n\nVerdict: ${verdictMsg}\nTime: ${timeTaken}s\n\n🏆 Rating: ${outcome.ratings.winner.oldRating} → ${outcome.ratings.winner.newRating} (${ratingChange >= 0 ? '+' : ''}${ratingChange})\n💎 XP: +${xpChange.toFixed(2)}\n\nWaiting for opponent...`
+                        });
+                        setShowResultModal(true);
+                    } catch (ratingError) {
+                        console.error('Failed to update ratings/XP:', ratingError);
+                        // Still show success, just without rating info
+                        setSubmitMessage('✅ Accepted!');
+                        setResultModalData({
+                            emoji: '🎉',
+                            title: 'Accepted!',
+                            message: `Congratulations! Your solution was accepted!\n\nVerdict: ${verdictMsg}\nTime: ${timeTaken}s\n\nWaiting for opponent...`
+                        });
+                        setShowResultModal(true);
+                    }
                 } else {
+                    // Wrong answer - just show verdict, XP already added for submission
                     setSubmitMessage(`❌ ${verdictMsg}`);
                     setResultModalData({
                         emoji: '❌',
@@ -482,6 +518,31 @@ const OneVOneGlobalBattlePage = () => {
         }
     };
 
+    // Handle EXIT button - process quit if battle is still active
+    const handleExit = async () => {
+        try {
+            // Check if battle is still active (neither player has won)
+            if (battleState.myStatus !== 'solved' && battleState.opponentStatus !== 'solved') {
+                console.log('🚪 Player quitting active battle...');
+                
+                // Process quit: quitter loses, opponent wins
+                try {
+                    const quitOutcome = await processQuit(currentUserId, opponentId);
+                    console.log('✅ Quit processed:', quitOutcome);
+                    console.log(`📊 Rating: ${quitOutcome.ratings.loser.oldRating} → ${quitOutcome.ratings.loser.newRating} (${quitOutcome.ratings.loser.change})`);
+                    console.log(`💎 XP: ${quitOutcome.xp.quitter.change.toFixed(2)}`);
+                } catch (quitError) {
+                    console.error('Failed to process quit:', quitError);
+                }
+            }
+        } catch (err) {
+            console.error('Error handling exit:', err);
+        } finally {
+            // Navigate regardless of quit processing result
+            navigate('/playmode1v1');
+        }
+    };
+
     return (
         <div className="coding-battle-container">
             {/* Header */}
@@ -502,7 +563,7 @@ const OneVOneGlobalBattlePage = () => {
                     </div>
                 </div>
                 
-                <button className="exit-btn" onClick={() => navigate('/playmode1v1')}>EXIT</button>
+                <button className="exit-btn" onClick={handleExit}>EXIT</button>
             </div>
 
             {/* Main Content */}
