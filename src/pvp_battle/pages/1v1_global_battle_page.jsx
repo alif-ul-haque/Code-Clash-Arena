@@ -145,6 +145,8 @@ const OneVOneGlobalBattlePage = () => {
     useEffect(() => {
         const setupBattle = async () => {
             try {
+                console.log('🔧 Setting up battle...', battleId, currentUser, opponent?.cf_handle);
+                
                 // Get current user's ID
                 const { data: userData } = await supabase
                     .from('users')
@@ -152,7 +154,9 @@ const OneVOneGlobalBattlePage = () => {
                     .eq('cf_handle', currentUser)
                     .single();
 
-                setCurrentUserId(userData?.id);
+                const myUserId = userData?.id;
+                setCurrentUserId(myUserId);
+                console.log('👤 My user ID:', myUserId);
 
                 // Get opponent's ID
                 const { data: opponentData } = await supabase
@@ -161,11 +165,14 @@ const OneVOneGlobalBattlePage = () => {
                     .eq('cf_handle', opponent.cf_handle)
                     .single();
 
-                setOpponentId(opponentData?.id);
+                const oppUserId = opponentData?.id;
+                setOpponentId(oppUserId);
+                console.log('🎯 Opponent user ID:', oppUserId);
 
                 // Subscribe to real-time battle updates
+                console.log('📡 Setting up realtime subscription for battle:', battleId);
                 const channel = supabase
-                    .channel('global-battle-updates')
+                    .channel('global-battle-updates-' + battleId)
                     .on(
                         'postgres_changes',
                         {
@@ -175,16 +182,43 @@ const OneVOneGlobalBattlePage = () => {
                             filter: `onevone_battle_id=eq.${battleId}`
                         },
                         (payload) => {
-                            console.log('Battle update:', payload);
-                            checkBattleStatus();
+                            console.log('🔔 Battle update received!', payload);
+                            console.log('📊 Updated record:', payload.new);
+                            
+                            // Check if someone solved the problem
+                            if (payload.new.problem_solved === 1) {
+                                console.log('✅ Someone solved! Player ID:', payload.new.player_id);
+                                console.log('🆔 My ID:', myUserId, 'Opponent ID:', oppUserId);
+                                
+                                // Use the IDs from closure, not state (state might not be updated yet)
+                                const iWon = payload.new.player_id === myUserId;
+                                console.log('🏆 Did I win?', iWon);
+                                
+                                if (!iWon) {
+                                    // I LOST - navigate immediately
+                                    console.log('😞 I LOST! Navigating to results page...');
+                                    setTimeout(() => {
+                                        navigate('/global-battle-result', {
+                                            state: {
+                                                winner: 'opponent',
+                                                currentUserId: myUserId,
+                                                opponentId: oppUserId,
+                                                currentUserHandle: currentUser,
+                                                opponentHandle: opponent?.cf_handle,
+                                                battleId: battleId
+                                            }
+                                        });
+                                    }, 1000);
+                                }
+                            }
                         }
                     )
-                    .subscribe();
-
-                // Initial status check
-                checkBattleStatus();
+                    .subscribe((status) => {
+                        console.log('📡 Subscription status:', status);
+                    });
 
                 return () => {
+                    console.log('🔌 Cleaning up subscription');
                     supabase.removeChannel(channel);
                 };
 
@@ -196,7 +230,7 @@ const OneVOneGlobalBattlePage = () => {
         if (battleId && currentUser && opponent) {
             setupBattle();
         }
-    }, [battleId, currentUser, opponent]);
+    }, [battleId, currentUser, opponent, navigate]);
 
     // Check current battle status
     const checkBattleStatus = async () => {
@@ -551,9 +585,9 @@ const OneVOneGlobalBattlePage = () => {
                         
                         console.log('🎉 Winner modal shown. Will navigate after 2.5 seconds...');
                         
-                        // Navigate to results page after showing modal
+                        // Navigate to results page after showing modal (Winner path)
                         setTimeout(() => {
-                            setHasNavigated(true);
+                            console.log('🏆 I WON! Navigating to results page...');
                             navigate('/global-battle-result', {
                                 state: {
                                     winner: 'you',
