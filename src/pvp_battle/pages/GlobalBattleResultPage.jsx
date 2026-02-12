@@ -52,6 +52,7 @@ const GlobalBattleResultPage = () => {
                 console.log('🔍 Current user participant:', currentUserParticipant);
                 console.log('🔍 Rating change from DB:', currentUserParticipant?.rating_change);
                 console.log('🔍 XP change from DB:', currentUserParticipant?.xp_change);
+                console.log('🔍 Opponent rating change:', opponentParticipant?.rating_change);
 
                 // Get problem details
                 const { data: battleData } = await supabase
@@ -59,6 +60,9 @@ const GlobalBattleResultPage = () => {
                     .select('problem_name, problem_contest_id, problem_index')
                     .eq('onevone_battle_id', battleId)
                     .single();
+                
+                const currentUserRatingChange = parseInt(currentUserParticipant?.rating_change) || 0;
+                const currentUserXPChange = parseFloat(currentUserParticipant?.xp_change) || 0;
 
                 setResultData({
                     won,
@@ -72,10 +76,10 @@ const GlobalBattleResultPage = () => {
                     loserTime: loserParticipant?.time_taken || 0,
                     problemName: battleData?.problem_name || 'Unknown',
                     problemId: `${battleData?.problem_contest_id}${battleData?.problem_index}`,
-                    currentUserRatingChange: currentUserParticipant?.rating_change || 0,
-                    opponentRatingChange: opponentParticipant?.rating_change || 0,
-                    currentUserXPChange: currentUserParticipant?.xp_change || 0,
-                    opponentXPChange: opponentParticipant?.xp_change || 0
+                    currentUserRatingChange: currentUserRatingChange,
+                    opponentRatingChange: parseInt(opponentParticipant?.rating_change) || 0,
+                    currentUserXPChange: currentUserXPChange,
+                    opponentXPChange: parseFloat(opponentParticipant?.xp_change) || 0
                 });
 
                 setLoading(false);

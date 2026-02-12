@@ -201,14 +201,22 @@ const OneVOneGlobalBattlePage = () => {
     // Check current battle status
     const checkBattleStatus = async () => {
         try {
+            console.log('⚡ checkBattleStatus called. hasNavigated:', hasNavigated);
+            
             const { data: participants } = await supabase
                 .from('onevone_participants')
                 .select('player_id, problem_solved, time_taken')
                 .eq('onevone_battle_id', battleId);
 
+            console.log('📋 Participants:', participants);
+            console.log('🆔 My ID:', currentUserId, 'Opponent ID:', opponentId);
+
             if (participants) {
                 const myData = participants.find(p => p.player_id === currentUserId);
                 const opponentData = participants.find(p => p.player_id === opponentId);
+
+                console.log('👤 My data:', myData);
+                console.log('🎯 Opponent data:', opponentData);
 
                 setBattleState({
                     myProgress: myData?.problem_solved || 0,
@@ -221,26 +229,36 @@ const OneVOneGlobalBattlePage = () => {
 
                 // If someone won, navigate to result page
                 if (myData?.problem_solved > 0 || opponentData?.problem_solved > 0) {
-                    if (hasNavigated) return; // Prevent double navigation (winner already navigating from modal)
-                    
-                    setHasNavigated(true);
-                    console.log('🏁 Battle finished! Navigating to results...');
+                    console.log('🏆 Someone won! My solved:', myData?.problem_solved, 'Opponent solved:', opponentData?.problem_solved);
                     
                     const iWon = myData?.problem_solved > 0;
                     
-                    // Small delay for smooth transition
-                    setTimeout(() => {
-                        navigate('/global-battle-result', {
-                            state: {
-                                winner: iWon ? 'you' : 'opponent',
-                                currentUserId: currentUserId,
-                                opponentId: opponentId,
-                                currentUserHandle: currentUser,
-                                opponentHandle: opponent?.cf_handle,
-                                battleId: battleId
-                            }
-                        });
-                    }, 1000);
+                    // If I won, I'll navigate from the modal (after 2.5s)
+                    // Only navigate here if I LOST (opponent won)
+                    if (!iWon) {
+                        if (hasNavigated) {
+                            console.log('⏭️ Already navigated, skipping...');
+                            return;
+                        }
+                        
+                        setHasNavigated(true);
+                        console.log('😞 I LOST - Navigating to results page...');
+                        
+                        setTimeout(() => {
+                            navigate('/global-battle-result', {
+                                state: {
+                                    winner: 'opponent',
+                                    currentUserId: currentUserId,
+                                    opponentId: opponentId,
+                                    currentUserHandle: currentUser,
+                                    opponentHandle: opponent?.cf_handle,
+                                    battleId: battleId
+                                }
+                            });
+                        }, 500);
+                    } else {
+                        console.log('🎉 I WON - Will navigate after modal is dismissed');
+                    }
                 }
             }
         } catch (err) {
@@ -459,6 +477,7 @@ const OneVOneGlobalBattlePage = () => {
                     // Update database - mark as solved
                     const timeTaken = Math.floor((Date.now() - submissionTimestamp * 1000) / 1000);
                     
+                    // First, mark problem as solved
                     await supabase
                         .from('onevone_participants')
                         .update({
@@ -470,6 +489,10 @@ const OneVOneGlobalBattlePage = () => {
                     
                     // UPDATE RATINGS AND XP!
                     console.log('🏆 Player won! Updating ratings and XP...');
+                    console.log('Battle ID:', battleId);
+                    console.log('Winner ID:', currentUserId);
+                    console.log('Loser ID:', opponentId);
+                    
                     try {
                         const outcome = await processMatchOutcome(currentUserId, opponentId);
                         
@@ -481,41 +504,41 @@ const OneVOneGlobalBattlePage = () => {
                         
                         // Store rating changes in database for both players to see
                         console.log('💾 Storing rating changes in database...');
-                        console.log('Winner change:', outcome.ratings.winner.change);
-                        console.log('Loser change:', outcome.ratings.loser.change);
+                        console.log('Winner change:', ratingChange, 'XP:', xpChange);
+                        console.log('Loser change:', outcome.ratings.loser.change, 'XP:', outcome.xp.loser.change);
                         
-                        const { data: winnerUpdate, error: winnerError } = await supabase
-                            .from('onevone_participants')
-                            .update({
-                                rating_change: outcome.ratings.winner.change,
-                                xp_change: outcome.xp.winner.change
-                            })
-                            .eq('onevone_battle_id', battleId)
-                            .eq('player_id', currentUserId)
-                            .select();
+                        // Update BOTH players' records with rating/XP changes
+                        const [winnerUpdate, loserUpdate] = await Promise.all([
+                            supabase
+                                .from('onevone_participants')
+                                .update({
+                                    rating_change: parseInt(ratingChange),
+                                    xp_change: parseFloat(xpChange)
+                                })
+                                .eq('onevone_battle_id', battleId)
+                                .eq('player_id', currentUserId)
+                                .select(),
+                            
+                            supabase
+                                .from('onevone_participants')
+                                .update({
+                                    rating_change: parseInt(outcome.ratings.loser.change),
+                                    xp_change: parseFloat(outcome.xp.loser.change)
+                                })
+                                .eq('onevone_battle_id', battleId)
+                                .eq('player_id', opponentId)
+                                .select()
+                        ]);
                         
-                        if (winnerError) {
-                            console.error('❌ Failed to store winner rating change:', winnerError);
-                            console.error('Error details:', winnerError.message);
-                        } else {
-                            console.log('✅ Winner rating change stored:', winnerUpdate);
+                        console.log('✅ Update Results:');
+                        console.log('Winner update:', winnerUpdate);
+                        console.log('Loser update:', loserUpdate);
+                        
+                        if (winnerUpdate.error) {
+                            console.error('❌ Winner update error:', winnerUpdate.error);
                         }
-                        
-                        const { data: loserUpdate, error: loserError } = await supabase
-                            .from('onevone_participants')
-                            .update({
-                                rating_change: outcome.ratings.loser.change,
-                                xp_change: outcome.xp.loser.change
-                            })
-                            .eq('onevone_battle_id', battleId)
-                            .eq('player_id', opponentId)
-                            .select();
-                        
-                        if (loserError) {
-                            console.error('❌ Failed to store loser rating change:', loserError);
-                            console.error('Error details:', loserError.message);
-                        } else {
-                            console.log('✅ Loser rating change stored:', loserUpdate);
+                        if (loserUpdate.error) {
+                            console.error('❌ Loser update error:', loserUpdate.error);
                         }
                         
                         setSubmitMessage('✅ Accepted!');
@@ -526,11 +549,11 @@ const OneVOneGlobalBattlePage = () => {
                         });
                         setShowResultModal(true);
                         
-                        // Mark that we're about to navigate (prevents double navigation from realtime updates)
-                        setHasNavigated(true);
+                        console.log('🎉 Winner modal shown. Will navigate after 2.5 seconds...');
                         
-                        // Navigate to results page after showing modal briefly
+                        // Navigate to results page after showing modal
                         setTimeout(() => {
+                            setHasNavigated(true);
                             navigate('/global-battle-result', {
                                 state: {
                                     winner: 'you',
