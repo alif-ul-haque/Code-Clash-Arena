@@ -97,6 +97,114 @@ const selectProblemForLocalBattle = async (cfHandle1, cfHandle2, avgRating) => {
     }
 };
 
+// Multi-problem selection for TIME RUSH MODE
+const selectMultipleProblems = async (cfHandle1, cfHandle2, avgRating, count) => {
+    try {
+        console.log(`🎯 TIME RUSH: Selecting ${count} problems for avg rating ${avgRating}`);
+        
+        const targetRating = Math.max(800, Math.min(2400, avgRating));
+        const minRating = targetRating - 200;
+        const maxRating = targetRating + 200;
+        console.log(`📊 Difficulty range: ${minRating} - ${maxRating}`);
+        
+        // Fetch problems from Codeforces
+        const response = await fetch('https://codeforces.com/api/problemset.problems');
+        const data = await response.json();
+        
+        if (data.status !== 'OK') {
+            throw new Error('Failed to fetch problems from Codeforces');
+        }
+        
+        // Filter valid problems
+        const validProblems = data.result.problems.filter(
+            p => p.rating >= minRating && 
+                 p.rating <= maxRating && 
+                 p.contestId && 
+                 p.index &&
+                 p.type === 'PROGRAMMING'
+        );
+        
+        if (validProblems.length === 0) {
+            throw new Error('No problems found in rating range');
+        }
+        
+        console.log(`📝 Found ${validProblems.length} problems in range`);
+        
+        // Fetch submissions for BOTH players
+        const [player1Submissions, player2Submissions] = await Promise.all([
+            fetch(`https://codeforces.com/api/user.status?handle=${cfHandle1}&from=1&count=10000`)
+                .then(r => r.json())
+                .catch(() => ({ status: 'FAILED', result: [] })),
+            fetch(`https://codeforces.com/api/user.status?handle=${cfHandle2}&from=1&count=10000`)
+                .then(r => r.json())
+                .catch(() => ({ status: 'FAILED', result: [] }))
+        ]);
+        
+        // Get solved problem IDs
+        const player1Solved = new Set();
+        const player2Solved = new Set();
+        
+        if (player1Submissions.status === 'OK') {
+            player1Submissions.result.forEach(sub => {
+                if (sub.verdict === 'OK') {
+                    player1Solved.add(`${sub.problem.contestId}-${sub.problem.index}`);
+                }
+            });
+        }
+        
+        if (player2Submissions.status === 'OK') {
+            player2Submissions.result.forEach(sub => {
+                if (sub.verdict === 'OK') {
+                    player2Solved.add(`${sub.problem.contestId}-${sub.problem.index}`);
+                }
+            });
+        }
+        
+        // Filter unsolved problems
+        let availableProblems = validProblems.filter(p => {
+            const problemId = `${p.contestId}-${p.index}`;
+            return !player1Solved.has(problemId) && !player2Solved.has(problemId);
+        });
+        
+        if (availableProblems.length === 0) {
+            console.log('⚠️ No unsolved problems, using all valid problems');
+            availableProblems = validProblems;
+        }
+        
+        // Select N unique random problems
+        const selectedProblems = [];
+        const usedIndices = new Set();
+        
+        for (let i = 0; i < count; i++) {
+            if (availableProblems.length === 0) break;
+            
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * availableProblems.length);
+            } while (usedIndices.has(randomIndex) && usedIndices.size < availableProblems.length);
+            
+            usedIndices.add(randomIndex);
+            const problem = availableProblems[randomIndex];
+            selectedProblems.push({
+                name: problem.name,
+                contestId: problem.contestId,
+                index: problem.index,
+                rating: problem.rating,
+                tags: problem.tags || []
+            });
+            
+            console.log(`✓ Problem ${i + 1}: ${problem.name} (${problem.contestId}${problem.index})`);
+        }
+        
+        console.log(`✅ Selected ${selectedProblems.length} problems for TIME RUSH MODE`);
+        return selectedProblems;
+        
+    } catch (error) {
+        console.error('Error selecting multiple problems:', error);
+        throw error;
+    }
+};
+
 const OneVOneLocalPage = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('friends');
@@ -412,8 +520,45 @@ const OneVOneLocalPage = () => {
                 if (updateError) throw updateError;
                 
                 console.log('✅ Problem stored in database, battle activated');
+            } else if (battle.battle_mode === 'TIME RUSH MODE') {
+                // For TIME RUSH MODE, select MULTIPLE problems
+                console.log(`🎲 Selecting ${battle.problem_count} random problems for TIME RUSH MODE...`);
+                
+                // Get both players' data
+                const [currentUserData, opponentUserData] = await Promise.all([
+                    supabase.from('users').select('rating, cf_handle').eq('cf_handle', loggedInUser).single(),
+                    supabase.from('users').select('rating, cf_handle').eq('cf_handle', opponent.cf_handle).single()
+                ]);
+                
+                if (currentUserData.error || opponentUserData.error) {
+                    throw new Error('Failed to fetch user data');
+                }
+                
+                const avgRating = Math.round((currentUserData.data.rating + opponentUserData.data.rating) / 2);
+                console.log(`📊 Average rating: ${avgRating}`);
+                
+                // Select multiple problems
+                const selectedProblems = await selectMultipleProblems(
+                    currentUserData.data.cf_handle,
+                    opponentUserData.data.cf_handle,
+                    avgRating,
+                    battle.problem_count
+                );
+                
+                // Store problems as JSON array in problem_tags column (reusing existing column)
+                const { error: updateError } = await supabase
+                    .from('onevonebattles')
+                    .update({
+                        status: 'active',
+                        problem_tags: JSON.stringify(selectedProblems)
+                    })
+                    .eq('onevone_battle_id', battleId);
+                
+                if (updateError) throw updateError;
+                
+                console.log('✅ Problems stored in database, battle activated');
             } else {
-                // For TIME RUSH MODE, just update status to active
+                // For other modes, just update status to active
                 const { error } = await supabase
                     .from('onevonebattles')
                     .update({ status: 'active' })
