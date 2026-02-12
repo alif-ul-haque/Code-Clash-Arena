@@ -12,6 +12,7 @@ import {
     getVerdictMessage 
 } from '../utilities/codeforcesSubmission';
 import MathRenderer from '../components/MathRenderer';
+import { processMatchOutcome } from '../utilities/ratingSystem';
 
 const OneVOneCodingBattlePage = () => {
     const navigate = useNavigate();
@@ -49,87 +50,95 @@ const OneVOneCodingBattlePage = () => {
     const [popupWindow, setPopupWindow] = useState(null);
     const [submissionTimestamp, setSubmissionTimestamp] = useState(null);
 
-    // Fetch problem from Codeforces
+    // Fetch the SAME problem that was selected when battle was accepted (stored in database)
     useEffect(() => {
         const loadProblem = async () => {
             try {
                 setLoadingProblem(true);
                 setProblemError(null);
                 
-                console.log('Starting problem fetch...');
-                // Fetch problem 2185A from Codeforces
-                const problemData = await fetchCodeforcesProblem(2185, 'A');
+                console.log('🔍 Fetching problem from database for battleId:', battleId);
+                
+                // Get problem details from onevonebattles table
+                const { data: battleData, error: battleError } = await supabase
+                    .from('onevonebattles')
+                    .select('problem_name, problem_contest_id, problem_index, problem_rating, problem_tags')
+                    .eq('onevone_battle_id', battleId)
+                    .single();
+                
+                if (battleError) {
+                    throw new Error('Failed to fetch battle data: ' + battleError.message);
+                }
+                
+                if (!battleData.problem_contest_id || !battleData.problem_index) {
+                    throw new Error('No problem assigned to this battle');
+                }
+                
+                console.log(`✓ Problem from DB: ${battleData.problem_name} (${battleData.problem_contest_id}${battleData.problem_index})`);
+                
+                // Fetch full problem details from Codeforces
+                const problemData = await fetchCodeforcesProblem(
+                    battleData.problem_contest_id,
+                    battleData.problem_index
+                );
                 
                 if (problemData) {
-                    console.log('Problem loaded successfully:', problemData.name);
+                    console.log('✓ Problem loaded successfully:', problemData.name);
                     setProblem(problemData);
                 } else {
-                    throw new Error('No problem data returned');
+                    throw new Error('Failed to fetch problem from Codeforces');
                 }
             } catch (error) {
-                console.error('Error loading problem:', error);
+                console.error('❌ Error loading problem:', error);
                 
-                // Show user-friendly error message
                 const errorMessage = error.message.includes('aborted') 
-                    ? 'Connection timeout. Using fallback problem.'
-                    : 'Failed to load problem from Codeforces. Using fallback.';
+                    ? 'Connection timeout. Please refresh the page.'
+                    : error.message || 'Failed to load problem. Please refresh the page.';
                 
                 setProblemError(errorMessage);
-                
-                // Fallback to a working default problem
-                setProblem({
-                    name: 'Two Sum',
-                    contestId: 0,
-                    index: 'A',
-                    rating: 800,
-                    tags: ['arrays', 'hash table'],
-                    statement: 'Given an array of integers nums and an integer target, return the indices of the two numbers that add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.',
-                    inputSpec: 'An array of integers nums and an integer target',
-                    outputSpec: 'Return the indices of the two numbers that add up to target',
-                    examples: [{
-                        input: 'nums = [2,7,11,15], target = 9',
-                        output: '[0,1]'
-                    }, {
-                        input: 'nums = [3,2,4], target = 6',
-                        output: '[1,2]'
-                    }],
-                    constraints: 'The answer is guaranteed to exist.',
-                    timeLimit: '1 second',
-                    memoryLimit: '256 megabytes'
-                });
             } finally {
                 setLoadingProblem(false);
             }
         };
 
-        loadProblem();
-    }, []);
+        if (battleId) {
+            loadProblem();
+        }
+    }, [battleId]);
 
-    // Check Codeforces session on mount
+    // Setup battle and real-time updates with closure pattern (like global battle)
     useEffect(() => {
         const setupBattle = async () => {
             try {
-                // Get current user's ID
+                console.log('🔧 Setting up local battle...');
+                
+                // Get current user's data
                 const { data: userData } = await supabase
                     .from('users')
-                    .select('id')
+                    .select('id, cf_handle')
                     .eq('cf_handle', currentUser)
                     .single();
 
-                setCurrentUserId(userData?.id);
-
-                // Get opponent's ID
+                // Get opponent's data
                 const { data: opponentData } = await supabase
                     .from('users')
-                    .select('id')
+                    .select('id, cf_handle')
                     .eq('cf_handle', opponent.cf_handle)
                     .single();
 
-                setOpponentId(opponentData?.id);
+                // Store IDs in closure scope (NOT state) for realtime callback
+                const myUserId = userData?.id;
+                const oppUserId = opponentData?.id;
+                
+                // Also set state for UI
+                setCurrentUserId(myUserId);
+                setOpponentId(oppUserId);
 
+                console.log('📡 Setting up realtime subscription for local battle...');
+                
                 // Subscribe to real-time changes on participants table
                 const channel = supabase
-                    .channel('battle-updates')
+                    .channel('local-battle-updates-' + battleId)
                     .on(
                         'postgres_changes',
                         {
@@ -139,11 +148,39 @@ const OneVOneCodingBattlePage = () => {
                             filter: `onevone_battle_id=eq.${battleId}`
                         },
                         (payload) => {
-                            // Update battle state when any participant's status changes
-                            checkBattleStatus();
+                            console.log('🔔 Local battle update received!', payload);
+                            
+                            // Check if someone solved the problem
+                            if (payload.new.problem_solved === 1) {
+                                console.log('✅ Someone solved! Player ID:', payload.new.player_id);
+                                console.log('🆔 My ID:', myUserId, 'Opponent ID:', oppUserId);
+                                
+                                // Check if I won or lost
+                                const iWon = payload.new.player_id === myUserId;
+                                console.log('🏆 Did I win?', iWon);
+                                
+                                if (!iWon) {
+                                    // I LOST - navigate immediately to results
+                                    console.log('😞 I LOST! Navigating to results page...');
+                                    setTimeout(() => {
+                                        navigate('/submit-page-real', {
+                                            state: {
+                                                battleId: battleId,
+                                                won: false,
+                                                opponent: opponentData.cf_handle,
+                                                currentUserId: myUserId,
+                                                opponentId: oppUserId
+                                            }
+                                        });
+                                    }, 1000);
+                                }
+                                // If I won, navigation happens from handleCheckVerdict after modal
+                            }
                         }
                     )
                     .subscribe();
+
+                console.log('✓ Realtime subscription active');
 
                 // Initial status check
                 checkBattleStatus();
@@ -154,16 +191,16 @@ const OneVOneCodingBattlePage = () => {
                 };
 
             } catch (err) {
-                console.error('Error setting up battle:', err);
+                console.error('❌ Error setting up battle:', err);
             }
         };
 
         if (battleId && currentUser && opponent) {
             setupBattle();
         }
-    }, [battleId, currentUser, opponent]);
+    }, [battleId, currentUser, opponent, navigate]);
 
-    // Function to check current battle status
+    // Function to check current battle status (for UI updates only, navigation handled by realtime)
     const checkBattleStatus = async () => {
         try {
             const { data: participants } = await supabase
@@ -183,20 +220,8 @@ const OneVOneCodingBattlePage = () => {
                     winner: myData?.problem_solved > 0 ? 'you' : 
                             opponentData?.problem_solved > 0 ? 'opponent' : null
                 });
-
-                // If someone won, navigate to result page
-                if (myData?.problem_solved > 0 || opponentData?.problem_solved > 0) {
-                    setTimeout(() => {
-                        navigate('/submit-page-real', {
-                            state: {
-                                battleId,
-                                won: myData?.problem_solved > 0,
-                                opponent: opponent.cf_handle,
-                                trophyChange: myData?.problem_solved > 0 ? '+115' : '-50'
-                            }
-                        });
-                    }, 1000);
-                }
+                
+                // Navigation is handled by realtime subscription
             }
         } catch (err) {
             console.error('Error checking battle status:', err);
@@ -302,7 +327,7 @@ const OneVOneCodingBattlePage = () => {
                 setResultModalData({
                     emoji: '�',
                     title: 'Code Copied to Clipboard!',
-                    message: `Codeforces popup opened!\n\n✅ Your code is copied to clipboard\n✅ Problem: ${problem.contestId}${problem.index}\n✅ Language: ${selectedLanguage}\n\n📌 Steps:\n1. Select language in popup\n2. Paste your code (Ctrl+V)\n3. Click Submit\n\nThe popup will auto-close 3s after submission!`
+                    message: `Codeforces popup opened!\n\n✅ Your code is copied to clipboard\n✅ Problem: ${problem.contestId}${problem.index}\n✅ Language: ${selectedLanguage}\n\n📌 Steps:\n1. Select language in popup\n2. Paste your code (Ctrl+V)\n3. Click Submit\n\nThe popup will auto-close after 1 minute!`
                 });
                 setShowResultModal(true);
                 setSubmitMessage('⏳ Waiting for you to paste and submit...');
@@ -364,11 +389,11 @@ const OneVOneCodingBattlePage = () => {
                 // If user clicked Submit → Codeforces redirects away from submit page
                 if (!currentUrl.includes(initialPath)) {
                     console.log('Submit detected! URL changed to:', currentUrl);
-                    console.log('Closing popup in 3 seconds...');
+                    console.log('Closing popup in 60 seconds (1 minute)...');
                     
                     clearInterval(monitorInterval);
                     
-                    setSubmitMessage('✅ Submitted! Closing popup in 3s...');
+                    setSubmitMessage('✅ Submitted! Closing popup in 60s...');
                     
                     setTimeout(() => {
                         if (!popup.closed) popup.close();
@@ -377,7 +402,7 @@ const OneVOneCodingBattlePage = () => {
                         setShowResultModal(false);
                         setSubmitMessage('✅ Checking verdict...');
                         handleCheckVerdict(timestamp);
-                    }, 3000); // 3 seconds delay after Submit
+                    }, 60000); // 60 seconds (1 minute) delay after Submit
                     
                     return;
                 }
@@ -428,20 +453,46 @@ const OneVOneCodingBattlePage = () => {
                 setSubmitMessage(`Verdict: ${verdictMsg}`);
                 
                 if (accepted) {
+                    console.log('🏆 Player won! Updating ratings and XP...');
+                    
                     // Calculate time taken (in seconds)
                     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
 
-                    // Update participant status - mark problem as solved
-                    const { error } = await supabase
-                        .from('onevone_participants')
-                        .update({
-                            problem_solved: 1,
-                            time_taken: timeTaken
-                        })
-                        .eq('onevone_battle_id', battleId)
-                        .eq('player_id', currentUserId);
+                    // Process match outcome (ELO rating + XP system)
+                    const matchResult = await processMatchOutcome(currentUserId, opponentId);
+                    
+                    console.log('💾 Storing rating changes in database...');
+                    console.log('Winner rating change:', matchResult.ratings.winner.change);
+                    console.log('Loser rating change:', matchResult.ratings.loser.change);
+                    console.log('Winner XP change:', matchResult.xp.winner.change);
+                    console.log('Loser XP change:', matchResult.xp.loser.change);
 
-                    if (error) throw error;
+                    // Update participants table with rating and XP changes
+                    await Promise.all([
+                        // Winner (current user)
+                        supabase
+                            .from('onevone_participants')
+                            .update({
+                                problem_solved: 1,
+                                time_taken: timeTaken,
+                                rating_change: parseInt(matchResult.ratings.winner.change),
+                                xp_change: parseFloat(matchResult.xp.winner.change)
+                            })
+                            .eq('onevone_battle_id', battleId)
+                            .eq('player_id', currentUserId),
+                        // Loser (opponent)
+                        supabase
+                            .from('onevone_participants')
+                            .update({
+                                problem_solved: 0,
+                                rating_change: parseInt(matchResult.ratings.loser.change),
+                                xp_change: parseFloat(matchResult.xp.loser.change)
+                            })
+                            .eq('onevone_battle_id', battleId)
+                            .eq('player_id', opponentId)
+                    ]);
+                    
+                    console.log('✅ Rating and XP changes stored in participants table');
 
                     // Update battle status to completed
                     await supabase
@@ -452,18 +503,16 @@ const OneVOneCodingBattlePage = () => {
                         })
                         .eq('onevone_battle_id', battleId);
 
-                    // Update user's trophy count
+                    // Update winner's problem_solved counter
                     const { data: currentUserData } = await supabase
                         .from('users')
-                        .select('rating, xp, problem_solved')
+                        .select('problem_solved')
                         .eq('id', currentUserId)
                         .single();
 
                     await supabase
                         .from('users')
                         .update({
-                            rating: (currentUserData.rating || 0) + 115,
-                            xp: (currentUserData.xp || 0) + 5,
                             problem_solved: (currentUserData.problem_solved || 0) + 1
                         })
                         .eq('id', currentUserId);
@@ -471,22 +520,26 @@ const OneVOneCodingBattlePage = () => {
                     setResultModalData({
                         emoji: '🎉',
                         title: 'Accepted! You Won!',
-                        message: `Congratulations! You won the battle!\n\nTime: ${submission.timeConsumedMillis}ms\nMemory: ${Math.round(submission.memoryConsumedBytes / 1024)}KB`
+                        message: `Congratulations! You won the battle!\n\nTime: ${submission.timeConsumedMillis}ms\nMemory: ${Math.round(submission.memoryConsumedBytes / 1024)}KB\n\nRating: ${matchResult.ratings.winner.change >= 0 ? '+' : ''}${matchResult.ratings.winner.change}\nXP: +${matchResult.xp.winner.change.toFixed(2)}`
                     });
                     setShowResultModal(true);
                     
-                    // Navigate to result page after short delay
+                    console.log('🎉 Winner modal shown. Will navigate after 2.5 seconds...');
+                    
+                    // Navigate to result page after modal delay
                     setTimeout(() => {
+                        console.log('🏆 I WON! Navigating to results page...');
                         navigate('/submit-page-real', {
                             state: {
                                 battleId,
                                 won: true,
                                 opponent: opponent.cf_handle,
-                                trophyChange: '+115',
+                                currentUserId: currentUserId,
+                                opponentId: opponentId,
                                 verdict: verdictMsg
                             }
                         });
-                    }, 2000);
+                    }, 2500);
                 } else {
                     setResultModalData({
                         emoji: '❌',
