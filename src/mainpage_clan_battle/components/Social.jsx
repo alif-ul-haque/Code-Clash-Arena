@@ -10,7 +10,7 @@ import { acceptClanRequest, rejectClanRequest } from '../utilities/ClanAdd.js';
 import AlertPage from '../../assets/components/AlertPage.jsx';
 import { supabase } from '../../supabaseclient.js';
 import { viewNonFriends, hasFriendRequest } from '../utilities/Friend_request.js';
-import { acceptFriendRequest , cancelFriendRequest} from '../utilities/FriendAdd.js';
+import { acceptFriendRequest, cancelFriendRequest } from '../utilities/FriendAdd.js';
 
 export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     const [activeTab, setActiveTab] = useState('friend');
@@ -111,9 +111,17 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
         try {
             if (mail.type === 'friend') {
                 await acceptFriendRequest({ id: mail.id, userId: mail.userId });
+                setAlertType('success');
                 setAlertMessage('Friend request accepted successfully!');
             } else if (mail.type === 'clan') {
-                await acceptClanRequest({ id: mail.id, userId: mail.userId, clanId: mail.clanId });
+                const { success, error } = await acceptClanRequest({ id: mail.id, userId: mail.userId, clanId: mail.clanId });
+                if (!success || error) {
+                    setAlertType('error');
+                    setAlertMessage('Failed to accept clan request');
+                    setShowAlert(true);
+                    return;
+                }
+                setAlertType('success');
                 setAlertMessage('Clan join request accepted successfully!');
             }
             setShowAlert(true);
@@ -122,6 +130,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                 setMails(loadedMails);
             }
         } catch (error) {
+            console.error('Error in handleAccept:', error);
             setAlertType('error');
             setAlertMessage('Failed to accept request');
             setShowAlert(true);
@@ -132,9 +141,17 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
         try {
             if (mail.type === 'friend') {
                 await cancelFriendRequest({ id: mail.id, userId: mail.userId });
+                setAlertType('success');
                 setAlertMessage('Friend request declined successfully!');
             } else if (mail.type === 'clan') {
-                await rejectClanRequest(mail.id);
+                const { success, error } = await rejectClanRequest(mail.id);
+                if (!success || error) {
+                    setAlertType('error');
+                    setAlertMessage('Failed to decline clan request');
+                    setShowAlert(true);
+                    return;
+                }
+                setAlertType('success');
                 setAlertMessage('Clan join request declined successfully!');
             }
             setShowAlert(true);
@@ -143,8 +160,9 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                 setMails(loadedMails);
             }
         } catch (error) {
+            console.error('Error in handleDecline:', error);
             setAlertType('error');
-            setAlertMessage('Failed to accept request');
+            setAlertMessage('Failed to decline request');
             setShowAlert(true);
         }
     };
