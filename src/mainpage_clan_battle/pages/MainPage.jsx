@@ -239,7 +239,7 @@ export default function MainPage() {
                 .select('id')
                 .eq('cf_handle', data.cf_handle)
                 .single();
-            
+
             if (userData) {
                 setCurrentUserId(userData.id);
                 // Check for existing incoming requests
@@ -394,8 +394,8 @@ export default function MainPage() {
         checkMails();
 
         // Subscribe to clan_join_requests changes
-        const mailChannel = supabase
-            .channel('mail_notifications')
+        const clanMailChannel = supabase
+            .channel('clan_mail_notifications')
             .on(
                 'postgres_changes',
                 {
@@ -409,8 +409,25 @@ export default function MainPage() {
             )
             .subscribe();
 
+        // Subscribe to friend_request changes
+        const friendMailChannel = supabase
+            .channel('friend_mail_notifications')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'friend_request'
+                },
+                async () => {
+                    await checkMails();
+                }
+            )
+            .subscribe();
+
         return () => {
-            supabase.removeChannel(mailChannel);
+            supabase.removeChannel(clanMailChannel);
+            supabase.removeChannel(friendMailChannel);
         };
     }, []);
     // Subscribe to incoming battle requests in real-time
@@ -679,13 +696,13 @@ export default function MainPage() {
                                 )}
                                 <p className="request-rating">Rating: {request.opponent.rating}</p>
                                 <div className="request-actions">
-                                    <button 
+                                    <button
                                         className="accept-btn"
                                         onClick={() => handleAcceptRequest(request.battleId, request.opponent, request.mode, request.problemCount)}
                                     >
                                         ACCEPT
                                     </button>
-                                    <button 
+                                    <button
                                         className="decline-btn"
                                         onClick={() => handleDeclineRequest(request.battleId)}
                                     >

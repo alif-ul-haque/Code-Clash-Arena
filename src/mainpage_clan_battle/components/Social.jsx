@@ -77,7 +77,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     }, [isOpen]);
 
     useEffect(() => {
-        const channel = supabase
+        const clanChannel = supabase
             .channel('clan_requests_changes')
             .on(
                 'postgres_changes',
@@ -102,8 +102,34 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
             )
             .subscribe();
 
+        const friendChannel = supabase
+            .channel('friend_requests_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'friend_request'
+                },
+                async (payload) => {
+                    console.log('Friend request changed:', payload);
+                    try {
+                        const { mails: loadedMails, error } = await loadMailBox();
+                        if (!error && loadedMails) {
+                            setMails(loadedMails);
+                        } else {
+                            setMails([]);
+                        }
+                    } catch (error) {
+                        console.error('Error refetching friend mails:', error);
+                    }
+                }
+            )
+            .subscribe();
+
         return () => {
-            supabase.removeChannel(channel);
+            supabase.removeChannel(clanChannel);
+            supabase.removeChannel(friendChannel);
         };
     }, []);
 
