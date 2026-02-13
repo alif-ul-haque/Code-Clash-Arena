@@ -2,11 +2,12 @@ import '../style/PlayerCard.css';
 import Button from '../../assets/components/Button.jsx';
 import trophyIcon from '../../assets/icons/trophy.png';
 import addFriend from '../../assets/icons/user.png';
-import { sendFriendRequest , cancelFriendRequest} from '../utilities/Friend_request.js';
+import { sendFriendRequest, cancelFriendRequest } from '../utilities/Friend_request.js';
 
 export default function PlayerCard({
     player,
     hasFriendRequest = false,
+    isAlreadyFriend = false,
     onToggleFriendRequest
 }) {
     return (
@@ -20,7 +21,16 @@ export default function PlayerCard({
                 <img src={trophyIcon} alt="Trophy" className="trophy-icon" />
             </div>
             <div className="player-action">
-                {!hasFriendRequest ? (
+                {isAlreadyFriend ? (
+                    <span style={{
+                        color: '#000000',
+                        fontWeight: 'bold',
+                        fontSize: '1rem',
+                        padding: '0.5rem 1rem'
+                    }}>
+                        Already Friend
+                    </span>
+                ) : !hasFriendRequest ? (
                     <Button
                         text=""
                         icon={addFriend}
