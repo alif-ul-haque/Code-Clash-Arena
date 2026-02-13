@@ -156,6 +156,7 @@ export default function MainPage() {
         haveClan: false,
         clanDetails: {
             name: "",
+            id: null,
             totalPoints: 0,
             members: '',
             type: '',
@@ -186,6 +187,7 @@ export default function MainPage() {
                     console.error("Failed to fetch clan data:", clanError);
                     return;
                 }
+                console.log(fetchedClanData);
                 clanData = fetchedClanData;
 
                 const { count: fetchedMemberCount, error: countError } = await countClanMembers(data.clan_id);
@@ -212,6 +214,7 @@ export default function MainPage() {
                 maxXp: data.level * 10,
                 clanDetails: clanData ? {
                     name: clanData.clan_name,
+                    id: clanData.id,
                     members: memberCount,
                     totalPoints: clanData.total_points,
                     type: clanData.type,
@@ -315,6 +318,7 @@ export default function MainPage() {
                                     ...prev,
                                     clanDetails: {
                                         name: clanData.clan_name,
+                                        id: clanData.id,
                                         members: memberCount,
                                         totalPoints: clanData.total_points,
                                         type: clanData.type,
@@ -354,6 +358,7 @@ export default function MainPage() {
                                 ...prev,
                                 clanDetails: {
                                     name: clanData.clan_name,
+                                    id: clanData.id,
                                     members: memberCount,
                                     totalPoints: clanData.total_points,
                                     type: clanData.type,
