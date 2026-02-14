@@ -28,7 +28,7 @@ const OneVOneCodingTimeRushMode = () => {
     // Timer state (30 minutes total for all problems)
     const [timeLeft, setTimeLeft] = useState(1800);
     const fileInputRef = useRef(null);
-    const [startTime] = useState(() => Date.now());
+    const [battleStartTime, setBattleStartTime] = useState(null);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [opponentId, setOpponentId] = useState(null);
     
@@ -48,17 +48,20 @@ const OneVOneCodingTimeRushMode = () => {
     // Track per-problem rating/XP changes
     const [perProblemRatings, setPerProblemRatings] = useState([]);
     const [solvedProblems, setSolvedProblems] = useState(0);
+    
+    // Track if component is fully mounted to prevent premature timeout
+    const isMountedRef = useRef(false);
 
-    // Fetch problems from database
+    // Fetch problems and battle data from database
     useEffect(() => {
-        const loadProblems = async () => {
+        const loadBattleData = async () => {
             try {
                 setLoadingProblems(true);
-                console.log('🔍 Fetching TIME RUSH problems from database...');
+                console.log('🔍 Fetching TIME RUSH battle data from database...');
                 
                 const { data: battleData, error } = await supabase
                     .from('onevonebattles')
-                    .select('problem_tags')
+                    .select('problem_tags, start_time')
                     .eq('onevone_battle_id', battleId)
                     .single();
                 
@@ -66,6 +69,63 @@ const OneVOneCodingTimeRushMode = () => {
                 
                 if (!battleData.problem_tags) {
                     throw new Error('No problems assigned to this battle');
+                }
+                
+                // Calculate timer based on actual start time
+                if (battleData.start_time) {
+                    // Parse the timestamp - handle both ISO string and PostgreSQL timestamp
+                    let startTime;
+                    if (typeof battleData.start_time === 'string') {
+                        // PostgreSQL timestamp without timezone - treat as local time
+                        startTime = new Date(battleData.start_time + 'Z').getTime(); // Add 'Z' to treat as UTC
+                    } else {
+                        startTime = new Date(battleData.start_time).getTime();
+                    }
+                    
+                    setBattleStartTime(startTime);
+                    
+                    const now = Date.now();
+                    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+                    const remainingTime = Math.max(0, 1800 - elapsedSeconds); // 30 minutes = 1800 seconds
+                    
+                    console.log('═══════════════════════════════════════');
+                    console.log('⏰ TIMER CALCULATION DEBUG:');
+                    console.log('Start time from DB (raw):', battleData.start_time);
+                    console.log('Start time type:', typeof battleData.start_time);
+                    console.log('Start time parsed (ms):', startTime);
+                    console.log('Start time as date:', new Date(startTime).toISOString());
+                    console.log('Current time (ms):', now);
+                    console.log('Current time as date:', new Date(now).toISOString());
+                    console.log('Elapsed seconds:', elapsedSeconds);
+                    console.log('Remaining time (seconds):', remainingTime);
+                    console.log('Remaining time (minutes):', Math.floor(remainingTime / 60));
+                    console.log('═══════════════════════════════════════');
+                    
+                    // CRITICAL FIX: If elapsed time is negative or way too large, reset
+                    if (elapsedSeconds < 0) {
+                        console.error('❌ Elapsed time is negative! Clock skew or timezone issue.');
+                        console.error('Resetting timer to 30 minutes and using current time as start');
+                        setTimeLeft(1800);
+                        setBattleStartTime(Date.now());
+                    } else if (elapsedSeconds > 1800) {
+                        console.error('❌ Battle time genuinely expired! Elapsed:', elapsedSeconds, 'seconds');
+                        console.error('⚠️ This should only happen if battle started more than 30 minutes ago');
+                        setTimeLeft(0);
+                    } else if (elapsedSeconds > 60 && remainingTime < 60) {
+                        // More than 1 minute elapsed but less than 1 minute remaining - likely timezone issue
+                        console.warn('⚠️ WARNING: Possible timestamp issue - elapsed > 60s but remaining < 60s');
+                        console.warn('Resetting to full 30 minutes');
+                        setTimeLeft(1800);
+                        setBattleStartTime(Date.now());
+                    } else {
+                        // Normal case - set the calculated remaining time
+                        console.log('✅ Timer set to', remainingTime, 'seconds =', Math.floor(remainingTime / 60), 'minutes');
+                        setTimeLeft(remainingTime);
+                    }
+                } else {
+                    console.warn('⚠️ No start_time found in database, using default 30 minutes');
+                    setTimeLeft(1800);
+                    setBattleStartTime(Date.now());
                 }
                 
                 const problemList = JSON.parse(battleData.problem_tags);
@@ -85,9 +145,15 @@ const OneVOneCodingTimeRushMode = () => {
                 );
                 
                 setProblems(detailedProblems);
-                console.log('✅ All problems loaded successfully');
+                console.log('✅ All battle data loaded successfully');
+                
+                // Mark component as fully mounted after problems are loaded
+                setTimeout(() => {
+                    isMountedRef.current = true;
+                    console.log('✅ Component fully mounted and ready');
+                }, 500);
             } catch (error) {
-                console.error('❌ Error loading problems:', error);
+                console.error('❌ Error loading battle data:', error);
                 setProblemError(error.message);
             } finally {
                 setLoadingProblems(false);
@@ -95,7 +161,7 @@ const OneVOneCodingTimeRushMode = () => {
         };
 
         if (battleId) {
-            loadProblems();
+            loadBattleData();
         }
     }, [battleId]);
 
@@ -130,14 +196,18 @@ const OneVOneCodingTimeRushMode = () => {
     
     // Timer countdown
     useEffect(() => {
-        if (timeLeft <= 0) return;
+        // Only trigger timeout if component is mounted and timer ran down
+        if (timeLeft <= 0 && isMountedRef.current) {
+            console.log('⏰ Timer reached 0, calling handleTimeOut');
+            handleTimeOut();
+            return;
+        }
         
         const timer = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
                     clearInterval(timer);
-                    handleTimeOut();
-                    return 0;
+                    return 0; // Don't call handleTimeOut here, let the effect above handle it
                 }
                 return prev - 1;
             });
@@ -153,7 +223,24 @@ const OneVOneCodingTimeRushMode = () => {
     };
 
     const handleTimeOut = async () => {
-        console.log('⏰ Time is up!');
+        console.log('⏰ handleTimeOut called');
+        console.log('Component mounted:', isMountedRef.current);
+        console.log('Problems loaded:', problems.length);
+        console.log('Current user ID:', currentUserId);
+        console.log('Opponent ID:', opponentId);
+        
+        // Only finalize if component is fully ready
+        if (!isMountedRef.current) {
+            console.warn('⚠️ Component not fully mounted yet, ignoring timeout');
+            return;
+        }
+        
+        if (!currentUserId || !opponentId) {
+            console.warn('⚠️ User IDs not loaded yet, ignoring timeout');
+            return;
+        }
+        
+        console.log('⏰ Time is up! Finalizing battle...');
         await finalizeBattle(false); // Lost due to timeout
     };
 
@@ -363,12 +450,17 @@ const OneVOneCodingTimeRushMode = () => {
             
             console.log(`Total rating: ${totalRatingChange}, Total XP: ${totalXPChange}`);
             
+            // Calculate time taken from battle start
+            const timeTaken = battleStartTime 
+                ? Math.floor((Date.now() - battleStartTime) / 1000)
+                : 0;
+            
             // Update participants table
             await supabase
                 .from('onevone_participants')
                 .update({
                     problem_solved: solvedProblems,
-                    time_taken: Math.floor((Date.now() - startTime) / 1000),
+                    time_taken: timeTaken,
                     rating_change: won ? totalRatingChange : -Math.abs(totalRatingChange),
                     xp_change: totalXPChange
                 })

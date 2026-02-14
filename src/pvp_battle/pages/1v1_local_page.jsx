@@ -254,7 +254,7 @@ const OneVOneLocalPage = () => {
                     problem_count: 1,
                     status: 'waiting',
                     trophy_reward: 115,
-                    start_time: new Date().toISOString(),
+                    // start_time will be set when battle is ACCEPTED, not when created
                     invited_player_id: opponentUser.id // Track who is being invited
                 })
                 .select()
@@ -505,10 +505,14 @@ const OneVOneLocalPage = () => {
                 );
                 
                 // Update battle with selected problem AND set to active
+                const battleStartTime = new Date();
+                console.log('🕐 Setting battle start time:', battleStartTime.toISOString());
+                
                 const { error: updateError } = await supabase
                     .from('onevonebattles')
                     .update({
                         status: 'active',
+                        start_time: battleStartTime.toISOString(), // Store as ISO string
                         problem_name: selectedProblem.name,
                         problem_contest_id: selectedProblem.contestId,
                         problem_index: selectedProblem.index,
@@ -520,6 +524,7 @@ const OneVOneLocalPage = () => {
                 if (updateError) throw updateError;
                 
                 console.log('✅ Problem stored in database, battle activated');
+                console.log('🕐 Start time set to:', battleStartTime.toISOString());
             } else if (battle.battle_mode === 'TIME RUSH MODE') {
                 // For TIME RUSH MODE, select MULTIPLE problems
                 console.log(`🎲 Selecting ${battle.problem_count} random problems for TIME RUSH MODE...`);
@@ -546,10 +551,14 @@ const OneVOneLocalPage = () => {
                 );
                 
                 // Store problems as JSON array in problem_tags column (reusing existing column)
+                const battleStartTime = new Date();
+                console.log('🕐 Setting battle start time:', battleStartTime.toISOString());
+                
                 const { error: updateError } = await supabase
                     .from('onevonebattles')
                     .update({
                         status: 'active',
+                        start_time: battleStartTime.toISOString(), // Store as ISO string
                         problem_tags: JSON.stringify(selectedProblems)
                     })
                     .eq('onevone_battle_id', battleId);
@@ -557,6 +566,7 @@ const OneVOneLocalPage = () => {
                 if (updateError) throw updateError;
                 
                 console.log('✅ Problems stored in database, battle activated');
+                console.log('🕐 Start time set to:', battleStartTime.toISOString());
             } else {
                 // For other modes, just update status to active
                 const { error } = await supabase
