@@ -11,6 +11,7 @@ export default function MyClan({ isOpen, onClose, clanDetails = {}, onDataChange
     const [showLeaveClan, setShowLeaveClan] = useState(false); const [userId, setUserId] = useState(null);
     const {
         name = "",
+        id = null,
         totalPoints = 0,
         members = '0/0',
         type = 'N/A',
@@ -89,6 +90,7 @@ export default function MyClan({ isOpen, onClose, clanDetails = {}, onDataChange
                     style={{ backgroundImage: `url(${bgimage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                     <div className="title-bar">
                         <p>{name}</p>
+                        <p>{id}</p>
                         <div className="close-button">
                             <Button
                                 text=''
@@ -135,30 +137,6 @@ export default function MyClan({ isOpen, onClose, clanDetails = {}, onDataChange
                     </div>
                 </div>
                 <div className="clan-menu-buttons">
-                    <Button
-                        text="War log"
-                        height="2.5rem"
-                        width="10rem"
-                        fontSize="24px"
-                        backgroundColor="#00B0FF"
-                        borderRadius="12px"
-                    />
-                    <Button
-                        text="Send Mail"
-                        height="2.5rem"
-                        width="10rem"
-                        fontSize="24px"
-                        backgroundColor="#08A24E"
-                        borderRadius="12px"
-                    />
-                    <Button
-                        text="Edit"
-                        height="2.5rem"
-                        width="10rem"
-                        fontSize="24px"
-                        backgroundColor="#08A24E"
-                        borderRadius="12px"
-                    />
                     <Button
                         text="Leave"
                         height="2.5rem"

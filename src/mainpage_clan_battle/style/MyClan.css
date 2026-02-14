@@ -142,18 +142,14 @@
 }
 
 .clan-menu-buttons {
-    width: 98.6%;
+    width: 100%;
     height: 3.5rem;
-    background-color: #4D4D4D;
-    margin-top: auto;
+    background-color: transparent;
     display: flex;
-    justify-content: space-evenly;
+    justify-content: flex-end;
     align-items: center;
-    gap: 1rem;
     border-radius: 15px;
     margin-top: 1rem;
-    border: 4px solid black;
-    padding: .4rem;
 }
 
 .clan-participants {

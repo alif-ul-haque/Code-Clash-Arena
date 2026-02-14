@@ -10,7 +10,8 @@ import { acceptClanRequest, rejectClanRequest } from '../utilities/ClanAdd.js';
 import AlertPage from '../../assets/components/AlertPage.jsx';
 import { supabase } from '../../supabaseclient.js';
 import { viewNonFriends, hasFriendRequest } from '../utilities/Friend_request.js';
-import { acceptFriendRequest , cancelFriendRequest} from '../utilities/FriendAdd.js';
+import { acceptFriendRequest, cancelFriendRequest } from '../utilities/FriendAdd.js';
+import { searchFriend } from '../utilities/SearchFeature.js';
 
 export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     const [activeTab, setActiveTab] = useState('friend');
@@ -21,6 +22,9 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
     const [alertMessage, setAlertMessage] = useState('');
     const [alertType, setAlertType] = useState('success');
     const [players, setPlayers] = useState([]);
+    const [searchResults, setSearchResults] = useState(null);
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchError, setSearchError] = useState(null);
 
 
     const toggleFriendRequest = (playerId) => {
@@ -73,11 +77,15 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
         if (isOpen) {
             fetchMails();
             fetchNonFriends();
+            // Reset search when modal opens/closes
+            setSearchQuery('');
+            setSearchResults(null);
+            setSearchError(null);
         }
     }, [isOpen]);
 
     useEffect(() => {
-        const channel = supabase
+        const clanChannel = supabase
             .channel('clan_requests_changes')
             .on(
                 'postgres_changes',
@@ -102,8 +110,34 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
             )
             .subscribe();
 
+        const friendChannel = supabase
+            .channel('friend_requests_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'friend_request'
+                },
+                async (payload) => {
+                    console.log('Friend request changed:', payload);
+                    try {
+                        const { mails: loadedMails, error } = await loadMailBox();
+                        if (!error && loadedMails) {
+                            setMails(loadedMails);
+                        } else {
+                            setMails([]);
+                        }
+                    } catch (error) {
+                        console.error('Error refetching friend mails:', error);
+                    }
+                }
+            )
+            .subscribe();
+
         return () => {
-            supabase.removeChannel(channel);
+            supabase.removeChannel(clanChannel);
+            supabase.removeChannel(friendChannel);
         };
     }, []);
 
@@ -111,9 +145,17 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
         try {
             if (mail.type === 'friend') {
                 await acceptFriendRequest({ id: mail.id, userId: mail.userId });
+                setAlertType('success');
                 setAlertMessage('Friend request accepted successfully!');
             } else if (mail.type === 'clan') {
-                await acceptClanRequest({ id: mail.id, userId: mail.userId, clanId: mail.clanId });
+                const { success, error } = await acceptClanRequest({ id: mail.id, userId: mail.userId, clanId: mail.clanId });
+                if (!success || error) {
+                    setAlertType('error');
+                    setAlertMessage('Failed to accept clan request');
+                    setShowAlert(true);
+                    return;
+                }
+                setAlertType('success');
                 setAlertMessage('Clan join request accepted successfully!');
             }
             setShowAlert(true);
@@ -122,6 +164,7 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                 setMails(loadedMails);
             }
         } catch (error) {
+            console.error('Error in handleAccept:', error);
             setAlertType('error');
             setAlertMessage('Failed to accept request');
             setShowAlert(true);
@@ -132,9 +175,17 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
         try {
             if (mail.type === 'friend') {
                 await cancelFriendRequest({ id: mail.id, userId: mail.userId });
+                setAlertType('success');
                 setAlertMessage('Friend request declined successfully!');
             } else if (mail.type === 'clan') {
-                await rejectClanRequest(mail.id);
+                const { success, error } = await rejectClanRequest(mail.id);
+                if (!success || error) {
+                    setAlertType('error');
+                    setAlertMessage('Failed to decline clan request');
+                    setShowAlert(true);
+                    return;
+                }
+                setAlertType('success');
                 setAlertMessage('Clan join request declined successfully!');
             }
             setShowAlert(true);
@@ -143,8 +194,9 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                 setMails(loadedMails);
             }
         } catch (error) {
+            console.error('Error in handleDecline:', error);
             setAlertType('error');
-            setAlertMessage('Failed to accept request');
+            setAlertMessage('Failed to decline request');
             setShowAlert(true);
         }
     };
@@ -229,9 +281,15 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                                         <p>Search Players:</p>
                                         <input
                                             type="text"
-                                            placeholder="Enter player name"
+                                            placeholder="Enter player name or ID"
                                             value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            onChange={(e) => {
+                                                setSearchQuery(e.target.value);
+                                                if (e.target.value === '') {
+                                                    setSearchResults(null);
+                                                    setSearchError(null);
+                                                }
+                                            }}
                                         />
                                     </div>
                                     <div className="icon-button">
@@ -244,17 +302,63 @@ export default function Social({ isOpen, onClose, hasNewMails, onMailsRead }) {
                                             width="10rem"
                                             fontSize='1.8rem'
                                             borderRadius='15px'
-                                            onClick={() => console.log("Searching:", searchQuery)}
+                                            onClick={async () => {
+                                                if (!searchQuery.trim()) {
+                                                    setSearchResults(null);
+                                                    setSearchError(null);
+                                                    return;
+                                                }
+
+                                                console.log("Searching:", searchQuery);
+                                                setIsSearching(true);
+                                                setSearchError(null);
+
+                                                const { data, error } = await searchFriend(searchQuery.trim());
+
+                                                if (error) {
+                                                    setSearchError(error);
+                                                    setSearchResults(null);
+                                                } else {
+                                                    setSearchResults(data || []);
+
+                                                    // Update friend requests from enriched data
+                                                    const requestsSet = new Set();
+                                                    for (const player of data || []) {
+                                                        if (player.hasFriendRequest) {
+                                                            requestsSet.add(player.id);
+                                                        }
+                                                    }
+                                                    setFriendRequests(requestsSet);
+                                                }
+
+                                                setIsSearching(false);
+                                            }}
                                         />
                                     </div>
                                 </div>
 
                                 <div className="players-list">
-                                    {players.map((player) => (
+                                    {isSearching && (
+                                        <p style={{ textAlign: 'center', color: '#999', marginTop: '2rem' }}>
+                                            Searching...
+                                        </p>
+                                    )}
+                                    {searchError && (
+                                        <p style={{ textAlign: 'center', color: '#ff4444', marginTop: '2rem' }}>
+                                            {searchError}
+                                        </p>
+                                    )}
+                                    {!isSearching && !searchError && (searchResults !== null ? searchResults : players).length === 0 && (
+                                        <p style={{ textAlign: 'center', color: '#999', marginTop: '2rem' }}>
+                                            {searchResults !== null ? 'No players found matching your search.' : 'No players available.'}
+                                        </p>
+                                    )}
+                                    {!isSearching && !searchError && (searchResults !== null ? searchResults : players).map((player) => (
                                         <PlayerCard
                                             key={player.id}
                                             player={player}
-                                            hasFriendRequest={friendRequests.has(player.id)}
+                                            hasFriendRequest={player.hasFriendRequest !== undefined ? player.hasFriendRequest : friendRequests.has(player.id)}
+                                            isAlreadyFriend={player.isAlreadyFriend || false}
                                             onToggleFriendRequest={() => toggleFriendRequest(player.id)}
                                         />
                                     ))}

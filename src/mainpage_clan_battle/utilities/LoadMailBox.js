@@ -20,7 +20,7 @@ export async function loadMailBox() {
             type: 'friend',
             from: fr.users.cf_handle,
             message: 'Has sent you a friend request.',
-            time:timeAgo( fr.created_at),
+            time: timeAgo(fr.created_at),
             userId: fr.to_user,
             clanId: null
         }));
@@ -35,7 +35,7 @@ export async function loadMailBox() {
         mails = [
             ...mails,
             ...clanRequest.map(cr => ({
-                id: cr.user_id,
+                id: cr.id,
                 type: 'clan',
                 from: cr.users.cf_handle,
                 message: 'Has requested to join your clan.',

@@ -5,6 +5,7 @@ import XpBar from '../components/XpBar'
 import xpImage from '../../assets/icons/xp.png'
 import bgImage from '../../assets/images/10001.png'
 import Button from '../../assets/components/Button.jsx'
+import AlertPage from '../../assets/components/AlertPage.jsx'
 import clanIcon from '../../assets/icons/clan.png'
 import combat from '../../assets/icons/sss.png'
 import history from '../../assets/icons/history.png'
@@ -25,7 +26,7 @@ import getUserData, { getClanData, countClanMembers, getClanMembers } from '../u
 import { supabase } from '../../supabaseclient.js'
 import { loadMailBox } from '../utilities/LoadMailBox.js'
 import { isUserClanLeader, hasOngoingClanBattle, subscribeToClanBattleChanges } from '../../Your_Clan/utilities/ClanBattleUtils.js'
-
+import copyToClipboard from '../utilities/CopyCode.js'
 
 
 export default function MainPage() {
@@ -47,6 +48,11 @@ export default function MainPage() {
     // State for incoming battle requests
     const [incomingRequests, setIncomingRequests] = useState([]);
     const [currentUserId, setCurrentUserId] = useState(null);
+
+    // State for copy alert
+    const [showCopyAlert, setShowCopyAlert] = useState(false);
+    const [copyAlertMessage, setCopyAlertMessage] = useState('');
+    const [copyAlertType, setCopyAlertType] = useState('success');
 
     const carouselCards = [
         {
@@ -154,8 +160,10 @@ export default function MainPage() {
         level: 0,
         displayXp: 0,
         haveClan: false,
+        user_id: null,
         clanDetails: {
             name: "",
+            id: null,
             totalPoints: 0,
             members: '',
             type: '',
@@ -186,6 +194,7 @@ export default function MainPage() {
                     console.error("Failed to fetch clan data:", clanError);
                     return;
                 }
+                console.log(fetchedClanData);
                 clanData = fetchedClanData;
 
                 const { count: fetchedMemberCount, error: countError } = await countClanMembers(data.clan_id);
@@ -207,11 +216,13 @@ export default function MainPage() {
                 ...prev,
                 haveClan: data.clan_id ? true : false,
                 username: data.cf_handle,
+                user_id: data.user_id,
                 level: data.level,
                 xp: data.xp,
                 maxXp: data.level * 10,
                 clanDetails: clanData ? {
                     name: clanData.clan_name,
+                    id: clanData.id,
                     members: memberCount,
                     totalPoints: clanData.total_points,
                     type: clanData.type,
@@ -239,7 +250,7 @@ export default function MainPage() {
                 .select('id')
                 .eq('cf_handle', data.cf_handle)
                 .single();
-            
+
             if (userData) {
                 setCurrentUserId(userData.id);
                 // Check for existing incoming requests
@@ -299,6 +310,7 @@ export default function MainPage() {
                         setUserDetail(prev => ({
                             ...prev,
                             username: data.cf_handle,
+                            user_id: data.user_id,
                             level: data.level,
                             xp: data.xp,
                             maxXp: data.level * 10,
@@ -315,6 +327,7 @@ export default function MainPage() {
                                     ...prev,
                                     clanDetails: {
                                         name: clanData.clan_name,
+                                        id: clanData.id,
                                         members: memberCount,
                                         totalPoints: clanData.total_points,
                                         type: clanData.type,
@@ -354,6 +367,7 @@ export default function MainPage() {
                                 ...prev,
                                 clanDetails: {
                                     name: clanData.clan_name,
+                                    id: clanData.id,
                                     members: memberCount,
                                     totalPoints: clanData.total_points,
                                     type: clanData.type,
@@ -394,8 +408,8 @@ export default function MainPage() {
         checkMails();
 
         // Subscribe to clan_join_requests changes
-        const mailChannel = supabase
-            .channel('mail_notifications')
+        const clanMailChannel = supabase
+            .channel('clan_mail_notifications')
             .on(
                 'postgres_changes',
                 {
@@ -409,8 +423,25 @@ export default function MainPage() {
             )
             .subscribe();
 
+        // Subscribe to friend_request changes
+        const friendMailChannel = supabase
+            .channel('friend_mail_notifications')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'friend_request'
+                },
+                async () => {
+                    await checkMails();
+                }
+            )
+            .subscribe();
+
         return () => {
-            supabase.removeChannel(mailChannel);
+            supabase.removeChannel(clanMailChannel);
+            supabase.removeChannel(friendMailChannel);
         };
     }, []);
     // Subscribe to incoming battle requests in real-time
@@ -663,6 +694,16 @@ export default function MainPage() {
 
     return (
         <>
+            {/* Copy Alert Notification */}
+            {showCopyAlert && (
+                <AlertPage
+                    message={copyAlertMessage}
+                    isVisible={showCopyAlert}
+                    onClose={() => setShowCopyAlert(false)}
+                    type={copyAlertType}
+                />
+            )}
+
             {/* Incoming Battle Requests Notification */}
             {incomingRequests.length > 0 && (
                 <div className="battle-request-overlay">
@@ -679,13 +720,13 @@ export default function MainPage() {
                                 )}
                                 <p className="request-rating">Rating: {request.opponent.rating}</p>
                                 <div className="request-actions">
-                                    <button 
+                                    <button
                                         className="accept-btn"
                                         onClick={() => handleAcceptRequest(request.battleId, request.opponent, request.mode, request.problemCount)}
                                     >
                                         ACCEPT
                                     </button>
-                                    <button 
+                                    <button
                                         className="decline-btn"
                                         onClick={() => handleDeclineRequest(request.battleId)}
                                     >
@@ -719,7 +760,24 @@ export default function MainPage() {
                     <div className="xpbar">
                         <div className="img-xp">
                             <p className={`level ${userDetail.level >= 10 ? 'level-two-digit' : ''}`}>{userDetail.level}</p>
-                            <img src={xpImage} alt="XP" className="xp-image" />
+                            <img
+                                src={xpImage}
+                                alt="XP"
+                                className="xp-image"
+                                onClick={() => copyToClipboard(
+                                    userDetail.user_id,
+                                    (message) => {
+                                        setCopyAlertMessage(message);
+                                        setCopyAlertType('success');
+                                        setShowCopyAlert(true);
+                                    },
+                                    (message) => {
+                                        setCopyAlertMessage(message);
+                                        setCopyAlertType('error');
+                                        setShowCopyAlert(true);
+                                    }
+                                )}
+                            />
                             <XpBar xp={userDetail.xp} maxXp={userDetail.maxXp} username={userDetail.username} />
                         </div>
                     </div>

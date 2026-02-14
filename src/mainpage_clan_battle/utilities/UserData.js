@@ -11,7 +11,7 @@ export default async function getUserData() {
 
         const { data, error } = await supabase
             .from('users')
-            .select('level, cf_handle, xp, clan_id, id')
+            .select('level, cf_handle, xp, clan_id, id, user_id')
             .eq('email', user.email)
             .maybeSingle();
 
@@ -64,7 +64,7 @@ export async function countClanMembers(clanId) {
 }
 
 export async function getClanMembers(clanId) {
-    const { data, error } = await supabase.rpc('get_clan_members_with_user_data' , { p_clan_id: clanId });
+    const { data, error } = await supabase.rpc('get_clan_members_with_user_data', { p_clan_id: clanId });
     if (error) {
         console.error("Error fetching clan members:", error.message);
         return { members: [], error };
