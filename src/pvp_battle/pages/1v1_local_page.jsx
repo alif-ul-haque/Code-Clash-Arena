@@ -228,6 +228,10 @@ const OneVOneLocalPage = () => {
     const [incomingRequests, setIncomingRequests] = useState([]);
     const [currentUserId, setCurrentUserId] = useState(null);
 
+    // State for battle history fetched from database
+    const [historyData, setHistoryData] = useState([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
+
     // Function to create a new battle when challenging a friend
     const handleChallenge = async (friend) => {
         try {
@@ -378,6 +382,135 @@ const OneVOneLocalPage = () => {
         // Call the function to fetch data
         fetchData();
     }, []); // Empty array means run only once when component mounts
+
+    // Fetch battle history from database
+    useEffect(() => {
+        const fetchBattleHistory = async () => {
+            if (!currentUserId) return;
+            
+            setHistoryLoading(true);
+            try {
+                console.log('📊 Fetching battle history for user:', currentUserId);
+
+                // Get all battles where current user participated
+                const { data: userParticipations, error: participationError } = await supabase
+                    .from('onevone_participants')
+                    .select(`
+                        onevone_battle_id,
+                        problem_solved,
+                        time_taken,
+                        rating_change,
+                        onevonebattles (
+                            onevone_battle_id,
+                            battle_mode,
+                            status,
+                            trophy_reward,
+                            start_time,
+                            end_time
+                        )
+                    `)
+                    .eq('player_id', currentUserId)
+                    .order('onevonebattles(start_time)', { ascending: false })
+                    .limit(20);
+
+                if (participationError) {
+                    console.error('Error fetching battle history:', participationError);
+                    return;
+                }
+
+                console.log('✓ User participations:', userParticipations);
+
+                // For each battle, get opponent information
+                const historyPromises = userParticipations.map(async (participation) => {
+                    if (!participation.onevonebattles) return null;
+
+                    const battleId = participation.onevone_battle_id;
+
+                    // Get opponent's data (the other participant in the same battle)
+                    const { data: allParticipants, error: opponentError } = await supabase
+                        .from('onevone_participants')
+                        .select(`
+                            player_id,
+                            problem_solved,
+                            time_taken,
+                            users (
+                                cf_handle
+                            )
+                        `)
+                        .eq('onevone_battle_id', battleId);
+
+                    if (opponentError || !allParticipants) {
+                        console.error('Error fetching opponents:', opponentError);
+                        return null;
+                    }
+
+                    // Find opponent (the participant who is not the current user)
+                    const opponent = allParticipants.find(p => p.player_id !== currentUserId);
+                    const currentUserData = allParticipants.find(p => p.player_id === currentUserId);
+
+                    if (!opponent || !currentUserData) return null;
+
+                    // Determine win/loss status
+                    let status = 'DRAW';
+                    let trophyChange = 0;
+
+                    // Check if battle is completed
+                    if (participation.onevonebattles.status === 'completed') {
+                        // Compare problem_solved, then time_taken
+                        if (currentUserData.problem_solved > opponent.problem_solved) {
+                            status = 'WON';
+                            trophyChange = participation.onevonebattles.trophy_reward || 150;
+                        } else if (currentUserData.problem_solved < opponent.problem_solved) {
+                            status = 'LOST';
+                            trophyChange = -(participation.onevonebattles.trophy_reward || 50);
+                        } else {
+                            // Same problems solved, check time
+                            if (currentUserData.time_taken < opponent.time_taken) {
+                                status = 'WON';
+                                trophyChange = participation.onevonebattles.trophy_reward || 150;
+                            } else if (currentUserData.time_taken > opponent.time_taken) {
+                                status = 'LOST';
+                                trophyChange = -(participation.onevonebattles.trophy_reward || 50);
+                            } else {
+                                status = 'DRAW';
+                                trophyChange = 0;
+                            }
+                        }
+                    } else if (participation.onevonebattles.status === 'abandoned') {
+                        status = 'ABANDONED';
+                        trophyChange = 0;
+                    }
+
+                    // Use rating_change if available
+                    if (participation.rating_change) {
+                        trophyChange = participation.rating_change;
+                        status = trophyChange > 0 ? 'WON' : trophyChange < 0 ? 'LOST' : 'DRAW';
+                    }
+
+                    return {
+                        id: battleId,
+                        username: opponent.users?.cf_handle || 'Unknown',
+                        mode: participation.onevonebattles.battle_mode || 'REAL MODE',
+                        status: status,
+                        trophy: trophyChange >= 0 ? `+${trophyChange}` : `${trophyChange}`
+                    };
+                });
+
+                const resolvedHistory = await Promise.all(historyPromises);
+                const filteredHistory = resolvedHistory.filter(h => h !== null);
+
+                console.log('✅ Battle history fetched:', filteredHistory);
+                setHistoryData(filteredHistory);
+
+            } catch (err) {
+                console.error('Error fetching battle history:', err);
+            } finally {
+                setHistoryLoading(false);
+            }
+        };
+
+        fetchBattleHistory();
+    }, [currentUserId]); // Re-fetch when currentUserId changes
 
     // Subscribe to incoming battle requests in real-time
     useEffect(() => {
@@ -626,13 +759,7 @@ const OneVOneLocalPage = () => {
         }
     };
 
-    // History data
-    const historyData = [
-        { id: 1, username: 'MATIN008', mode: 'REAL MODE', status: 'WON', trophy: '+150' },
-        { id: 2, username: 'Than_007', mode: 'REAL MODE', status: 'WON', trophy: '+150' },
-        { id: 3, username: 'TakiL_096', mode: 'REAL MODE', status: 'LOST', trophy: '-50' },
-        { id: 4, username: 'Usama_Jeager', mode: 'REAL MODE', status: 'WON', trophy: '+150' }
-    ];
+    // History data is now fetched from database via useEffect
 
     return (
         <div className="local-battle-container">
@@ -757,7 +884,22 @@ const OneVOneLocalPage = () => {
 
             {activeTab === 'history' && (
                 <div className="history-list">
-                    {historyData.map((match) => (
+                    {/* Show loading message while fetching history */}
+                    {historyLoading && (
+                        <div style={{ textAlign: 'center', padding: '20px', color: 'white' }}>
+                            Loading battle history...
+                        </div>
+                    )}
+
+                    {/* Show message if no history found */}
+                    {!historyLoading && historyData.length === 0 && (
+                        <div style={{ textAlign: 'center', padding: '20px', color: 'white' }}>
+                            No battle history yet. Start challenging friends!
+                        </div>
+                    )}
+
+                    {/* Display battle history from database */}
+                    {!historyLoading && historyData.map((match) => (
                         <div key={match.id} className={`history-card ${match.status.toLowerCase()}`}>
                             <span className="history-username">{match.username}</span>
                             <span className="history-mode">{match.mode}</span>
