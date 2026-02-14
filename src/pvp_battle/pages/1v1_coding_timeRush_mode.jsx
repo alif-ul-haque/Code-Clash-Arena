@@ -444,11 +444,34 @@ const OneVOneCodingTimeRushMode = () => {
         try {
             console.log('🏁 Finalizing battle...');
             
-            // Calculate total rating/XP changes
-            const totalRatingChange = perProblemRatings.reduce((sum, p) => sum + p.ratingChange, 0);
-            const totalXPChange = perProblemRatings.reduce((sum, p) => sum + p.xpChange, 0);
+            let totalRatingChange = 0;
+            let totalXPChange = 0;
             
-            console.log(`Total rating: ${totalRatingChange}, Total XP: ${totalXPChange}`);
+            // If problems were solved, sum their ratings
+            if (perProblemRatings.length > 0) {
+                totalRatingChange = perProblemRatings.reduce((sum, p) => sum + p.ratingChange, 0);
+                totalXPChange = perProblemRatings.reduce((sum, p) => sum + p.xpChange, 0);
+                console.log(`Calculated from solved problems - Rating: ${totalRatingChange}, XP: ${totalXPChange}`);
+            } else {
+                // No problems solved - calculate base win/loss rating (like REAL MODE)
+                console.log('No problems solved, calculating base ELO rating for', won ? 'WIN' : 'LOSS');
+                
+                if (won) {
+                    // Winner gets rating/XP based on ELO calculation
+                    const matchResult = await processMatchOutcome(currentUserId, opponentId);
+                    totalRatingChange = matchResult.ratings.winner.change;
+                    totalXPChange = matchResult.xp.winner.change;
+                    console.log(`Winner (no solves) - Rating: +${totalRatingChange}, XP: +${totalXPChange}`);
+                } else {
+                    // Loser gets negative rating
+                    const matchResult = await processMatchOutcome(opponentId, currentUserId);
+                    totalRatingChange = matchResult.ratings.loser.change;
+                    totalXPChange = matchResult.xp.loser.change;
+                    console.log(`Loser (no solves) - Rating: ${totalRatingChange}, XP: ${totalXPChange}`);
+                }
+            }
+            
+            console.log(`Final totals - Rating: ${totalRatingChange}, XP: ${totalXPChange}`);
             
             // Calculate time taken from battle start
             const timeTaken = battleStartTime 
@@ -461,11 +484,13 @@ const OneVOneCodingTimeRushMode = () => {
                 .update({
                     problem_solved: solvedProblems,
                     time_taken: timeTaken,
-                    rating_change: won ? totalRatingChange : -Math.abs(totalRatingChange),
-                    xp_change: totalXPChange
+                    rating_change: parseInt(totalRatingChange),
+                    xp_change: parseFloat(totalXPChange)
                 })
                 .eq('onevone_battle_id', battleId)
                 .eq('player_id', currentUserId);
+            
+            console.log('✅ Rating and XP changes stored in participants table');
             
             // Update battle status
             await supabase
