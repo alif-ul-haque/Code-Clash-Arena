@@ -1,11 +1,14 @@
-export default async function copyToClipboard(text) {
+export default async function copyToClipboard(text, onSuccess, onError) {
     try {
-        console.log("Copying to clipboard:", text);
         await navigator.clipboard.writeText(text);
-        alert("Copied to clipboard!");
+        if (onSuccess) {
+            onSuccess("User ID copied to clipboard!");
+        }
     }
     catch (err) {
         console.error("Failed to copy: ", err);
-        alert("Failed to copy to clipboard.");
+        if (onError) {
+            onError("Failed to copy to clipboard.");
+        }
     }
 }

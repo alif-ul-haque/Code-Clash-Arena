@@ -5,6 +5,7 @@ import XpBar from '../components/XpBar'
 import xpImage from '../../assets/icons/xp.png'
 import bgImage from '../../assets/images/10001.png'
 import Button from '../../assets/components/Button.jsx'
+import AlertPage from '../../assets/components/AlertPage.jsx'
 import clanIcon from '../../assets/icons/clan.png'
 import combat from '../../assets/icons/sss.png'
 import history from '../../assets/icons/history.png'
@@ -47,6 +48,11 @@ export default function MainPage() {
     // State for incoming battle requests
     const [incomingRequests, setIncomingRequests] = useState([]);
     const [currentUserId, setCurrentUserId] = useState(null);
+
+    // State for copy alert
+    const [showCopyAlert, setShowCopyAlert] = useState(false);
+    const [copyAlertMessage, setCopyAlertMessage] = useState('');
+    const [copyAlertType, setCopyAlertType] = useState('success');
 
     const carouselCards = [
         {
@@ -688,6 +694,16 @@ export default function MainPage() {
 
     return (
         <>
+            {/* Copy Alert Notification */}
+            {showCopyAlert && (
+                <AlertPage
+                    message={copyAlertMessage}
+                    isVisible={showCopyAlert}
+                    onClose={() => setShowCopyAlert(false)}
+                    type={copyAlertType}
+                />
+            )}
+
             {/* Incoming Battle Requests Notification */}
             {incomingRequests.length > 0 && (
                 <div className="battle-request-overlay">
@@ -748,7 +764,19 @@ export default function MainPage() {
                                 src={xpImage}
                                 alt="XP"
                                 className="xp-image"
-                                onClick={() => copyToClipboard(userDetail.user_id)}
+                                onClick={() => copyToClipboard(
+                                    userDetail.user_id,
+                                    (message) => {
+                                        setCopyAlertMessage(message);
+                                        setCopyAlertType('success');
+                                        setShowCopyAlert(true);
+                                    },
+                                    (message) => {
+                                        setCopyAlertMessage(message);
+                                        setCopyAlertType('error');
+                                        setShowCopyAlert(true);
+                                    }
+                                )}
                             />
                             <XpBar xp={userDetail.xp} maxXp={userDetail.maxXp} username={userDetail.username} />
                         </div>
