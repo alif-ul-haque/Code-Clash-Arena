@@ -4,15 +4,16 @@ import '../style/submit_page_real.css';
 import trophyIcon from '../../assets/icons/trophy.png';
 import { supabase } from '../../supabaseclient';
 
-const SubmitPageReal = () => {
+const GlobalBattleResultPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { 
-        battleId,
-        won, 
-        opponent,
+        winner, 
         currentUserId, 
-        opponentId
+        opponentId,
+        currentUserHandle,
+        opponentHandle,
+        battleId
     } = location.state || {};
 
     const [loading, setLoading] = useState(true);
@@ -21,10 +22,7 @@ const SubmitPageReal = () => {
     useEffect(() => {
         const fetchResults = async () => {
             try {
-                console.log('📊 Fetching local battle results...');
-                console.log('Battle ID:', battleId, 'Won:', won, 'Opponent:', opponent);
-                
-                // Fetch both users' current data
+                // Fetch both users' current ratings to show changes
                 const [currentUserData, opponentData] = await Promise.all([
                     supabase.from('users').select('rating, xp, cf_handle').eq('id', currentUserId).single(),
                     supabase.from('users').select('rating, xp, cf_handle').eq('id', opponentId).single()
@@ -34,23 +32,27 @@ const SubmitPageReal = () => {
                     throw new Error('Failed to fetch user data');
                 }
 
-                // Get battle details and rating changes from participants table
+                const won = winner === 'you';
+                const winnerId = won ? currentUserId : opponentId;
+                const loserId = won ? opponentId : currentUserId;
+
+                // Get battle details to see timing and rating changes
                 const { data: participants } = await supabase
                     .from('onevone_participants')
                     .select('player_id, problem_solved, time_taken, rating_change, xp_change')
                     .eq('onevone_battle_id', battleId);
 
-                if (!participants || participants.length === 0) {
-                    throw new Error('No participant data found');
-                }
+                const winnerParticipant = participants?.find(p => p.player_id === winnerId);
+                const loserParticipant = participants?.find(p => p.player_id === loserId);
+                
+                const currentUserParticipant = participants?.find(p => p.player_id === currentUserId);
+                const opponentParticipant = participants?.find(p => p.player_id === opponentId);
 
-                const currentUserParticipant = participants.find(p => p.player_id === currentUserId);
-                const opponentParticipant = participants.find(p => p.player_id === opponentId);
-
+                console.log('🔍 Debug - Participants data:', participants);
                 console.log('🔍 Current user participant:', currentUserParticipant);
-                console.log('🔍 Opponent participant:', opponentParticipant);
                 console.log('🔍 Rating change from DB:', currentUserParticipant?.rating_change);
                 console.log('🔍 XP change from DB:', currentUserParticipant?.xp_change);
+                console.log('🔍 Opponent rating change:', opponentParticipant?.rating_change);
 
                 // Get problem details
                 const { data: battleData } = await supabase
@@ -70,6 +72,8 @@ const SubmitPageReal = () => {
                     opponentXP: opponentData.data.xp,
                     currentUserHandle: currentUserData.data.cf_handle,
                     opponentHandle: opponentData.data.cf_handle,
+                    winnerTime: winnerParticipant?.time_taken || 0,
+                    loserTime: loserParticipant?.time_taken || 0,
                     problemName: battleData?.problem_name || 'Unknown',
                     problemId: `${battleData?.problem_contest_id}${battleData?.problem_index}`,
                     currentUserRatingChange: currentUserRatingChange,
@@ -78,28 +82,17 @@ const SubmitPageReal = () => {
                     opponentXPChange: parseFloat(opponentParticipant?.xp_change) || 0
                 });
 
-                console.log('✅ Results loaded successfully');
                 setLoading(false);
             } catch (error) {
-                console.error('❌ Error fetching results:', error);
+                console.error('Error fetching results:', error);
                 setLoading(false);
             }
         };
 
         if (battleId && currentUserId && opponentId) {
             fetchResults();
-        } else {
-            console.warn('⚠️ Missing battle data, using fallback');
-            // Fallback for old navigation format
-            setResultData({
-                won: won,
-                opponentHandle: opponent,
-                currentUserRatingChange: 0,
-                currentUserXPChange: 0
-            });
-            setLoading(false);
         }
-    }, [battleId, currentUserId, opponentId, won, opponent]);
+    }, [battleId, currentUserId, opponentId, winner]);
 
     if (loading) {
         return (
@@ -143,7 +136,7 @@ const SubmitPageReal = () => {
                     </h1>
                     
                     <p className="opponent-text">
-                        Against: {resultData.opponentHandle || opponent}
+                        Against: {resultData.opponentHandle}
                     </p>
                     
                     <div className="trophy-box" style={{
@@ -167,4 +160,4 @@ const SubmitPageReal = () => {
     );
 };
 
-export default SubmitPageReal;
+export default GlobalBattleResultPage;

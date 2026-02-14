@@ -12,12 +12,17 @@ import {
     getVerdictMessage 
 } from '../utilities/codeforcesSubmission';
 import MathRenderer from '../components/MathRenderer';
-import { processMatchOutcome } from '../utilities/ratingSystem';
+import { codeforcesAPI, calculateUserStats } from '../../practice_gym/utilities/codeforcesAPI';
+import { 
+    processMatchOutcome, 
+    addSubmissionXP,
+    processQuit 
+} from '../utilities/ratingSystem';
 
-const OneVOneCodingBattlePage = () => {
+const OneVOneGlobalBattlePage = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { battleId, opponent, currentUser, mode } = location.state || {};
+    const { battleId, opponent, currentUser } = location.state || {};
     
     const [selectedLanguage, setSelectedLanguage] = useState('PYTHON');
     const [code, setCode] = useState('## WRITE YOUR PYTHON CODE\n##FROM HERE');
@@ -38,10 +43,10 @@ const OneVOneCodingBattlePage = () => {
     });
     const [currentUserId, setCurrentUserId] = useState(null);
     const [opponentId, setOpponentId] = useState(null);
-    const [startTime] = useState(Date.now());
     const [isEditorMinimized, setIsEditorMinimized] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitMessage, setSubmitMessage] = useState('');
+    const [hasNavigated, setHasNavigated] = useState(false);
     
     // Custom modal states
     const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -50,16 +55,23 @@ const OneVOneCodingBattlePage = () => {
     const [popupWindow, setPopupWindow] = useState(null);
     const [submissionTimestamp, setSubmissionTimestamp] = useState(null);
 
-    // Fetch the SAME problem that was selected when battle was accepted (stored in database)
+    // Fetch the SAME problem that was selected during matchmaking (stored in database)
     useEffect(() => {
         const loadProblem = async () => {
+            if (!battleId) {
+                setProblemError('Missing battle ID');
+                setLoadingProblem(false);
+                return;
+            }
+
             try {
                 setLoadingProblem(true);
                 setProblemError(null);
                 
-                console.log('🔍 Fetching problem from database for battleId:', battleId);
+                console.log('📖 Fetching problem from battle record:', battleId);
                 
-                // Get problem details from onevonebattles table
+                // Fetch the problem that was ALREADY SELECTED during matchmaking
+                // This ensures BOTH players get the SAME problem
                 const { data: battleData, error: battleError } = await supabase
                     .from('onevonebattles')
                     .select('problem_name, problem_contest_id, problem_index, problem_rating, problem_tags')
@@ -67,78 +79,100 @@ const OneVOneCodingBattlePage = () => {
                     .single();
                 
                 if (battleError) {
-                    throw new Error('Failed to fetch battle data: ' + battleError.message);
+                    console.error('Error fetching battle:', battleError);
+                    throw new Error('Failed to load battle data');
                 }
                 
-                if (!battleData.problem_contest_id || !battleData.problem_index) {
-                    throw new Error('No problem assigned to this battle');
+                if (!battleData.problem_name || !battleData.problem_contest_id || !battleData.problem_index) {
+                    throw new Error('Problem not assigned to this battle');
                 }
                 
-                console.log(`✓ Problem from DB: ${battleData.problem_name} (${battleData.problem_contest_id}${battleData.problem_index})`);
+                console.log(`✅ SAME problem for BOTH players: ${battleData.problem_name} (${battleData.problem_contest_id}${battleData.problem_index})`);
+                console.log(`📊 Problem rating: ${battleData.problem_rating}`);
                 
-                // Fetch full problem details from Codeforces
+                // Fetch full problem details from Codeforces API
                 const problemData = await fetchCodeforcesProblem(
                     battleData.problem_contest_id,
                     battleData.problem_index
                 );
                 
                 if (problemData) {
-                    console.log('✓ Problem loaded successfully:', problemData.name);
                     setProblem(problemData);
+                    console.log('✓ Problem loaded successfully');
                 } else {
-                    throw new Error('Failed to fetch problem from Codeforces');
+                    // Fallback to stored data if Codeforces API fails
+                    console.log('⚠️ Using stored problem data (Codeforces API failed)');
+                    setProblem({
+                        name: battleData.problem_name,
+                        contestId: battleData.problem_contest_id,
+                        index: battleData.problem_index,
+                        rating: battleData.problem_rating,
+                        tags: JSON.parse(battleData.problem_tags || '[]')
+                    });
                 }
+                
             } catch (error) {
                 console.error('❌ Error loading problem:', error);
+                setProblemError('Failed to load problem: ' + error.message);
                 
-                const errorMessage = error.message.includes('aborted') 
-                    ? 'Connection timeout. Please refresh the page.'
-                    : error.message || 'Failed to load problem. Please refresh the page.';
-                
-                setProblemError(errorMessage);
+                // Fallback problem only as last resort
+                setProblem({
+                    name: 'Sum of Two Numbers',
+                    contestId: 0,
+                    index: 'A',
+                    rating: 800,
+                    tags: ['math'],
+                    statement: 'Given two integers a and b, find their sum.',
+                    inputSpec: 'Two integers a and b',
+                    outputSpec: 'Output a single integer - the sum of a and b',
+                    examples: [{
+                        input: '2 3',
+                        output: '5'
+                    }],
+                    constraints: '-1000 ≤ a, b ≤ 1000',
+                    timeLimit: '1 second',
+                    memoryLimit: '256 megabytes'
+                });
             } finally {
                 setLoadingProblem(false);
             }
         };
 
-        if (battleId) {
-            loadProblem();
-        }
+        loadProblem();
     }, [battleId]);
 
-    // Setup battle and real-time updates with closure pattern (like global battle)
+    // Setup battle and real-time updates
     useEffect(() => {
         const setupBattle = async () => {
             try {
-                console.log('🔧 Setting up local battle...');
+                console.log('🔧 Setting up battle...', battleId, currentUser, opponent?.cf_handle);
                 
-                // Get current user's data
+                // Get current user's ID
                 const { data: userData } = await supabase
                     .from('users')
-                    .select('id, cf_handle')
+                    .select('id')
                     .eq('cf_handle', currentUser)
                     .single();
 
-                // Get opponent's data
+                const myUserId = userData?.id;
+                setCurrentUserId(myUserId);
+                console.log('👤 My user ID:', myUserId);
+
+                // Get opponent's ID
                 const { data: opponentData } = await supabase
                     .from('users')
-                    .select('id, cf_handle')
+                    .select('id, cf_handle, rating')
                     .eq('cf_handle', opponent.cf_handle)
                     .single();
 
-                // Store IDs in closure scope (NOT state) for realtime callback
-                const myUserId = userData?.id;
                 const oppUserId = opponentData?.id;
-                
-                // Also set state for UI
-                setCurrentUserId(myUserId);
                 setOpponentId(oppUserId);
+                console.log('🎯 Opponent user ID:', oppUserId);
 
-                console.log('📡 Setting up realtime subscription for local battle...');
-                
-                // Subscribe to real-time changes on participants table
+                // Subscribe to real-time battle updates
+                console.log('📡 Setting up realtime subscription for battle:', battleId);
                 const channel = supabase
-                    .channel('local-battle-updates-' + battleId)
+                    .channel('global-battle-updates-' + battleId)
                     .on(
                         'postgres_changes',
                         {
@@ -148,50 +182,48 @@ const OneVOneCodingBattlePage = () => {
                             filter: `onevone_battle_id=eq.${battleId}`
                         },
                         (payload) => {
-                            console.log('🔔 Local battle update received!', payload);
+                            console.log('🔔 Battle update received!', payload);
+                            console.log('📊 Updated record:', payload.new);
                             
                             // Check if someone solved the problem
                             if (payload.new.problem_solved === 1) {
                                 console.log('✅ Someone solved! Player ID:', payload.new.player_id);
                                 console.log('🆔 My ID:', myUserId, 'Opponent ID:', oppUserId);
                                 
-                                // Check if I won or lost
+                                // Use the IDs from closure, not state (state might not be updated yet)
                                 const iWon = payload.new.player_id === myUserId;
                                 console.log('🏆 Did I win?', iWon);
                                 
                                 if (!iWon) {
-                                    // I LOST - navigate immediately to results
+                                    // I LOST - navigate immediately
                                     console.log('😞 I LOST! Navigating to results page...');
                                     setTimeout(() => {
-                                        navigate('/submit-page-real', {
+                                        navigate('/global-battle-result', {
                                             state: {
-                                                battleId: battleId,
-                                                won: false,
-                                                opponent: opponentData.cf_handle,
+                                                winner: 'opponent',
                                                 currentUserId: myUserId,
-                                                opponentId: oppUserId
+                                                opponentId: oppUserId,
+                                                currentUserHandle: currentUser,
+                                                opponentHandle: opponent?.cf_handle,
+                                                battleId: battleId
                                             }
                                         });
                                     }, 1000);
                                 }
-                                // If I won, navigation happens from handleCheckVerdict after modal
                             }
                         }
                     )
-                    .subscribe();
+                    .subscribe((status) => {
+                        console.log('📡 Subscription status:', status);
+                    });
 
-                console.log('✓ Realtime subscription active');
-
-                // Initial status check
-                checkBattleStatus();
-
-                // Cleanup subscription on unmount
                 return () => {
+                    console.log('🔌 Cleaning up subscription');
                     supabase.removeChannel(channel);
                 };
 
             } catch (err) {
-                console.error('❌ Error setting up battle:', err);
+                console.error('Error setting up battle:', err);
             }
         };
 
@@ -200,17 +232,25 @@ const OneVOneCodingBattlePage = () => {
         }
     }, [battleId, currentUser, opponent, navigate]);
 
-    // Function to check current battle status (for UI updates only, navigation handled by realtime)
+    // Check current battle status
     const checkBattleStatus = async () => {
         try {
+            console.log('⚡ checkBattleStatus called. hasNavigated:', hasNavigated);
+            
             const { data: participants } = await supabase
                 .from('onevone_participants')
                 .select('player_id, problem_solved, time_taken')
                 .eq('onevone_battle_id', battleId);
 
+            console.log('📋 Participants:', participants);
+            console.log('🆔 My ID:', currentUserId, 'Opponent ID:', opponentId);
+
             if (participants) {
                 const myData = participants.find(p => p.player_id === currentUserId);
                 const opponentData = participants.find(p => p.player_id === opponentId);
+
+                console.log('👤 My data:', myData);
+                console.log('🎯 Opponent data:', opponentData);
 
                 setBattleState({
                     myProgress: myData?.problem_solved || 0,
@@ -220,8 +260,40 @@ const OneVOneCodingBattlePage = () => {
                     winner: myData?.problem_solved > 0 ? 'you' : 
                             opponentData?.problem_solved > 0 ? 'opponent' : null
                 });
-                
-                // Navigation is handled by realtime subscription
+
+                // If someone won, navigate to result page
+                if (myData?.problem_solved > 0 || opponentData?.problem_solved > 0) {
+                    console.log('🏆 Someone won! My solved:', myData?.problem_solved, 'Opponent solved:', opponentData?.problem_solved);
+                    
+                    const iWon = myData?.problem_solved > 0;
+                    
+                    // If I won, I'll navigate from the modal (after 2.5s)
+                    // Only navigate here if I LOST (opponent won)
+                    if (!iWon) {
+                        if (hasNavigated) {
+                            console.log('⏭️ Already navigated, skipping...');
+                            return;
+                        }
+                        
+                        setHasNavigated(true);
+                        console.log('😞 I LOST - Navigating to results page...');
+                        
+                        setTimeout(() => {
+                            navigate('/global-battle-result', {
+                                state: {
+                                    winner: 'opponent',
+                                    currentUserId: currentUserId,
+                                    opponentId: opponentId,
+                                    currentUserHandle: currentUser,
+                                    opponentHandle: opponent?.cf_handle,
+                                    battleId: battleId
+                                }
+                            });
+                        }, 500);
+                    } else {
+                        console.log('🎉 I WON - Will navigate after modal is dismissed');
+                    }
+                }
             }
         } catch (err) {
             console.error('Error checking battle status:', err);
@@ -268,7 +340,6 @@ const OneVOneCodingBattlePage = () => {
             setIsSubmitting(true);
             setSubmitMessage('🔍 Checking Codeforces login...');
             
-            // Check if user is logged into Codeforces (via browser session)
             const isLoggedIn = await checkCodeforcesLogin(currentUser);
             
             if (!isLoggedIn) {
@@ -276,16 +347,15 @@ const OneVOneCodingBattlePage = () => {
                 setResultModalData({
                     emoji: '⚠️',
                     title: 'Codeforces Login Required',
-                    message: 'You must be logged into Codeforces first!\n\nSteps:\n1. Open Codeforces.com in a new tab\n2. Log in with your account\n3. Come back here and try again\n\nWe use your browser session (like vjudge).'
+                    message: 'You must be logged into Codeforces first!\n\nSteps:\n1. Open Codeforces.com in a new tab\n2. Log in with your account\n3. Come back here and try again'
                 });
                 setShowResultModal(true);
                 setIsSubmitting(false);
                 return;
             }
             
-            // Ask for confirmation before submitting
             setShowConfirmModal(true);
-            return; // Wait for modal response
+            return;
         } catch (err) {
             console.error('Error submitting solution:', err);
             setSubmitMessage('❌ Submission failed');
@@ -299,19 +369,15 @@ const OneVOneCodingBattlePage = () => {
         }
     };
     
-    // Handle actual submission after confirmation
     const proceedWithSubmission = async () => {
         try {
             setShowConfirmModal(false);
             
-            // Capture the current timestamp (in seconds) before submission
             const timestamp = Math.floor(Date.now() / 1000);
             setSubmissionTimestamp(timestamp);
-            console.log(`Submission timestamp: ${timestamp} (${new Date(timestamp * 1000).toISOString()})`);
             
-            setSubmitMessage('📤 Opening Codeforces...');
+            setSubmitMessage('');
             
-            // Submit code (opens Codeforces with pre-filled form)
             try {
                 const result = await submitCodeWithSession(
                     problem.contestId,
@@ -320,25 +386,16 @@ const OneVOneCodingBattlePage = () => {
                     selectedLanguage
                 );
                 
-                // Store popup reference for monitoring
                 setPopupWindow(result.popupWindow);
                 
-                // Show simplified instructions to user
                 setResultModalData({
-<<<<<<< HEAD
-                    emoji: '🚀',
-                    title: 'Auto-Filling Code!',
-                    message: `Opening Codeforces with automatic code transfer...\n\n✅ Problem: ${problem.contestId}${problem.index}\n✅ Language: ${selectedLanguage}\n✅ Code: ${code.length} characters\n\n⚡ Your code will auto-fill in the form!\n\nJust verify and click Submit in the popup.\n\nPopup auto-closes 3s after submission.`
-=======
-                    emoji: '�',
-                    title: 'Code Copied to Clipboard!',
-                    message: `Codeforces popup opened!\n\n✅ Your code is copied to clipboard\n✅ Problem: ${problem.contestId}${problem.index}\n✅ Language: ${selectedLanguage}\n\n📌 Steps:\n1. Select language in popup\n2. Paste your code (Ctrl+V)\n3. Click Submit\n\nThe popup will auto-close after 1 minute!`
->>>>>>> 1v1_battle_backend_local_battle
+                    emoji: '✅',
+                    title: 'Opening Codeforces',
+                    message: `Code copied to clipboard!\n\nProblem: ${problem.contestId}${problem.index}\nLanguage: ${selectedLanguage}\nCode: ${code.length} characters\n\nPaste your code (Ctrl+V) in the textarea and submit.\n\nWindow will close automatically after submission.`
                 });
                 setShowResultModal(true);
-                setSubmitMessage('⏳ Auto-filling code in Codeforces...');
+                setSubmitMessage('');
                 
-                // Start monitoring the popup for submission
                 startPopupMonitoring(result.popupWindow, timestamp);
                 
             } catch (submitError) {
@@ -366,228 +423,260 @@ const OneVOneCodingBattlePage = () => {
         }
     };
     
-    // Monitor popup for submission and auto-close
     const startPopupMonitoring = (popup, timestamp) => {
         if (!popup) return;
         
         let checkCount = 0;
-        const maxChecks = 120; // Monitor for up to 2 minutes (120 * 1 second)
+        const maxChecks = 120;
         
-        const initialPath = "/submit"; // Submit page keyword
+        const initialPath = "/submit";
         
         const monitorInterval = setInterval(() => {
             try {
                 checkCount++;
                 
-                // Check if popup is manually closed
                 if (popup.closed) {
-                    console.log('Popup was closed manually');
                     clearInterval(monitorInterval);
-                    setShowResultModal(false);
-                    setSubmitMessage('✅ Checking verdict...');
+                    console.log('✓ Popup closed manually');
                     handleCheckVerdict(timestamp);
                     return;
                 }
                 
-                // Try reading URL to detect submission
-                const currentUrl = popup.location.href;
-                
-                // If user clicked Submit → Codeforces redirects away from submit page
-                if (!currentUrl.includes(initialPath)) {
-                    console.log('Submit detected! URL changed to:', currentUrl);
-                    console.log('Closing popup in 60 seconds (1 minute)...');
+                try {
+                    const currentUrl = popup.location.href;
+                    const currentPath = new URL(currentUrl).pathname;
                     
-                    clearInterval(monitorInterval);
+                    const isNoLongerOnSubmitPage = !currentPath.includes(initialPath);
+                    const isOnMySubmissions = currentPath.includes('/my');
+                    const isOnStatus = currentPath.includes('/status');
                     
-                    setSubmitMessage('✅ Submitted! Closing popup in 60s...');
-                    
-                    setTimeout(() => {
-                        if (!popup.closed) popup.close();
-                        setPopupWindow(null);
+                    if (isNoLongerOnSubmitPage && (isOnMySubmissions || isOnStatus)) {
+                        console.log('✓ Detected submission - closing popup');
+                        setTimeout(() => {
+                            if (!popup.closed) {
+                                popup.close();
+                            }
+                        }, 3000);
                         
-                        setShowResultModal(false);
-                        setSubmitMessage('✅ Checking verdict...');
+                        clearInterval(monitorInterval);
                         handleCheckVerdict(timestamp);
-                    }, 60000); // 60 seconds (1 minute) delay after Submit
-                    
-                    return;
+                        return;
+                    }
+                } catch (err) {
+                    // Cross-origin access blocked - expected
                 }
                 
-                // Safety timeout after max checks
-                if (checkCount > maxChecks) {
-                    console.log('Popup monitoring timeout - closing popup');
+                if (checkCount >= maxChecks) {
                     clearInterval(monitorInterval);
-                    if (!popup.closed) popup.close();
-                    setShowResultModal(false);
-                    handleCheckVerdict(timestamp);
+                    console.log('⏱ Monitoring timeout');
                 }
                 
             } catch (err) {
-                // Cross-origin reading fails due to CORS - this is expected
-                // Just wait and try again on next interval
-                console.log('Waiting for submission... (CORS blocked URL check)');
+                console.error('Monitor error:', err);
+                clearInterval(monitorInterval);
             }
-        }, 1000); // Check every second
+        }, 1000);
     };
     
-    // Handle verdict check after manual submission
     const handleCheckVerdict = async (timestamp = null) => {
         try {
             setShowResultModal(false);
-            // Use provided timestamp or calculate from 30 seconds ago
             const submissionTimestamp = timestamp || (Math.floor(Date.now() / 1000) - 30);
             
             setSubmitMessage('⏳ Checking verdict...');
             
-            // Poll for verdict - only check submissions created after submissionTimestamp
+            // Add submission XP (+0.5 XP for each submission)
+            try {
+                await addSubmissionXP(currentUserId);
+                console.log('✅ Submission XP added (+0.5)');
+            } catch (xpError) {
+                console.error('Failed to add submission XP:', xpError);
+            }
+            
             try {
                 console.log('Starting verdict polling...');
                 const submission = await pollForVerdict(
                     currentUser,
                     problem.contestId,
                     problem.index,
-                    40, // 40 attempts
-                    3000, // 3 seconds interval
-                    submissionTimestamp // Only check submissions after this timestamp
+                    40,
+                    3000,
+                    submissionTimestamp
                 );
                 
-                console.log('Verdict received:', submission);
-                const verdict = submission.verdict;
-                const accepted = isVerdictAccepted(verdict);
-                const verdictMsg = getVerdictMessage(verdict);
-                
-                setSubmitMessage(`Verdict: ${verdictMsg}`);
+                const accepted = isVerdictAccepted(submission.verdict);
+                const verdictMsg = getVerdictMessage(submission.verdict);
                 
                 if (accepted) {
+                    // Update database - mark as solved
+                    const timeTaken = Math.floor((Date.now() - submissionTimestamp * 1000) / 1000);
+                    
+                    // First, mark problem as solved
+                    await supabase
+                        .from('onevone_participants')
+                        .update({
+                            problem_solved: 1,
+                            time_taken: timeTaken
+                        })
+                        .eq('onevone_battle_id', battleId)
+                        .eq('player_id', currentUserId);
+                    
+                    // UPDATE RATINGS AND XP!
                     console.log('🏆 Player won! Updating ratings and XP...');
+                    console.log('Battle ID:', battleId);
+                    console.log('Winner ID:', currentUserId);
+                    console.log('Loser ID:', opponentId);
                     
-                    // Calculate time taken (in seconds)
-                    const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-
-                    // Process match outcome (ELO rating + XP system)
-                    const matchResult = await processMatchOutcome(currentUserId, opponentId);
-                    
-                    console.log('💾 Storing rating changes in database...');
-                    console.log('Winner rating change:', matchResult.ratings.winner.change);
-                    console.log('Loser rating change:', matchResult.ratings.loser.change);
-                    console.log('Winner XP change:', matchResult.xp.winner.change);
-                    console.log('Loser XP change:', matchResult.xp.loser.change);
-
-                    // Update participants table with rating and XP changes
-                    await Promise.all([
-                        // Winner (current user)
-                        supabase
-                            .from('onevone_participants')
-                            .update({
-                                problem_solved: 1,
-                                time_taken: timeTaken,
-                                rating_change: parseInt(matchResult.ratings.winner.change),
-                                xp_change: parseFloat(matchResult.xp.winner.change)
-                            })
-                            .eq('onevone_battle_id', battleId)
-                            .eq('player_id', currentUserId),
-                        // Loser (opponent)
-                        supabase
-                            .from('onevone_participants')
-                            .update({
-                                problem_solved: 0,
-                                rating_change: parseInt(matchResult.ratings.loser.change),
-                                xp_change: parseFloat(matchResult.xp.loser.change)
-                            })
-                            .eq('onevone_battle_id', battleId)
-                            .eq('player_id', opponentId)
-                    ]);
-                    
-                    console.log('✅ Rating and XP changes stored in participants table');
-
-                    // Update battle status to completed
-                    await supabase
-                        .from('onevonebattles')
-                        .update({
-                            status: 'completed',
-                            end_time: new Date().toISOString()
-                        })
-                        .eq('onevone_battle_id', battleId);
-
-                    // Update winner's problem_solved counter
-                    const { data: currentUserData } = await supabase
-                        .from('users')
-                        .select('problem_solved')
-                        .eq('id', currentUserId)
-                        .single();
-
-                    await supabase
-                        .from('users')
-                        .update({
-                            problem_solved: (currentUserData.problem_solved || 0) + 1
-                        })
-                        .eq('id', currentUserId);
-                    
-                    setResultModalData({
-                        emoji: '🎉',
-                        title: 'Accepted! You Won!',
-                        message: `Congratulations! You won the battle!\n\nTime: ${submission.timeConsumedMillis}ms\nMemory: ${Math.round(submission.memoryConsumedBytes / 1024)}KB\n\nRating: ${matchResult.ratings.winner.change >= 0 ? '+' : ''}${matchResult.ratings.winner.change}\nXP: +${matchResult.xp.winner.change.toFixed(2)}`
-                    });
-                    setShowResultModal(true);
-                    
-                    console.log('🎉 Winner modal shown. Will navigate after 2.5 seconds...');
-                    
-                    // Navigate to result page after modal delay
-                    setTimeout(() => {
-                        console.log('🏆 I WON! Navigating to results page...');
-                        navigate('/submit-page-real', {
-                            state: {
-                                battleId,
-                                won: true,
-                                opponent: opponent.cf_handle,
-                                currentUserId: currentUserId,
-                                opponentId: opponentId,
-                                verdict: verdictMsg
-                            }
+                    try {
+                        const outcome = await processMatchOutcome(currentUserId, opponentId);
+                        
+                        console.log('📊 Rating changes:', outcome.ratings);
+                        console.log('💎 XP changes:', outcome.xp);
+                        
+                        const ratingChange = outcome.ratings.winner.change;
+                        const xpChange = outcome.xp.winner.change;
+                        
+                        // Store rating changes in database for both players to see
+                        console.log('💾 Storing rating changes in database...');
+                        console.log('Winner change:', ratingChange, 'XP:', xpChange);
+                        console.log('Loser change:', outcome.ratings.loser.change, 'XP:', outcome.xp.loser.change);
+                        
+                        // Update BOTH players' records with rating/XP changes
+                        const [winnerUpdate, loserUpdate] = await Promise.all([
+                            supabase
+                                .from('onevone_participants')
+                                .update({
+                                    rating_change: parseInt(ratingChange),
+                                    xp_change: parseFloat(xpChange)
+                                })
+                                .eq('onevone_battle_id', battleId)
+                                .eq('player_id', currentUserId)
+                                .select(),
+                            
+                            supabase
+                                .from('onevone_participants')
+                                .update({
+                                    rating_change: parseInt(outcome.ratings.loser.change),
+                                    xp_change: parseFloat(outcome.xp.loser.change)
+                                })
+                                .eq('onevone_battle_id', battleId)
+                                .eq('player_id', opponentId)
+                                .select()
+                        ]);
+                        
+                        console.log('✅ Update Results:');
+                        console.log('Winner update:', winnerUpdate);
+                        console.log('Loser update:', loserUpdate);
+                        
+                        if (winnerUpdate.error) {
+                            console.error('❌ Winner update error:', winnerUpdate.error);
+                        }
+                        if (loserUpdate.error) {
+                            console.error('❌ Loser update error:', loserUpdate.error);
+                        }
+                        
+                        setSubmitMessage('✅ Accepted!');
+                        setResultModalData({
+                            emoji: '🎉',
+                            title: 'Accepted!',
+                            message: `Congratulations! Your solution was accepted!\n\nVerdict: ${verdictMsg}\nTime: ${timeTaken}s\n\n🏆 Rating: ${ratingChange >= 0 ? '+' : ''}${ratingChange}\n💎 XP: +${xpChange.toFixed(2)}\n\nNavigating to results...`
                         });
-                    }, 2500);
+                        setShowResultModal(true);
+                        
+                        console.log('🎉 Winner modal shown. Will navigate after 2.5 seconds...');
+                        
+                        // Navigate to results page after showing modal (Winner path)
+                        setTimeout(() => {
+                            console.log('🏆 I WON! Navigating to results page...');
+                            navigate('/global-battle-result', {
+                                state: {
+                                    winner: 'you',
+                                    currentUserId: currentUserId,
+                                    opponentId: opponentId,
+                                    currentUserHandle: currentUser,
+                                    opponentHandle: opponent?.cf_handle,
+                                    battleId: battleId
+                                }
+                            });
+                        }, 2500);
+                    } catch (ratingError) {
+                        console.error('Failed to update ratings/XP:', ratingError);
+                        // Still show success, just without rating info
+                        setSubmitMessage('✅ Accepted!');
+                        setResultModalData({
+                            emoji: '🎉',
+                            title: 'Accepted!',
+                            message: `Congratulations! Your solution was accepted!\n\nVerdict: ${verdictMsg}\nTime: ${timeTaken}s\n\nWaiting for opponent...`
+                        });
+                        setShowResultModal(true);
+                    }
                 } else {
+                    // Wrong answer - just show verdict, XP already added for submission
+                    setSubmitMessage(`❌ ${verdictMsg}`);
                     setResultModalData({
                         emoji: '❌',
-                        title: verdictMsg,
-                        message: 'Your solution was not accepted. Keep trying!'
+                        title: 'Wrong Answer',
+                        message: `Verdict: ${verdictMsg}\n\nTry again!`
                     });
                     setShowResultModal(true);
-                    setIsSubmitting(false);
                 }
+                
+                setIsSubmitting(false);
+                
             } catch (verdictError) {
-                console.error('Error getting verdict:', verdictError);
-                setSubmitMessage('⚠️ Could not verify submission. Please check Codeforces.');
+                console.error('Verdict check error:', verdictError);
+                setSubmitMessage('⚠️ Could not verify submission');
                 setResultModalData({
                     emoji: '⚠️',
                     title: 'Verification Failed',
-                    message: 'Could not automatically verify your submission.\n\nPlease check your submission status on Codeforces and try again if needed.'
+                    message: 'Could not check verdict. Please check Codeforces manually.'
                 });
                 setShowResultModal(true);
                 setIsSubmitting(false);
             }
 
         } catch (err) {
-            console.error('Error submitting solution:', err);
-            setSubmitMessage('❌ Submission failed');
-            setResultModalData({
-                emoji: '❌',
-                title: 'Submission Failed',
-                message: 'Failed to submit. Please try again.'
-            });
-            setShowResultModal(true);
+            console.error('Error checking verdict:', err);
+            setSubmitMessage('❌ Verification failed');
             setIsSubmitting(false);
+        }
+    };
+
+    // Handle EXIT button - process quit if battle is still active
+    const handleExit = async () => {
+        try {
+            // Check if battle is still active (neither player has won)
+            if (battleState.myStatus !== 'solved' && battleState.opponentStatus !== 'solved') {
+                console.log('🚪 Player quitting active battle...');
+                
+                // Process quit: quitter loses, opponent wins
+                try {
+                    const quitOutcome = await processQuit(currentUserId, opponentId);
+                    console.log('✅ Quit processed:', quitOutcome);
+                    console.log(`📊 Rating: ${quitOutcome.ratings.loser.oldRating} → ${quitOutcome.ratings.loser.newRating} (${quitOutcome.ratings.loser.change})`);
+                    console.log(`💎 XP: ${quitOutcome.xp.quitter.change.toFixed(2)}`);
+                } catch (quitError) {
+                    console.error('Failed to process quit:', quitError);
+                }
+            }
+        } catch (err) {
+            console.error('Error handling exit:', err);
+        } finally {
+            // Navigate regardless of quit processing result
+            navigate('/playmode1v1');
         }
     };
 
     return (
         <div className="coding-battle-container">
-            {/* Header Section */}
+            {/* Header */}
             <div className="battle-header">
                 <img src={logo} alt="Logo" className="battle-logo" />
                 
                 <div className="battle-title-section">
-                    <h1 className="battle-title">{currentUser?.toUpperCase()} VS {opponent?.cf_handle?.toUpperCase()}</h1>
+                    <h1 className="battle-title">
+                        GLOBAL BATTLE: {currentUser?.toUpperCase()} VS {opponent?.cf_handle?.toUpperCase()}
+                    </h1>
                     <div className="player-labels">
                         <span className="player-label">
                             YOU {battleState.myStatus === 'solved' && '✓'}
@@ -598,12 +687,12 @@ const OneVOneCodingBattlePage = () => {
                     </div>
                 </div>
                 
-                <button className="exit-btn" onClick={() => navigate('/playmode1v1')}>EXIT</button>
+                <button className="exit-btn" onClick={handleExit}>EXIT</button>
             </div>
 
             {/* Main Content */}
             <div className="battle-content">
-                {/* Left Section - Problem */}
+                {/* Problem Section */}
                 <div className={`problem-section ${isEditorMinimized ? 'full-width' : ''}`}>
                     {loadingProblem ? (
                         <div className="loading-problem">
@@ -676,7 +765,7 @@ const OneVOneCodingBattlePage = () => {
                     )}
                 </div>
 
-                {/* Right Section - Code Editor */}
+                {/* Code Editor Section */}
                 {!isEditorMinimized ? (
                     <div className="editor-section">
                         <div className="editor-controls">
@@ -753,7 +842,7 @@ const OneVOneCodingBattlePage = () => {
                 )}
             </div>
             
-            {/* Custom Confirmation Modal */}
+            {/* Modals */}
             {showConfirmModal && (
                 <div className="custom-modal-overlay">
                     <div className="custom-modal">
@@ -762,13 +851,12 @@ const OneVOneCodingBattlePage = () => {
                             <h2 className="modal-title">Ready to Submit?</h2>
                         </div>
                         <div className="modal-body">
-                            <p className="modal-text">Your code will be submitted to Codeforces automatically.</p>
+                            <p className="modal-text">Your code will be submitted to Codeforces.</p>
                             <div className="modal-info">
                                 <p><strong>Problem:</strong> {problem?.name}</p>
                                 <p><strong>Language:</strong> {selectedLanguage}</p>
                                 <p><strong>Lines of code:</strong> {code.split('\n').length}</p>
                             </div>
-                            <p className="modal-text-small">Click SUBMIT to proceed!</p>
                         </div>
                         <div className="modal-footer">
                             <button 
@@ -792,7 +880,6 @@ const OneVOneCodingBattlePage = () => {
                 </div>
             )}
             
-            {/* Custom Result Modal */}
             {showResultModal && (
                 <div className="custom-modal-overlay">
                     <div className="custom-modal">
@@ -806,19 +893,7 @@ const OneVOneCodingBattlePage = () => {
                         <div className="modal-footer">
                             <button 
                                 className="modal-btn modal-btn-submit"
-                                onClick={() => {
-                                    // If this is the popup modal and user manually closes it
-                                    if (resultModalData.title === 'Auto-Filling Code!') {
-                                        // Close popup if still open
-                                        if (popupWindow && !popupWindow.closed) {
-                                            popupWindow.close();
-                                        }
-                                        setShowResultModal(false);
-                                        // Let the monitoring handle verdict check
-                                    } else {
-                                        setShowResultModal(false);
-                                    }
-                                }}
+                                onClick={() => setShowResultModal(false)}
                             >
                                 OK
                             </button>
@@ -830,4 +905,4 @@ const OneVOneCodingBattlePage = () => {
     );
 };
 
-export default OneVOneCodingBattlePage;
+export default OneVOneGlobalBattlePage;

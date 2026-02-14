@@ -5,6 +5,205 @@ import logo from '../../assets/icons/cca.png';
 import trophyIcon from '../../assets/icons/trophy.png';
 import { supabase } from '../../supabaseclient';
 
+// Problem selection function for REAL MODE (same logic as global battle)
+const selectProblemForLocalBattle = async (cfHandle1, cfHandle2, avgRating) => {
+    try {
+        console.log(`🎯 UNIVERSAL SELECTION: Picking ONE problem for avg rating ${avgRating}`);
+        
+        // Calculate difficulty range based on average rating
+        const targetRating = Math.max(800, Math.min(2400, avgRating));
+        const minRating = targetRating - 200;
+        const maxRating = targetRating + 200;
+        console.log(`📊 Difficulty range: ${minRating} - ${maxRating}`);
+        
+        // Fetch problems from Codeforces
+        const response = await fetch('https://codeforces.com/api/problemset.problems');
+        const data = await response.json();
+        
+        if (data.status !== 'OK') {
+            throw new Error('Failed to fetch problems from Codeforces');
+        }
+        
+        // Filter problems by rating range and type
+        const validProblems = data.result.problems.filter(
+            p => p.rating >= minRating && 
+                 p.rating <= maxRating && 
+                 p.contestId && 
+                 p.index &&
+                 p.type === 'PROGRAMMING'
+        );
+        
+        if (validProblems.length === 0) {
+            throw new Error('No problems found in rating range');
+        }
+        
+        console.log(`📝 Found ${validProblems.length} problems in range ${minRating}-${maxRating}`);
+        
+        // Fetch submissions for BOTH players
+        const [player1Submissions, player2Submissions] = await Promise.all([
+            fetch(`https://codeforces.com/api/user.status?handle=${cfHandle1}&from=1&count=10000`)
+                .then(r => r.json())
+                .catch(() => ({ status: 'FAILED', result: [] })),
+            fetch(`https://codeforces.com/api/user.status?handle=${cfHandle2}&from=1&count=10000`)
+                .then(r => r.json())
+                .catch(() => ({ status: 'FAILED', result: [] }))
+        ]);
+        
+        // Get solved problem IDs for both players
+        const player1Solved = new Set();
+        const player2Solved = new Set();
+        
+        if (player1Submissions.status === 'OK') {
+            player1Submissions.result.forEach(sub => {
+                if (sub.verdict === 'OK') {
+                    player1Solved.add(`${sub.problem.contestId}-${sub.problem.index}`);
+                }
+            });
+        }
+        
+        if (player2Submissions.status === 'OK') {
+            player2Submissions.result.forEach(sub => {
+                if (sub.verdict === 'OK') {
+                    player2Solved.add(`${sub.problem.contestId}-${sub.problem.index}`);
+                }
+            });
+        }
+        
+        console.log(`✓ ${cfHandle1} solved: ${player1Solved.size}, ${cfHandle2} solved: ${player2Solved.size}`);
+        
+        // Filter problems that NEITHER player has solved
+        const unsolvedProblems = validProblems.filter(p => {
+            const problemId = `${p.contestId}-${p.index}`;
+            return !player1Solved.has(problemId) && !player2Solved.has(problemId);
+        });
+        
+        let selectedProblem;
+        
+        if (unsolvedProblems.length === 0) {
+            console.log('⚠️ No unsolved problems found, picking from all valid problems');
+            selectedProblem = validProblems[Math.floor(Math.random() * validProblems.length)];
+        } else {
+            console.log(`✓ Found ${unsolvedProblems.length} unsolved problems`);
+            selectedProblem = unsolvedProblems[Math.floor(Math.random() * unsolvedProblems.length)];
+        }
+        
+        console.log(`🎲 SELECTED: ${selectedProblem.name} (${selectedProblem.contestId}${selectedProblem.index}, rating: ${selectedProblem.rating})`);
+        console.log(`✅ This SAME problem will be given to BOTH players`);
+        
+        return selectedProblem;
+    } catch (error) {
+        console.error('Error selecting problem:', error);
+        throw error;
+    }
+};
+
+// Multi-problem selection for TIME RUSH MODE
+const selectMultipleProblems = async (cfHandle1, cfHandle2, avgRating, count) => {
+    try {
+        console.log(`🎯 TIME RUSH: Selecting ${count} problems for avg rating ${avgRating}`);
+        
+        const targetRating = Math.max(800, Math.min(2400, avgRating));
+        const minRating = targetRating - 200;
+        const maxRating = targetRating + 200;
+        console.log(`📊 Difficulty range: ${minRating} - ${maxRating}`);
+        
+        // Fetch problems from Codeforces
+        const response = await fetch('https://codeforces.com/api/problemset.problems');
+        const data = await response.json();
+        
+        if (data.status !== 'OK') {
+            throw new Error('Failed to fetch problems from Codeforces');
+        }
+        
+        // Filter valid problems
+        const validProblems = data.result.problems.filter(
+            p => p.rating >= minRating && 
+                 p.rating <= maxRating && 
+                 p.contestId && 
+                 p.index &&
+                 p.type === 'PROGRAMMING'
+        );
+        
+        if (validProblems.length === 0) {
+            throw new Error('No problems found in rating range');
+        }
+        
+        console.log(`📝 Found ${validProblems.length} problems in range`);
+        
+        // Fetch submissions for BOTH players
+        const [player1Submissions, player2Submissions] = await Promise.all([
+            fetch(`https://codeforces.com/api/user.status?handle=${cfHandle1}&from=1&count=10000`)
+                .then(r => r.json())
+                .catch(() => ({ status: 'FAILED', result: [] })),
+            fetch(`https://codeforces.com/api/user.status?handle=${cfHandle2}&from=1&count=10000`)
+                .then(r => r.json())
+                .catch(() => ({ status: 'FAILED', result: [] }))
+        ]);
+        
+        // Get solved problem IDs
+        const player1Solved = new Set();
+        const player2Solved = new Set();
+        
+        if (player1Submissions.status === 'OK') {
+            player1Submissions.result.forEach(sub => {
+                if (sub.verdict === 'OK') {
+                    player1Solved.add(`${sub.problem.contestId}-${sub.problem.index}`);
+                }
+            });
+        }
+        
+        if (player2Submissions.status === 'OK') {
+            player2Submissions.result.forEach(sub => {
+                if (sub.verdict === 'OK') {
+                    player2Solved.add(`${sub.problem.contestId}-${sub.problem.index}`);
+                }
+            });
+        }
+        
+        // Filter unsolved problems
+        let availableProblems = validProblems.filter(p => {
+            const problemId = `${p.contestId}-${p.index}`;
+            return !player1Solved.has(problemId) && !player2Solved.has(problemId);
+        });
+        
+        if (availableProblems.length === 0) {
+            console.log('⚠️ No unsolved problems, using all valid problems');
+            availableProblems = validProblems;
+        }
+        
+        // Select N unique random problems
+        const selectedProblems = [];
+        const usedIndices = new Set();
+        
+        for (let i = 0; i < count; i++) {
+            if (availableProblems.length === 0) break;
+            
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * availableProblems.length);
+            } while (usedIndices.has(randomIndex) && usedIndices.size < availableProblems.length);
+            
+            usedIndices.add(randomIndex);
+            const problem = availableProblems[randomIndex];
+            selectedProblems.push({
+                name: problem.name,
+                contestId: problem.contestId,
+                index: problem.index,
+                rating: problem.rating,
+                tags: problem.tags || []
+            });
+            
+            console.log(`✓ Problem ${i + 1}: ${problem.name} (${problem.contestId}${problem.index})`);
+        }
+        
+        console.log(`✅ Selected ${selectedProblems.length} problems for TIME RUSH MODE`);
+        return selectedProblems;
+        
+    } catch (error) {
+        console.error('Error selecting multiple problems:', error);
+        throw error;
+    }
+};
 
 const OneVOneLocalPage = () => {
     const navigate = useNavigate();
@@ -28,6 +227,10 @@ const OneVOneLocalPage = () => {
     // State for incoming battle requests
     const [incomingRequests, setIncomingRequests] = useState([]);
     const [currentUserId, setCurrentUserId] = useState(null);
+
+    // State for battle history fetched from database
+    const [historyData, setHistoryData] = useState([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
 
     // Function to create a new battle when challenging a friend
     const handleChallenge = async (friend) => {
@@ -55,7 +258,7 @@ const OneVOneLocalPage = () => {
                     problem_count: 1,
                     status: 'waiting',
                     trophy_reward: 115,
-                    start_time: new Date().toISOString(),
+                    // start_time will be set when battle is ACCEPTED, not when created
                     invited_player_id: opponentUser.id // Track who is being invited
                 })
                 .select()
@@ -180,6 +383,135 @@ const OneVOneLocalPage = () => {
         fetchData();
     }, []); // Empty array means run only once when component mounts
 
+    // Fetch battle history from database
+    useEffect(() => {
+        const fetchBattleHistory = async () => {
+            if (!currentUserId) return;
+            
+            setHistoryLoading(true);
+            try {
+                console.log('📊 Fetching battle history for user:', currentUserId);
+
+                // Get all battles where current user participated
+                const { data: userParticipations, error: participationError } = await supabase
+                    .from('onevone_participants')
+                    .select(`
+                        onevone_battle_id,
+                        problem_solved,
+                        time_taken,
+                        rating_change,
+                        onevonebattles (
+                            onevone_battle_id,
+                            battle_mode,
+                            status,
+                            trophy_reward,
+                            start_time,
+                            end_time
+                        )
+                    `)
+                    .eq('player_id', currentUserId)
+                    .order('onevonebattles(start_time)', { ascending: false })
+                    .limit(20);
+
+                if (participationError) {
+                    console.error('Error fetching battle history:', participationError);
+                    return;
+                }
+
+                console.log('✓ User participations:', userParticipations);
+
+                // For each battle, get opponent information
+                const historyPromises = userParticipations.map(async (participation) => {
+                    if (!participation.onevonebattles) return null;
+
+                    const battleId = participation.onevone_battle_id;
+
+                    // Get opponent's data (the other participant in the same battle)
+                    const { data: allParticipants, error: opponentError } = await supabase
+                        .from('onevone_participants')
+                        .select(`
+                            player_id,
+                            problem_solved,
+                            time_taken,
+                            users (
+                                cf_handle
+                            )
+                        `)
+                        .eq('onevone_battle_id', battleId);
+
+                    if (opponentError || !allParticipants) {
+                        console.error('Error fetching opponents:', opponentError);
+                        return null;
+                    }
+
+                    // Find opponent (the participant who is not the current user)
+                    const opponent = allParticipants.find(p => p.player_id !== currentUserId);
+                    const currentUserData = allParticipants.find(p => p.player_id === currentUserId);
+
+                    if (!opponent || !currentUserData) return null;
+
+                    // Determine win/loss status
+                    let status = 'DRAW';
+                    let trophyChange = 0;
+
+                    // Check if battle is completed
+                    if (participation.onevonebattles.status === 'completed') {
+                        // Compare problem_solved, then time_taken
+                        if (currentUserData.problem_solved > opponent.problem_solved) {
+                            status = 'WON';
+                            trophyChange = participation.onevonebattles.trophy_reward || 150;
+                        } else if (currentUserData.problem_solved < opponent.problem_solved) {
+                            status = 'LOST';
+                            trophyChange = -(participation.onevonebattles.trophy_reward || 50);
+                        } else {
+                            // Same problems solved, check time
+                            if (currentUserData.time_taken < opponent.time_taken) {
+                                status = 'WON';
+                                trophyChange = participation.onevonebattles.trophy_reward || 150;
+                            } else if (currentUserData.time_taken > opponent.time_taken) {
+                                status = 'LOST';
+                                trophyChange = -(participation.onevonebattles.trophy_reward || 50);
+                            } else {
+                                status = 'DRAW';
+                                trophyChange = 0;
+                            }
+                        }
+                    } else if (participation.onevonebattles.status === 'abandoned') {
+                        status = 'ABANDONED';
+                        trophyChange = 0;
+                    }
+
+                    // Use rating_change if available
+                    if (participation.rating_change) {
+                        trophyChange = participation.rating_change;
+                        status = trophyChange > 0 ? 'WON' : trophyChange < 0 ? 'LOST' : 'DRAW';
+                    }
+
+                    return {
+                        id: battleId,
+                        username: opponent.users?.cf_handle || 'Unknown',
+                        mode: participation.onevonebattles.battle_mode || 'REAL MODE',
+                        status: status,
+                        trophy: trophyChange >= 0 ? `+${trophyChange}` : `${trophyChange}`
+                    };
+                });
+
+                const resolvedHistory = await Promise.all(historyPromises);
+                const filteredHistory = resolvedHistory.filter(h => h !== null);
+
+                console.log('✅ Battle history fetched:', filteredHistory);
+                setHistoryData(filteredHistory);
+
+            } catch (err) {
+                console.error('Error fetching battle history:', err);
+            } finally {
+                setHistoryLoading(false);
+            }
+        };
+
+        fetchBattleHistory();
+    }, [currentUserId]); // Re-fetch when currentUserId changes
+
     // Subscribe to incoming battle requests in real-time
     useEffect(() => {
         if (!currentUserId) return;
@@ -273,14 +605,6 @@ const OneVOneLocalPage = () => {
     // Function to accept battle request
     const handleAcceptRequest = async (battleId, opponent) => {
         try {
-            // Update battle status to 'active'
-            const { error } = await supabase
-                .from('onevonebattles')
-                .update({ status: 'active' })
-                .eq('onevone_battle_id', battleId);
-
-            if (error) throw error;
-
             // Navigate to battle page
             const loggedInUser = localStorage.getItem('loggedInUser');
             const { data: battle } = await supabase
@@ -288,6 +612,103 @@ const OneVOneLocalPage = () => {
                 .select('battle_mode, problem_count')
                 .eq('onevone_battle_id', battleId)
                 .single();
+
+            // For REAL MODE, select and store problem BEFORE activating battle
+            if (battle.battle_mode === 'REAL MODE') {
+                console.log('🎲 Selecting random problem for REAL MODE...');
+                
+                // Get both players' data
+                const [currentUserData, opponentUserData] = await Promise.all([
+                    supabase.from('users').select('rating, cf_handle').eq('cf_handle', loggedInUser).single(),
+                    supabase.from('users').select('rating, cf_handle').eq('cf_handle', opponent.cf_handle).single()
+                ]);
+                
+                if (currentUserData.error || opponentUserData.error) {
+                    throw new Error('Failed to fetch user data');
+                }
+                
+                const avgRating = Math.round((currentUserData.data.rating + opponentUserData.data.rating) / 2);
+                console.log(`📊 Average rating: ${avgRating}`);
+                
+                // Select problem universally
+                const selectedProblem = await selectProblemForLocalBattle(
+                    currentUserData.data.cf_handle,
+                    opponentUserData.data.cf_handle,
+                    avgRating
+                );
+                
+                // Update battle with selected problem AND set to active
+                const battleStartTime = new Date();
+                console.log('🕐 Setting battle start time:', battleStartTime.toISOString());
+                
+                const { error: updateError } = await supabase
+                    .from('onevonebattles')
+                    .update({
+                        status: 'active',
+                        start_time: battleStartTime.toISOString(), // Store as ISO string
+                        problem_name: selectedProblem.name,
+                        problem_contest_id: selectedProblem.contestId,
+                        problem_index: selectedProblem.index,
+                        problem_rating: selectedProblem.rating,
+                        problem_tags: JSON.stringify(selectedProblem.tags || [])
+                    })
+                    .eq('onevone_battle_id', battleId);
+                
+                if (updateError) throw updateError;
+                
+                console.log('✅ Problem stored in database, battle activated');
+                console.log('🕐 Start time set to:', battleStartTime.toISOString());
+            } else if (battle.battle_mode === 'TIME RUSH MODE') {
+                // For TIME RUSH MODE, select MULTIPLE problems
+                console.log(`🎲 Selecting ${battle.problem_count} random problems for TIME RUSH MODE...`);
+                
+                // Get both players' data
+                const [currentUserData, opponentUserData] = await Promise.all([
+                    supabase.from('users').select('rating, cf_handle').eq('cf_handle', loggedInUser).single(),
+                    supabase.from('users').select('rating, cf_handle').eq('cf_handle', opponent.cf_handle).single()
+                ]);
+                
+                if (currentUserData.error || opponentUserData.error) {
+                    throw new Error('Failed to fetch user data');
+                }
+                
+                const avgRating = Math.round((currentUserData.data.rating + opponentUserData.data.rating) / 2);
+                console.log(`📊 Average rating: ${avgRating}`);
+                
+                // Select multiple problems
+                const selectedProblems = await selectMultipleProblems(
+                    currentUserData.data.cf_handle,
+                    opponentUserData.data.cf_handle,
+                    avgRating,
+                    battle.problem_count
+                );
+                
+                // Store problems as JSON array in problem_tags column (reusing existing column)
+                const battleStartTime = new Date();
+                console.log('🕐 Setting battle start time:', battleStartTime.toISOString());
+                
+                const { error: updateError } = await supabase
+                    .from('onevonebattles')
+                    .update({
+                        status: 'active',
+                        start_time: battleStartTime.toISOString(), // Store as ISO string
+                        problem_tags: JSON.stringify(selectedProblems)
+                    })
+                    .eq('onevone_battle_id', battleId);
+                
+                if (updateError) throw updateError;
+                
+                console.log('✅ Problems stored in database, battle activated');
+                console.log('🕐 Start time set to:', battleStartTime.toISOString());
+            } else {
+                // For other modes, just update status to active
+                const { error } = await supabase
+                    .from('onevonebattles')
+                    .update({ status: 'active' })
+                    .eq('onevone_battle_id', battleId);
+                
+                if (error) throw error;
+            }
 
             // Navigate to appropriate page based on battle mode
             if (battle.battle_mode === 'TIME RUSH MODE') {
@@ -314,7 +735,7 @@ const OneVOneLocalPage = () => {
 
         } catch (err) {
             console.error('Error accepting request:', err);
-            alert('Failed to accept battle request.');
+            alert('Failed to accept battle request: ' + err.message);
         }
     };
 
@@ -338,13 +759,7 @@ const OneVOneLocalPage = () => {
         }
     };
 
-    // History data
-    const historyData = [
-        { id: 1, username: 'MATIN008', mode: 'REAL MODE', status: 'WON', trophy: '+150' },
-        { id: 2, username: 'Than_007', mode: 'REAL MODE', status: 'WON', trophy: '+150' },
-        { id: 3, username: 'TakiL_096', mode: 'REAL MODE', status: 'LOST', trophy: '-50' },
-        { id: 4, username: 'Usama_Jeager', mode: 'REAL MODE', status: 'WON', trophy: '+150' }
-    ];
+    // History data is now fetched from database via useEffect
 
     return (
         <div className="local-battle-container">
@@ -469,7 +884,22 @@ const OneVOneLocalPage = () => {
 
             {activeTab === 'history' && (
                 <div className="history-list">
-                    {historyData.map((match) => (
+                    {/* Show loading message while fetching history */}
+                    {historyLoading && (
+                        <div style={{ textAlign: 'center', padding: '20px', color: 'white' }}>
+                            Loading battle history...
+                        </div>
+                    )}
+
+                    {/* Show message if no history found */}
+                    {!historyLoading && historyData.length === 0 && (
+                        <div style={{ textAlign: 'center', padding: '20px', color: 'white' }}>
+                            No battle history yet. Start challenging friends!
+                        </div>
+                    )}
+
+                    {/* Display battle history from database */}
+                    {!historyLoading && historyData.map((match) => (
                         <div key={match.id} className={`history-card ${match.status.toLowerCase()}`}>
                             <span className="history-username">{match.username}</span>
                             <span className="history-mode">{match.mode}</span>

@@ -420,6 +420,10 @@
   display: none;
 }
 
+.history-list::-webkit-scrollbar {
+  display: none;
+}
+
 .friend-card {
   position: relative;
   background-color: #F1CA76;
@@ -547,12 +551,17 @@
   left: 50%;
   transform: translateX(-50%);
   width: 85%;
-  max-width: 1300px !important;
-  max-height: 445px !important;
+  max-width: 1300px;
+  max-height: 380px;
   margin-top: 60px;
   display: flex;
   flex-direction: column;
   gap: 15px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .history-card {
