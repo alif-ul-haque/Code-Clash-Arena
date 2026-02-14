@@ -325,15 +325,9 @@ const OneVOneCodingBattlePage = () => {
                 
                 // Show simplified instructions to user
                 setResultModalData({
-<<<<<<< HEAD
                     emoji: '🚀',
                     title: 'Auto-Filling Code!',
                     message: `Opening Codeforces with automatic code transfer...\n\n✅ Problem: ${problem.contestId}${problem.index}\n✅ Language: ${selectedLanguage}\n✅ Code: ${code.length} characters\n\n⚡ Your code will auto-fill in the form!\n\nJust verify and click Submit in the popup.\n\nPopup auto-closes 3s after submission.`
-=======
-                    emoji: '�',
-                    title: 'Code Copied to Clipboard!',
-                    message: `Codeforces popup opened!\n\n✅ Your code is copied to clipboard\n✅ Problem: ${problem.contestId}${problem.index}\n✅ Language: ${selectedLanguage}\n\n📌 Steps:\n1. Select language in popup\n2. Paste your code (Ctrl+V)\n3. Click Submit\n\nThe popup will auto-close after 1 minute!`
->>>>>>> 1v1_battle_backend_local_battle
                 });
                 setShowResultModal(true);
                 setSubmitMessage('⏳ Auto-filling code in Codeforces...');
