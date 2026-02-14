@@ -25,7 +25,7 @@ import getUserData, { getClanData, countClanMembers, getClanMembers } from '../u
 import { supabase } from '../../supabaseclient.js'
 import { loadMailBox } from '../utilities/LoadMailBox.js'
 import { isUserClanLeader, hasOngoingClanBattle, subscribeToClanBattleChanges } from '../../Your_Clan/utilities/ClanBattleUtils.js'
-
+import copyToClipboard from '../utilities/CopyCode.js'
 
 
 export default function MainPage() {
@@ -154,6 +154,7 @@ export default function MainPage() {
         level: 0,
         displayXp: 0,
         haveClan: false,
+        user_id: null,
         clanDetails: {
             name: "",
             id: null,
@@ -209,6 +210,7 @@ export default function MainPage() {
                 ...prev,
                 haveClan: data.clan_id ? true : false,
                 username: data.cf_handle,
+                user_id: data.user_id,
                 level: data.level,
                 xp: data.xp,
                 maxXp: data.level * 10,
@@ -302,6 +304,7 @@ export default function MainPage() {
                         setUserDetail(prev => ({
                             ...prev,
                             username: data.cf_handle,
+                            user_id: data.user_id,
                             level: data.level,
                             xp: data.xp,
                             maxXp: data.level * 10,
@@ -741,7 +744,12 @@ export default function MainPage() {
                     <div className="xpbar">
                         <div className="img-xp">
                             <p className={`level ${userDetail.level >= 10 ? 'level-two-digit' : ''}`}>{userDetail.level}</p>
-                            <img src={xpImage} alt="XP" className="xp-image" />
+                            <img
+                                src={xpImage}
+                                alt="XP"
+                                className="xp-image"
+                                onClick={() => copyToClipboard(userDetail.user_id)}
+                            />
                             <XpBar xp={userDetail.xp} maxXp={userDetail.maxXp} username={userDetail.username} />
                         </div>
                     </div>
