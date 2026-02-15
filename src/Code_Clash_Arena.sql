@@ -158,3 +158,69 @@ ON onevonebattles(problem_contest_id, problem_index);
 ALTER TABLE onevone_participants
 ADD COLUMN IF NOT EXISTS rating_change INTEGER DEFAULT 0,
 ADD COLUMN IF NOT EXISTS xp_change DECIMAL(10,2) DEFAULT 0.0;
+
+
+-- Function to handle automatic leveling up based on XP
+CREATE OR REPLACE FUNCTION handle_level_up()
+RETURNS TRIGGER AS $$
+DECLARE
+    max_xp INTEGER;
+    remaining_xp NUMERIC;
+BEGIN
+    -- Calculate max XP for current level (level * 10)
+    max_xp := NEW.level * 10;
+    remaining_xp := NEW.xp;
+    
+    -- Loop to handle multiple level-ups at once
+    WHILE remaining_xp >= max_xp LOOP
+        -- Subtract the max XP from remaining XP
+        remaining_xp := remaining_xp - max_xp;
+        
+        -- Increment level
+        NEW.level := NEW.level + 1;
+        
+        -- Recalculate max XP for the new level
+        max_xp := NEW.level * 10;
+    END LOOP;
+    
+    -- Set the final XP value (leftover XP after leveling up)
+    NEW.xp := remaining_xp;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Drop existing trigger if it exists
+DROP TRIGGER IF EXISTS trigger_level_up ON users;
+
+-- Create trigger that fires BEFORE INSERT or UPDATE on xp or level
+CREATE TRIGGER trigger_level_up
+    BEFORE INSERT OR UPDATE OF xp, level
+    ON users
+    FOR EACH ROW
+    WHEN (NEW.xp IS NOT NULL AND NEW.level IS NOT NULL)
+    EXECUTE FUNCTION handle_level_up();
+
+-- Test the trigger with sample data
+-- Example 1: User gains 16 XP at level 1 (should become level 2 with 6 XP)
+-- UPDATE users SET xp = xp + 16 WHERE id = 'some-user-id';
+
+-- Example 2: User gains 35 XP at level 1 (should become level 3 with 5 XP)
+-- Level 1: max_xp = 10, remaining = 35 - 10 = 25
+-- Level 2: max_xp = 20, remaining = 25 - 20 = 5
+-- Level 3: xp = 5
+-- UPDATE users SET xp = xp + 35 WHERE id = 'some-user-id';
+
+-- Enable pg_cron extension (run as superuser)
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- Schedule a job to check every minute
+-- Enable pg_cron extension (run as superuser)
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- Schedule a job to check every minute
+SELECT cron.schedule(
+    'level-up-check',           -- Job name
+    '* * * * *',                -- Every minute (cron syntax)
+    'UPDATE users SET xp = xp WHERE xp >= (level * 10);'  -- Use single quotes instead
+);
