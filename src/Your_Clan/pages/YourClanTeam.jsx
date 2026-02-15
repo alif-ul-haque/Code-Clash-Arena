@@ -46,7 +46,7 @@ export default function YourClanTeam() {
     };
 
     const handleStartBattle = async () => {
-        if (selectedPlayers.length === 2) {
+        if (selectedPlayers.length === 1) {
             setIsSearching(true);
             
             // Join the battle queue with selected members
@@ -69,14 +69,14 @@ export default function YourClanTeam() {
             {/* Header with Start Battle Button */}
             <div className="page-header">
                 <button 
-                    className={`start-battle-btn ${selectedPlayers.length === 2 ? 'ready' : 'disabled'} ${isSearching ? 'searching' : ''}`}
+                    className={`start-battle-btn ${selectedPlayers.length === 1 ? 'ready' : 'disabled'} ${isSearching ? 'searching' : ''}`}
                     onClick={handleStartBattle}
-                    disabled={selectedPlayers.length !== 2 || isSearching}
+                    disabled={selectedPlayers.length !== 1 || isSearching}
                 >
                     {isSearching ? 'Finding Opponent...' : 'Start Battle'}
                 </button>
                 <div className="selection-counter">
-                    <span className="counter-text">Selected: {selectedPlayers.length}/2</span>
+                    <span className="counter-text">Selected: {selectedPlayers.length}/5</span>
                 </div>
             </div>
 
@@ -89,7 +89,7 @@ export default function YourClanTeam() {
                         return (
                             <div 
                                 key={player.id}
-                                className={`player-row ${isSelected ? 'selected' : ''} ${selectedPlayers.length >= 2 && !isSelected ? 'disabled' : ''}`}
+                                className={`player-row ${isSelected ? 'selected' : ''} ${selectedPlayers.length >= 1 && !isSelected ? 'disabled' : ''}`}
                                 onClick={() => handlePlayerToggle(player.id)}
                                 style={{ animationDelay: `${index * 0.05}s` }}
                             >

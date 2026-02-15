@@ -1,13 +1,17 @@
-const express = require('express');
-const cors = require('cors');
-const axios = require('axios');
-const FormData = require('form-data');
+
+import express from 'express';
+import cors from 'cors';
+import axios from 'axios';
+import FormData from 'form-data';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // Store user sessions (in production, use Redis or database)
+
+import clanwarProblemsRoute from './clanwarProblemsRoute.js';
+app.use('/api/clanwar', clanwarProblemsRoute);
 const userSessions = new Map();
 
 /**

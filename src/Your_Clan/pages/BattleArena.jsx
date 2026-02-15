@@ -12,14 +12,14 @@ export default function BattleArena() {
     const navigate = useNavigate();
     const [participants, setParticipants] = useState([]);
     const [battleId, setBattleId] = useState(null);
-    const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
+    const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
     const [battleEnded, setBattleEnded] = useState(false);
     const [myClanName, setMyClanName] = useState('Your Clan');
     const [opponentClanName, setOpponentClanName] = useState('Opponent Clan');
     const [myClanScore, setMyClanScore] = useState(0);
     const [opponentClanScore, setOpponentClanScore] = useState(0);
     const [battleStartTime, setBattleStartTime] = useState(null);
-    const [battleDuration, setBattleDuration] = useState(120);
+    const [battleDuration, setBattleDuration] = useState(600);
 
     // Fetch battle participants and start battle
     useEffect(() => {
@@ -241,53 +241,51 @@ export default function BattleArena() {
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
     
-    const problems = [
-        {
-            id: 1,
-            title: "Array Conquest",
-            difficulty: "Medium",
-            points: 100,
-            solved: false,
-            solvedBy: [],
-            solvingBy: ["alif_dev"]
-        },
-        {
-            id: 2,
-            title: "String Warrior",
-            difficulty: "Easy",
-            points: 50,
-            solved: true,
-            solvedBy: ["rizvee_113"],
-            solvingBy: []
-        },
-        {
-            id: 3,
-            title: "Tree Domination",
-            difficulty: "Hard",
-            points: 150,
-            solved: false,
-            solvedBy: [],
-            solvingBy: []
-        },
-        {
-            id: 4,
-            title: "Graph Siege",
-            difficulty: "Hard",
-            points: 150,
-            solved: false,
-            solvedBy: [],
-            solvingBy: ["sabit_pro"]
-        },
-        {
-            id: 5,
-            title: "DP Battle",
-            difficulty: "Medium",
-            points: 100,
-            solved: false,
-            solvedBy: [],
-            solvingBy: []
+
+    // Dynamic problems state
+    const [problems, setProblems] = useState([]);
+    const [problemsLoading, setProblemsLoading] = useState(true);
+    const [problemsError, setProblemsError] = useState(null);
+
+    // Fetch problems for this battle using participants' handles
+    useEffect(() => {
+        async function fetchProblems() {
+            if (!battleId) return;
+            setProblemsLoading(true);
+            setProblemsError(null);
+            try {
+                // Get participants to group handles by clan
+                const { participants: battleParticipants } = await getBattleParticipants(battleId);
+                if (!battleParticipants || battleParticipants.length === 0) throw new Error('No participants found');
+                // Group handles by clan_id
+                const clanMap = {};
+                battleParticipants.forEach(p => {
+                    if (!clanMap[p.clan_id]) clanMap[p.clan_id] = [];
+                    clanMap[p.clan_id].push(p.users?.cf_handle);
+                });
+                const clanIds = Object.keys(clanMap);
+                const handles1 = clanMap[clanIds[0]] || [];
+                const handles2 = clanMap[clanIds[1]] || [];
+                // POST to backend to get problems
+                const res = await fetch('/api/clanwar/problems', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ handles1, handles2 })
+                });
+                if (!res.ok) throw new Error('Failed to fetch problems');
+                const fetchedProblems = await res.json();
+                setProblems(fetchedProblems);
+            } catch (err) {
+                setProblemsError('Failed to load problems. Please try again.');
+            } finally {
+                setProblemsLoading(false);
+            }
         }
-    ];
+        fetchProblems();
+    }, [battleId]);
 
     const handleProblemClick = (problemId) => {
         navigate(`/your-clan/problem/${problemId}`);
@@ -301,6 +299,22 @@ export default function BattleArena() {
             default: return '#00FF7F';
         }
     };
+
+    // Loading and error states for problems
+    if (problemsLoading) {
+        return (
+            <div className="battle-arena-page loading-state">
+                <div className="loader">Loading problems...</div>
+            </div>
+        );
+    }
+    if (problemsError || !problems || problems.length === 0) {
+        return (
+            <div className="battle-arena-page error-state">
+                <div className="error-message">{problemsError || 'No problems found for this battle.'}</div>
+            </div>
+        );
+    }
 
     return (
         <div className="battle-arena-page">
@@ -367,25 +381,19 @@ export default function BattleArena() {
                         <div 
                             key={problem.id} 
                             className={`problem-card ${problem.solved ? 'solved' : ''}`}
-                            onClick={() => handleProblemClick(problem.id)}
                             style={{ animationDelay: `${index * 0.1}s` }}
                         >
                             <div className="problem-header">
                                 <h3 className="problem-title">{problem.title}</h3>
-                                <span 
-                                    className="problem-difficulty"
-                                    style={{ color: getDifficultyColor(problem.difficulty) }}
-                                >
-                                    {problem.difficulty}
+                                <span className="problem-difficulty" style={{ color: getDifficultyColor(problem.difficulty || problem.rating) }}>
+                                    {problem.difficulty || (problem.rating ? `CF ${problem.rating}` : 'Unrated')}
                                 </span>
                             </div>
-
                             <div className="problem-info">
                                 <div className="problem-points">
                                     <span className="points-label">Points:</span>
-                                    <span className="points-value">{problem.points}</span>
+                                    <span className="points-value">{problem.points || ''}</span>
                                 </div>
-                                
                                 {problem.solved && (
                                     <div className="solved-indicator">
                                         <span className="checkmark">✓</span>
@@ -393,23 +401,33 @@ export default function BattleArena() {
                                     </div>
                                 )}
                             </div>
-
+                            {/* Tags removed: Only show problem name/title, not tags or type */}
+                            {/* View on Codeforces */}
+                            {problem.contestId && problem.index && (
+                                <a
+                                    href={`https://codeforces.com/problemset/problem/${problem.contestId}/${problem.index}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="view-problem-btn"
+                                >
+                                    📖 View on Codeforces
+                                </a>
+                            )}
                             {/* Teammate indicators */}
-                            {(problem.solvedBy.length > 0 || problem.solvingBy.length > 0) && (
+                            {(((problem.solvedBy || []).length > 0) || ((problem.solvingBy || []).length > 0)) && (
                                 <div className="teammate-status">
-                                    {problem.solvedBy.map((name, i) => (
+                                    {(problem.solvedBy || []).map((name, i) => (
                                         <span key={i} className="teammate-badge solved-badge">
                                             {name} ✓
                                         </span>
                                     ))}
-                                    {problem.solvingBy.map((name, i) => (
+                                    {(problem.solvingBy || []).map((name, i) => (
                                         <span key={i} className="teammate-badge solving-badge">
                                             {name} 🔨
                                         </span>
                                     ))}
                                 </div>
                             )}
-
                             <div className="problem-glow"></div>
                         </div>
                     ))}
