@@ -16,236 +16,87 @@ export const submitCodeWithSession = async (contestId, problemIndex, sourceCode,
         try {
             // Language mapping to Codeforces program type IDs
             const languageMap = {
-                'PYTHON': {
-                    id: '31',           // Python 3.8.10
-                    alternateIds: ['31', '7', '41'],  // Python 3 variants
-                    namePatterns: ['Python 3', 'Python3', 'PyPy']
-                },
-                'PYTHON3': {
-                    id: '31',
-                    alternateIds: ['31', '7', '41'],
-                    namePatterns: ['Python 3', 'Python3', 'PyPy']
-                },
-                'C++': {
-                    id: '54',           // GNU G++17 7.3.0
-                    alternateIds: ['54', '50', '52', '61', '73'],  // C++ variants
-                    namePatterns: ['GNU G++17', 'GNU G++', 'C++17', 'C++14', 'C++20']
-                },
-                'CPP': {
-                    id: '54',
-                    alternateIds: ['54', '50', '52', '61', '73'],
-                    namePatterns: ['GNU G++17', 'GNU G++', 'C++17', 'C++14', 'C++20']
-                },
-                'JAVA': {
-                    id: '60',           // Java 11.0.6
-                    alternateIds: ['60', '36', '87'],  // Java variants
-                    namePatterns: ['Java 11', 'Java 8', 'Java']
-                },
-                'JAVASCRIPT': {
-                    id: '55',           // Node.js 12.6.3
-                    alternateIds: ['55', '34'],  // JavaScript/Node variants
-                    namePatterns: ['Node.js', 'JavaScript', 'JS']
-                },
-                'JS': {
-                    id: '55',
-                    alternateIds: ['55', '34'],
-                    namePatterns: ['Node.js', 'JavaScript', 'JS']
-                }
+                'PYTHON': 'Python 3 (31)',
+                'PYTHON3': 'Python 3 (31)',
+                'C++': 'GNU G++17 (54)',
+                'CPP': 'GNU G++17 (54)',
+                'JAVA': 'Java 11 (60)',
+                'JAVASCRIPT': 'Node.js (55)',
+                'JS': 'Node.js (55)'
             };
 
-            const languageNames = {
-                'PYTHON': 'Python 3',
-                'C++': 'GNU G++17',
-                'JAVA': 'Java 11',
-                'JAVASCRIPT': 'Node.js'
-            };
-
-            const languageConfig = languageMap[language.toUpperCase()];
-            const langDisplay = languageNames[language.toUpperCase()] || language;
+            const langDisplay = languageMap[language.toUpperCase()] || language;
             
-            if (!languageConfig) {
+            if (!langDisplay) {
                 reject(new Error(`Unsupported language: ${language}`));
                 return;
             }
             
-            // Store code and language info in sessionStorage
-            sessionStorage.setItem('cf_submit_code', sourceCode);
-            sessionStorage.setItem('cf_submit_language_id', languageConfig.id);
-            sessionStorage.setItem('cf_submit_language_alternates', JSON.stringify(languageConfig.alternateIds));
-            sessionStorage.setItem('cf_submit_language_patterns', JSON.stringify(languageConfig.namePatterns));
-            sessionStorage.setItem('cf_submit_problem', `${contestId}${problemIndex}`);
+            // CRITICAL: Copy to clipboard BEFORE opening popup
+            // Once popup opens, focus shifts and clipboard access may be blocked
+            console.log('📋 Copying code to clipboard...');
             
-            console.log('✓ Code saved to browser storage');
+            let copySuccess = false;
+            
+            // Method 1: Modern Clipboard API (most reliable)
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(sourceCode);
+                    console.log('✅ Code copied to clipboard (Clipboard API)');
+                    copySuccess = true;
+                } catch (clipErr) {
+                    console.warn('Clipboard API failed, trying fallback...', clipErr);
+                }
+            }
+            
+            // Method 2: Fallback for older browsers or if Clipboard API fails
+            if (!copySuccess) {
+                try {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = sourceCode;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    if (successful) {
+                        console.log('✅ Code copied to clipboard (execCommand fallback)');
+                        copySuccess = true;
+                    }
+                } catch (fallbackErr) {
+                    console.error('Fallback copy failed:', fallbackErr);
+                }
+            }
+            
+            if (!copySuccess) {
+                reject(new Error('Failed to copy code to clipboard. Please check browser permissions.'));
+                return;
+            }
+            
+            // Small delay to ensure clipboard is ready
+            await new Promise(resolve => setTimeout(resolve, 100));
             
             // Open Codeforces submission page
             const submitUrl = `https://codeforces.com/problemset/submit/${contestId}/${problemIndex}`;
-            const submitWindow = window.open(submitUrl, 'cf_submit', 'width=1200,height=900,scrollbars=yes');
+            const submitWindow = window.open(submitUrl, 'cf_submit', 'width=1200,height=900,scrollbars=yes,resizable=yes');
             
             if (!submitWindow) {
                 reject(new Error('Popup blocked! Please allow popups for this site.'));
                 return;
             }
 
-            console.log('Opened Codeforces submission page');
-            
-            // Try to inject auto-fill script after page loads
-            setTimeout(() => {
-                try {
-                    // Create a script that will run in the popup window context
-                    const autoFillScript = `
-                        (function() {
-                            console.log('🔄 Auto-fill script loaded');
-                            
-                            // Get the stored code and language info from sessionStorage
-                            const storedCode = sessionStorage.getItem('cf_submit_code');
-                            const primaryLangId = sessionStorage.getItem('cf_submit_language_id');
-                            const alternateLangIds = JSON.parse(sessionStorage.getItem('cf_submit_language_alternates') || '[]');
-                            const langPatterns = JSON.parse(sessionStorage.getItem('cf_submit_language_patterns') || '[]');
-                            
-                            if (!storedCode) {
-                                console.warn('No code found in storage');
-                                return;
-                            }
-                            
-                            console.log('✓ Found code in storage, length:', storedCode.length);
-                            console.log('✓ Language config - Primary ID:', primaryLangId, 'Alternates:', alternateLangIds, 'Patterns:', langPatterns);
-                            
-                            // Smart language selection function
-                            function selectLanguage(langSelect) {
-                                if (!langSelect) return false;
-                                
-                                // Method 1: Try primary language ID
-                                if (primaryLangId) {
-                                    for (let option of langSelect.options) {
-                                        if (option.value === primaryLangId) {
-                                            langSelect.value = primaryLangId;
-                                            console.log('✓ Language selected by primary ID:', primaryLangId, '→', option.text);
-                                            return true;
-                                        }
-                                    }
-                                }
-                                
-                                // Method 2: Try alternate IDs
-                                for (let altId of alternateLangIds) {
-                                    for (let option of langSelect.options) {
-                                        if (option.value === altId) {
-                                            langSelect.value = altId;
-                                            console.log('✓ Language selected by alternate ID:', altId, '→', option.text);
-                                            return true;
-                                        }
-                                    }
-                                }
-                                
-                                // Method 3: Try matching by text pattern
-                                for (let pattern of langPatterns) {
-                                    for (let option of langSelect.options) {
-                                        if (option.text.includes(pattern)) {
-                                            langSelect.value = option.value;
-                                            console.log('✓ Language selected by pattern:', pattern, '→', option.text);
-                                            return true;
-                                        }
-                                    }
-                                }
-                                
-                                console.warn('⚠️ Could not auto-select language. Please select manually.');
-                                return false;
-                            }
-                            
-                            // Function to fill the form
-                            function fillForm() {
-                                try {
-                                    // Find and set language dropdown
-                                    const langSelect = document.querySelector('select[name="programTypeId"]');
-                                    const langSelected = selectLanguage(langSelect);
-                                    
-                                    // Find the source code textarea
-                                    const sourceTextarea = document.querySelector('textarea[name="sourceCode"]');
-                                    
-                                    if (sourceTextarea) {
-                                        // Set the code value
-                                        sourceTextarea.value = storedCode;
-                                        
-                                        // Trigger input event to ensure the form recognizes the change
-                                        sourceTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-                                        sourceTextarea.dispatchEvent(new Event('change', { bubbles: true }));
-                                        
-                                        console.log('✅ Code transferred to textarea!');
-                                        
-                                        // Show success indicator
-                                        const indicator = document.createElement('div');
-                                        indicator.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #4CAF50; color: white; padding: 20px 30px; border-radius: 10px; z-index: 999999; font-family: Arial; font-size: 18px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.5s ease;';
-                                        
-                                        if (langSelected) {
-                                            indicator.innerHTML = '✅ Code & Language Auto-Filled!<br><small style="font-size: 14px; font-weight: normal;">Just click Submit below</small>';
-                                        } else {
-                                            indicator.innerHTML = '✅ Code Auto-Filled!<br><small style="font-size: 14px; font-weight: normal;">⚠️ Please select language manually</small>';
-                                            indicator.style.background = '#FF9800'; // Orange for partial success
-                                        }
-                                        
-                                        document.body.appendChild(indicator);
-                                        
-                                        // Add animation
-                                        const style = document.createElement('style');
-                                        style.textContent = '@keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }';
-                                        document.head.appendChild(style);
-                                        
-                                        // Remove indicator after 5 seconds
-                                        setTimeout(() => {
-                                            indicator.style.transition = 'opacity 0.5s';
-                                            indicator.style.opacity = '0';
-                                            setTimeout(() => indicator.remove(), 500);
-                                        }, 5000);
-                                        
-                                        // Clear storage after successful fill
-                                        sessionStorage.removeItem('cf_submit_code');
-                                        sessionStorage.removeItem('cf_submit_language_id');
-                                        sessionStorage.removeItem('cf_submit_language_alternates');
-                                        sessionStorage.removeItem('cf_submit_language_patterns');
-                                        sessionStorage.removeItem('cf_submit_problem');
-                                        
-                                        return true;
-                                    } else {
-                                        console.warn('Textarea not found, retrying...');
-                                        return false;
-                                    }
-                                } catch (err) {
-                                    console.error('Error filling form:', err);
-                                    return false;
-                                }
-                            }
-                            
-                            // Try to fill immediately if page is ready
-                            if (document.readyState === 'complete') {
-                                if (!fillForm()) {
-                                    // Retry after a short delay
-                                    setTimeout(fillForm, 1000);
-                                }
-                            } else {
-                                // Wait for page load
-                                window.addEventListener('load', function() {
-                                    setTimeout(fillForm, 500);
-                                });
-                            }
-                        })();
-                    `;
-                    
-                    // Try to inject the script into the popup
-                    const script = submitWindow.document.createElement('script');
-                    script.textContent = autoFillScript;
-                    submitWindow.document.head.appendChild(script);
-                    
-                    console.log('✓ Auto-fill script injected');
-                    
-                } catch (err) {
-                    // CORS will block this - expected
-                    console.log('⚠️ Cannot inject script due to CORS (expected). Code is in sessionStorage for manual backup.');
-                }
-            }, 2000); // Wait 2 seconds for Codeforces page to start loading
+            console.log('✅ Popup opened:', submitUrl);
+            console.log('📋 Code in clipboard - Ready to paste with Ctrl+V');
             
             // Show notification and return popup reference
             resolve({
                 success: true,
-                message: `Opening Codeforces with auto-fill...\n\n✓ Language: ${langDisplay}\n✓ Code: ${sourceCode.length} chars\n\nThe form should fill automatically!`,
+                message: `✅ Code copied to clipboard!\n\nProblem: ${contestId}${problemIndex}\nLanguage: ${langDisplay}\nCode: ${sourceCode.length} characters\n\n📋 PASTE INSTRUCTIONS:\n1. Click in the code textarea (popup window)\n2. Press Ctrl+V (or Cmd+V on Mac)\n3. Select the correct language from dropdown\n4. Click Submit button\n\n⚡ The window will be monitored for submission.`,
                 popupWindow: submitWindow
             });
 
@@ -284,17 +135,45 @@ export const checkCodeforcesLogin = async (cfHandle) => {
  * @param {string} problemIndex - Problem index (A, B, C, etc.)
  * @param {string} code - Source code to submit
  * @param {string} language - Programming language
- * @returns {Window} Reference to opened window
+ * @returns {Promise<Window>} Reference to opened window
  */
-export const openCodeforcesSubmitPage = (contestId, problemIndex, code, language) => {
+export const openCodeforcesSubmitPage = async (contestId, problemIndex, code, language) => {
   const submitUrl = `https://codeforces.com/problemset/submit/${contestId}/${problemIndex}`;
   
-  // Copy code to clipboard for easy pasting
-  navigator.clipboard.writeText(code).then(() => {
-    console.log('Code copied to clipboard');
-  }).catch(err => {
-    console.error('Failed to copy code:', err);
-  });
+  // Copy code to clipboard BEFORE opening popup (critical timing)
+  let copySuccess = false;
+  
+  // Try modern Clipboard API first
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(code);
+      console.log('✅ Code copied to clipboard');
+      copySuccess = true;
+    } catch (err) {
+      console.warn('Clipboard API failed, trying fallback...', err);
+    }
+  }
+  
+  // Fallback method
+  if (!copySuccess) {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = code;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      console.log('✅ Code copied to clipboard (fallback)');
+      copySuccess = true;
+    } catch (err) {
+      console.error('Failed to copy code:', err);
+    }
+  }
+  
+  // Small delay to ensure clipboard is ready
+  await new Promise(resolve => setTimeout(resolve, 50));
   
   // Open Codeforces submit page
   const submitWindow = window.open(submitUrl, '_blank', 'width=1200,height=800');
