@@ -1,4 +1,4 @@
-import { supabase } from "../../supabaseclient";
+import { supabase } from "../../supabaseclient.js";
 
 export default async function getUserData() {
     try {
