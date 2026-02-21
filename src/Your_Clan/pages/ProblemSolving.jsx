@@ -655,7 +655,6 @@ export default function ProblemSolving() {
 
                 {/* Resizable Divider */}
                 <div className="resize-divider" onMouseDown={handleMouseDown} disabled={isSubmitting}>
-                        {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
                     <div className="divider-handle">
                         <div className="handle-circle">
                             <div className="handle-icon">⬌</div>
