@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import '../style/AIAssistancePage.css';
 import { getSmartHint } from '../utilities/aiHintAPI';
-import { canAffordHint, deductXP, HINT_COSTS } from '../utilities/xpManager';
 
-const AIAssistancePage = ({ problem, userCode, userData, onBack, onXPUpdate }) => {
+const AIAssistancePage = ({ problem, userCode, userData, onBack }) => {
   const [currentLevel, setCurrentLevel] = useState(1);
   const [hints, setHints] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userXP, setUserXP] = useState(userData?.xp || 0);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingHintLevel, setPendingHintLevel] = useState(null);
 
@@ -105,12 +103,6 @@ const AIAssistancePage = ({ problem, userCode, userData, onBack, onXPUpdate }) =
           <span>🤖 AI HINT</span>
           <span className="underline"></span>
         </h1>
-
-        {/* XP Display */}
-        <div className="xp-display">
-          <span className="xp-label">Your XP:</span>
-          <span className="xp-value">{userXP}</span>
-        </div>
 
         {/* Hint Level Selector */}
         <div className="hint-level-selector">

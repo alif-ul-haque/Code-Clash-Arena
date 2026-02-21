@@ -42,28 +42,6 @@
   position: relative;
 }
 
-/* XP Display */
-.xp-display {
-  background: rgba(255, 255, 255, 0.4);
-  padding: 12px 24px;
-  border-radius: 12px;
-  margin-bottom: 25px;
-  border: 2px solid rgba(11, 60, 93, 0.2);
-}
-
-.xp-label {
-  font-size: 1rem;
-  color: #0b3c5d;
-  margin-right: 10px;
-  font-weight: bold;
-}
-
-.xp-value {
-  font-size: 1.4rem;
-  color: #ff6b00;
-  font-weight: bold;
-}
-
 /* Hint Level Selector */
 .hint-level-selector {
   display: flex;
@@ -523,12 +501,6 @@
   font-size: 1rem;
   color: #0b3c5d;
   margin: 5px 0;
-}
-
-.xp-after {
-  font-size: 1.1rem !important;
-  color: #006600 !important;
-  margin-top: 10px !important;
 }
 
 .hint-note {

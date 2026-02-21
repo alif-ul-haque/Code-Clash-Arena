@@ -336,14 +336,6 @@ const Dashboard = () => {
     setShowSuccess(true);
   };
 
-  const handleXPUpdate = (newXP) => {
-    // Update userData with new XP value
-    setUserData(prev => ({
-      ...prev,
-      xp: newXP
-    }));
-  };
-
   const toggleTag = (tag) => {
     setSelectedTags(prev => {
       if (prev.includes(tag)) {
@@ -429,7 +421,6 @@ const Dashboard = () => {
       userCode={userCode}
       userData={userData}
       onBack={() => setShowAIHelp(false)}
-      onXPUpdate={handleXPUpdate}
     />;
   }
 
