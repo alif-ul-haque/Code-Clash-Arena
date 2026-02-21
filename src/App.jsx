@@ -54,7 +54,7 @@ function App() {
         <Route path="/your-clan/finding-opponent" element={<FindingOpponent />} />
         <Route path="/your-clan/revealing-warriors" element={<RevealingWarriors />} />
         <Route path="/your-clan/battle-arena" element={<BattleArena />} />
-        <Route path="/your-clan/problem/:problemId" element={<ProblemSolving />} />
+        <Route path="/your-clan/problem/:contestId/:index" element={<ProblemSolving />} />
         <Route path="/your-clan/no-battle" element={<NoBattleOngoing />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

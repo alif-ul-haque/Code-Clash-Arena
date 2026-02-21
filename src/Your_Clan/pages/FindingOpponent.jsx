@@ -11,6 +11,7 @@ export default function FindingOpponent() {
     const [dots, setDots] = useState('');
     const [isCreatingBattle, setIsCreatingBattle] = useState(false);
     const [waitingMessage, setWaitingMessage] = useState('');
+    const [waitingForBattle, setWaitingForBattle] = useState(false);
     const isProcessingBattle = useRef(false);
 
     // Define handleMatchFound before useEffect to avoid hoisting issues
@@ -82,14 +83,34 @@ export default function FindingOpponent() {
                         setWaitingMessage(`Synchronizing with opponent... (${attempts}s)`);
                     }
                     
-                    // Check if battle exists
-                    const { data: existingBattle } = await supabase
-                        .from('clan_battles')
-                        .select('battle_id')
-                        .or(`and(clan1_id.eq.${user.clan_id},clan2_id.eq.${opponentClanId}),and(clan1_id.eq.${opponentClanId},clan2_id.eq.${user.clan_id})`)
-                        .in('status', ['preparing', 'in_progress'])
-                        .single();
-                    
+                    // Check if battle exists (avoid complex `or` encoding by doing two simple queries)
+                    let existingBattle = null;
+                    try {
+                        const { data: b1, error: e1 } = await supabase
+                            .from('clan_battles')
+                            .select('battle_id')
+                            .eq('clan1_id', user.clan_id)
+                            .eq('clan2_id', opponentClanId)
+                            .in('status', ['preparing', 'in_progress'])
+                            .single();
+                        if (e1) console.debug('check b1 error', e1);
+                        if (b1) existingBattle = b1;
+
+                        if (!existingBattle) {
+                            const { data: b2, error: e2 } = await supabase
+                                .from('clan_battles')
+                                .select('battle_id')
+                                .eq('clan1_id', opponentClanId)
+                                .eq('clan2_id', user.clan_id)
+                                .in('status', ['preparing', 'in_progress'])
+                                .single();
+                            if (e2) console.debug('check b2 error', e2);
+                            if (b2) existingBattle = b2;
+                        }
+                    } catch (errCheck) {
+                        console.error('Error checking existing battle (two-query fallback):', errCheck);
+                    }
+
                     if (existingBattle) {
                         battleId = existingBattle.battle_id;
                         console.log('Battle found:', battleId);
@@ -101,10 +122,34 @@ export default function FindingOpponent() {
                 }
                 
                 if (!battleId) {
-                    console.error('Battle was not created in time');
-                    isProcessingBattle.current = false;
-                    alert('Failed to join battle. Please try again.');
-                    navigate('/your-clan');
+                    console.warn('Battle was not created in time — entering wait mode and subscribing for creation.');
+                    // Keep the user on this page and subscribe for clan_battles so we pick it up when opponent creates it
+                    setWaitingForBattle(true);
+                    // Subscribe to clan_battles for creation events involving either clan
+                    const { data: user } = await getUserData();
+                    let watchChannel = null;
+                    try {
+                        watchChannel = supabase
+                            .channel('finding_opponent_watch')
+                            .on('postgres_changes', { event: '*', schema: 'public', table: 'clan_battles' }, async (payload) => {
+                                try {
+                                    const newBattle = payload?.new;
+                                    if (!newBattle) return;
+                                    if (newBattle.clan1_id === user.clan_id || newBattle.clan2_id === user.clan_id) {
+                                        // Found battle for this user; navigate to revealing warriors
+                                        const opponentClanId = newBattle.clan1_id === user.clan_id ? newBattle.clan2_id : newBattle.clan1_id;
+                                        navigate('/your-clan/revealing-warriors', { state: { battleId: newBattle.battle_id, opponentClanId } });
+                                    }
+                                } catch (e) {
+                                    console.error('Error handling clan_battles realtime in FindingOpponent', e);
+                                }
+                            })
+                            .subscribe();
+                    } catch (e) {
+                        console.warn('Failed to subscribe to clan_battles from FindingOpponent', e);
+                    }
+
+                    // Keep function running (do not navigate away)
                     return;
                 }
             }

@@ -12,6 +12,7 @@ export default function BattleArena() {
     const navigate = useNavigate();
     const [participants, setParticipants] = useState([]);
     const [battleId, setBattleId] = useState(null);
+    const [waitingForBattle, setWaitingForBattle] = useState(false);
     const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
     const [battleEnded, setBattleEnded] = useState(false);
     const [myClanName, setMyClanName] = useState('Your Clan');
@@ -27,7 +28,7 @@ export default function BattleArena() {
             try {
                 // Retry logic: Try multiple times to find the battle (for synchronization)
                 let attempts = 0;
-                const maxAttempts = 10;
+                const maxAttempts = 30; // increase retry window to 30s
                 let hasOngoingBattle = false;
                 let activeBattleId = null;
                 
@@ -127,16 +128,65 @@ export default function BattleArena() {
                         console.error('Failed to start battle:', error);
                     }
                 } else {
-                    console.warn('No ongoing battle found, redirecting...');
-                    navigate('/your-clan');
+                    console.warn('No ongoing battle found after retries, entering wait state.');
+                    // Don't force navigation away. Show waiting state and subscribe for new battles.
+                    setWaitingForBattle(true);
                 }
             } catch (error) {
                 console.error('Error initiating battle:', error);
-                navigate('/your-clan');
+                    // Keep user on page and show waiting state instead of navigating away unexpectedly
+                    setWaitingForBattle(true);
             }
         }
-        
-        initiateBattle();
+            initiateBattle();
+
+            // Subscribe to clan_battles CREATE/UPDATE events so clients learn about new battles for their clan
+            let clubChannel = null;
+            try {
+                clubChannel = supabase
+                    .channel('clan_battles_watch')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'clan_battles' }, async (payload) => {
+                        try {
+                            const newBattle = payload?.new;
+                            if (!newBattle) return;
+                            // Check if this battle involves the current user
+                            const { data: user } = await getUserData();
+                            const userClanId = user?.clan_id;
+                            if (!userClanId) return;
+                            if (newBattle.clan1_id === userClanId || newBattle.clan2_id === userClanId) {
+                                // If battle status is preparing or in_progress, set up the battle
+                                if (['preparing', 'in_progress'].includes(newBattle.status)) {
+                                    setWaitingForBattle(false);
+                                    setBattleId(newBattle.battle_id);
+                                    // Re-run the initialization flow by fetching participants and problems
+                                    const { participants: battleParticipants } = await getBattleParticipants(newBattle.battle_id);
+                                    setParticipants(battleParticipants || []);
+                                    const { battle } = await getBattle(newBattle.battle_id);
+                                    if (battle && battle.start_time) {
+                                        const startTime = new Date(battle.start_time);
+                                        setBattleStartTime(startTime);
+                                        setBattleDuration(battle.duration_seconds);
+                                        const currentTime = new Date();
+                                        const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+                                        const remainingSeconds = Math.max(0, battle.duration_seconds - elapsedSeconds);
+                                        setTimeLeft(remainingSeconds);
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Error handling clan_battles realtime message', e);
+                        }
+                    })
+                    .subscribe();
+            } catch (e) {
+                console.warn('Failed to subscribe to clan_battles watch channel', e);
+            }
+
+            return () => {
+                try {
+                    if (clubChannel) supabase.removeChannel(clubChannel);
+                } catch (e) {}
+            };
     }, [navigate]);
 
     // Subscribe to participant changes for real-time score updates
@@ -184,6 +234,37 @@ export default function BattleArena() {
         return () => {
             supabase.removeChannel(channel);
         };
+    }, [battleId]);
+
+    // Subscribe to battle status changes (so all clients react when battle completes)
+    useEffect(() => {
+        if (!battleId) return;
+
+        const statusChannel = supabase
+            .channel(`battle_status_${battleId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'clan_battles',
+                    filter: `battle_id=eq.${battleId}`
+                },
+                (payload) => {
+                    try {
+                        const newStatus = payload?.new?.status;
+                        if (newStatus === 'completed') {
+                            console.log('Battle status updated to completed via realtime');
+                            setBattleEnded(true);
+                        }
+                    } catch (e) {
+                        console.error('Error handling battle status change', e);
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => supabase.removeChannel(statusChannel);
     }, [battleId]);
 
     // Countdown timer - synchronized across tabs using server time
@@ -287,8 +368,10 @@ export default function BattleArena() {
         fetchProblems();
     }, [battleId]);
 
-    const handleProblemClick = (problemId) => {
-        navigate(`/your-clan/problem/${problemId}`);
+    // Only allow navigation when problems are loaded and valid
+    const handleProblemClick = (problem) => {
+        if (!problem || !problem.contestId || !problem.index) return;
+        navigate(`/your-clan/problem/${problem.contestId}/${problem.index}`);
     };
 
     const getDifficultyColor = (difficulty) => {
@@ -301,6 +384,17 @@ export default function BattleArena() {
     };
 
     // Loading and error states for problems
+    if (waitingForBattle) {
+        return (
+            <div className="battle-arena-page waiting-state">
+                <div className="loader">Waiting for a battle to be created for your clan...</div>
+                <div style={{ marginTop: 16 }}>
+                    <button className="main-page-btn" onClick={() => navigate('/your-clan')}>Return to Your Clan</button>
+                </div>
+            </div>
+        );
+    }
+
     if (problemsLoading) {
         return (
             <div className="battle-arena-page loading-state">
@@ -315,6 +409,19 @@ export default function BattleArena() {
             </div>
         );
     }
+
+    // Sort problems so A (easiest) is first, B is second, etc.
+    // If problems have index (A, B, C...), sort by index; else by rating ascending
+    const sortedProblems = [...problems].sort((a, b) => {
+        if (a.index && b.index) {
+            // Compare by index letter (A < B < C ...)
+            return a.index.localeCompare(b.index);
+        } else if (a.rating && b.rating) {
+            return a.rating - b.rating;
+        } else {
+            return 0;
+        }
+    });
 
     return (
         <div className="battle-arena-page">
@@ -377,60 +484,54 @@ export default function BattleArena() {
             <div className="problems-container">
                 <h1 className="arena-title">Battle Arena</h1>
                 <div className="problems-list">
-                    {problems.map((problem, index) => (
-                        <div 
-                            key={problem.id} 
-                            className={`problem-card ${problem.solved ? 'solved' : ''}`}
-                            style={{ animationDelay: `${index * 0.1}s` }}
-                        >
-                            <div className="problem-header">
-                                <h3 className="problem-title">{problem.title}</h3>
-                                <span className="problem-difficulty" style={{ color: getDifficultyColor(problem.difficulty || problem.rating) }}>
-                                    {problem.difficulty || (problem.rating ? `CF ${problem.rating}` : 'Unrated')}
-                                </span>
-                            </div>
-                            <div className="problem-info">
-                                <div className="problem-points">
-                                    <span className="points-label">Points:</span>
-                                    <span className="points-value">{problem.points || ''}</span>
+                    {sortedProblems.map((problem, index) => {
+                        // Use a composite key to ensure uniqueness: contestId-index-index
+                        const uniqueKey = `${problem.contestId || problem.id || 'p'}-${problem.index || index}-${index}`;
+                        return (
+                            <div
+                                key={uniqueKey}
+                                className={`problem-card ${problem.solved ? 'solved' : ''}`}
+                                style={{ animationDelay: `${index * 0.1}s`, cursor: problemsLoading ? 'not-allowed' : 'pointer' }}
+                                onClick={() => !problemsLoading && handleProblemClick(problem)}
+                            >
+                                <div className="problem-header">
+                                    <h3 className="problem-title">{problem.title}</h3>
+                                    <span className="problem-difficulty" style={{ color: getDifficultyColor(problem.difficulty || problem.rating) }}>
+                                        {problem.difficulty || (problem.rating ? `CF ${problem.rating}` : 'Unrated')}
+                                    </span>
                                 </div>
-                                {problem.solved && (
-                                    <div className="solved-indicator">
-                                        <span className="checkmark">✓</span>
-                                        Solved
+                                <div className="problem-info">
+                                    <div className="problem-points">
+                                        <span className="points-label">Points:</span>
+                                        <span className="points-value">{problem.points || ''}</span>
+                                    </div>
+                                    {problem.solved && (
+                                        <div className="solved-indicator">
+                                            <span className="checkmark">✓</span>
+                                            Solved
+                                        </div>
+                                    )}
+                                </div>
+                                {/* View on Codeforces removed as requested */}
+                                {/* Teammate indicators */}
+                                {(((problem.solvedBy || []).length > 0) || ((problem.solvingBy || []).length > 0)) && (
+                                    <div className="teammate-status">
+                                        {(problem.solvedBy || []).map((name, i) => (
+                                            <span key={i} className="teammate-badge solved-badge">
+                                                {name} ✓
+                                            </span>
+                                        ))}
+                                        {(problem.solvingBy || []).map((name, i) => (
+                                            <span key={i} className="teammate-badge solving-badge">
+                                                {name} 🔨
+                                            </span>
+                                        ))}
                                     </div>
                                 )}
+                                <div className="problem-glow"></div>
                             </div>
-                            {/* Tags removed: Only show problem name/title, not tags or type */}
-                            {/* View on Codeforces */}
-                            {problem.contestId && problem.index && (
-                                <a
-                                    href={`https://codeforces.com/problemset/problem/${problem.contestId}/${problem.index}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="view-problem-btn"
-                                >
-                                    📖 View on Codeforces
-                                </a>
-                            )}
-                            {/* Teammate indicators */}
-                            {(((problem.solvedBy || []).length > 0) || ((problem.solvingBy || []).length > 0)) && (
-                                <div className="teammate-status">
-                                    {(problem.solvedBy || []).map((name, i) => (
-                                        <span key={i} className="teammate-badge solved-badge">
-                                            {name} ✓
-                                        </span>
-                                    ))}
-                                    {(problem.solvingBy || []).map((name, i) => (
-                                        <span key={i} className="teammate-badge solving-badge">
-                                            {name} 🔨
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                            <div className="problem-glow"></div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </div>
