@@ -7,11 +7,12 @@ import { supabase } from '../../supabaseclient';
 
 /**
  * XP costs for different hint levels
+ * All hints are now FREE!
  */
 export const HINT_COSTS = {
-  1: 50,   // Subtle hint
-  2: 100,  // Detailed hint
-  3: 150   // Algorithm steps
+  1: 0,   // Subtle hint - FREE
+  2: 0,  // Detailed hint - FREE
+  3: 0   // Algorithm steps - FREE
 };
 
 /**

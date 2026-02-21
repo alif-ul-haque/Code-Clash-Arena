@@ -70,36 +70,13 @@ const AIAssistancePage = ({ problem, userCode, userData, onBack, onXPUpdate }) =
       const result = await getSmartHint(problem, level, userCode);
 
       if (result.success) {
-        // Check if this is a pre-generated hint (free) or AI-generated (costs XP)
-        if (!result.isPreGenerated && level > 1) {
-          // Check if user has enough XP
-          if (!canAffordHint(userXP, level)) {
-            setError(`Not enough XP! You need ${HINT_COSTS[level]} XP for this hint. You have ${userXP} XP.`);
-            setLoading(false);
-            return;
-          }
-
-          // Deduct XP
-          const xpResult = await deductXP(userData.id, HINT_COSTS[level]);
-          if (xpResult.success) {
-            setUserXP(xpResult.newXP);
-            // Notify parent to update XP display
-            if (onXPUpdate) {
-              onXPUpdate(xpResult.newXP);
-            }
-          } else {
-            setError('Failed to deduct XP. Please try again.');
-            setLoading(false);
-            return;
-          }
-        }
-
+        // All hints are now FREE - no XP deduction!
         // Store and display hint
         setHints({
           ...hints,
           [level]: {
             text: result.hint,
-            cost: result.isPreGenerated ? 0 : HINT_COSTS[level],
+            cost: 0,  // All hints are free
             isPreGenerated: result.isPreGenerated
           }
         });
@@ -145,7 +122,7 @@ const AIAssistancePage = ({ problem, userCode, userData, onBack, onXPUpdate }) =
             <div className="level-icon">💡</div>
             <div className="level-text">
               <div>Subtle Hint</div>
-              <div className="level-cost">{hints[1]?.isPreGenerated ? 'FREE' : 'FREE'}</div>
+              <div className="level-cost">FREE</div>
             </div>
           </button>
           
@@ -157,9 +134,7 @@ const AIAssistancePage = ({ problem, userCode, userData, onBack, onXPUpdate }) =
             <div className="level-icon">🔍</div>
             <div className="level-text">
               <div>Detailed Hint</div>
-              <div className="level-cost">
-                {hints[2]?.isPreGenerated ? 'FREE' : `${HINT_COSTS[2]} XP`}
-              </div>
+              <div className="level-cost">FREE</div>
             </div>
           </button>
           
@@ -171,9 +146,7 @@ const AIAssistancePage = ({ problem, userCode, userData, onBack, onXPUpdate }) =
             <div className="level-icon">📝</div>
             <div className="level-text">
               <div>Algorithm Steps</div>
-              <div className="level-cost">
-                {hints[3]?.isPreGenerated ? 'FREE' : `${HINT_COSTS[3]} XP`}
-              </div>
+              <div className="level-cost">FREE</div>
             </div>
           </button>
         </div>
@@ -199,7 +172,7 @@ const AIAssistancePage = ({ problem, userCode, userData, onBack, onXPUpdate }) =
                 {currentHint.isPreGenerated ? (
                   <span className="badge-free">⚡ Instant Hint (Free)</span>
                 ) : (
-                  <span className="badge-ai">🤖 AI Generated {currentHint.cost > 0 && `(-${currentHint.cost} XP)`}</span>
+                  <span className="badge-ai">🤖 AI Generated (Free)</span>
                 )}
               </div>
               
@@ -218,7 +191,7 @@ const AIAssistancePage = ({ problem, userCode, userData, onBack, onXPUpdate }) =
 
         <div className="hint-footer">
           <div className="hint-info">
-            ℹ️ First hint is always free! Additional hints may cost XP.
+            ℹ️ All AI hints are now completely FREE! Get as much help as you need.
           </div>
           <button className="return-btn" onClick={onBack}>
             ← Return to Problem
@@ -249,19 +222,12 @@ const AIAssistancePage = ({ problem, userCode, userData, onBack, onXPUpdate }) =
               
               <div className="xp-warning">
                 <div className="warning-box">
-                  <div className="warning-icon">💰</div>
+                  <div className="warning-icon">✨</div>
                   <div className="warning-text">
-                    <strong>XP Cost: {HINT_COSTS[pendingHintLevel]} XP</strong>
-                    <p>Your XP will be deducted if this hint is AI-generated.</p>
-                    <p className="xp-after">After: <strong>{userXP - HINT_COSTS[pendingHintLevel]} XP</strong></p>
+                    <strong>This hint is FREE!</strong>
+                    <p>All AI hints are now completely free. No XP will be deducted.</p>
                   </div>
                 </div>
-                
-                {hints[1] && !hints[1].isPreGenerated && (
-                  <div className="hint-note">
-                    ℹ️ This problem doesn't have pre-generated hints, so AI will generate one.
-                  </div>
-                )}
               </div>
             </div>
             
