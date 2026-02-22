@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../style/ProblemSolving.css';
@@ -6,88 +7,114 @@ import bgImage from '../../assets/images/10002.png';
 import { submitSolution, getBattle, completeBattle } from '../utilities/ClanBattleManager';
 import { hasOngoingClanBattle } from '../utilities/ClanBattleUtils';
 
+
+// Helper to fetch problems from backend using handles1 and handles2
+async function fetchClanWarProblems(handles1, handles2) {
+    const res = await fetch('/api/clanwar/problems', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ handles1, handles2 })
+    });
+    if (!res.ok) throw new Error('Failed to fetch problems');
+    return await res.json();
+}
+
 export default function ProblemSolving() {
     const { problemId } = useParams();
     const navigate = useNavigate();
+
     const [code, setCode] = useState('## WRITE YOUR PYTHON CODE ##FROM HERE\n\n');
     const [splitPosition, setSplitPosition] = useState(45); // Percentage
     const [isDragging, setIsDragging] = useState(false);
     const [selectedLanguage, setSelectedLanguage] = useState('PYTHON');
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
-    const [initialTime] = useState(120);
+    const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+    const [initialTime] = useState(600);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitError, setSubmitError] = useState(null);
+    // Removed unused submitError
     const [earnedPoints, setEarnedPoints] = useState(0);
     const [battleId, setBattleId] = useState(null);
     const [battleStartTime, setBattleStartTime] = useState(null);
-    const [battleDuration, setBattleDuration] = useState(120);
+    const [battleDuration, setBattleDuration] = useState(600);
     const [battleEnded, setBattleEnded] = useState(false);
+    const [problems, setProblems] = useState([]);
+    const [problemsLoading, setProblemsLoading] = useState(true);
+    const [problemsError, setProblemsError] = useState(null);
     const containerRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    const problemData = {
-        1: {
-            title: "Array Conquest",
-            difficulty: "Medium",
-            description: "Given an array of integers nums and an integer target, return the indices of the two numbers that add up to target.",
-            examples: [
-                { 
-                    title: "EXAMPLES:",
-                    input: "nums = [2,7,11,15], target = 9", 
-                    output: "[0,1]"
-                }
-            ],
-            constraints: ["2 <= nums.length <= 104", "-109 <= nums[i] <= 109", "Only one valid answer exists."]
-        }
-    };
+    // Get current problem from dynamic set
+    let problem = null;
+    if (problems && problems.length > 0) {
+        const idx = parseInt(problemId, 10) - 1;
+        problem = problems[idx] || problems[0];
+    }
 
-    const problem = problemData[problemId] || problemData[1];
 
-    // Fetch battle ID and start time on mount
+    // Fetch battle ID, participants, and problems on mount
     useEffect(() => {
-        async function fetchBattleId() {
+        async function fetchBattleIdAndProblems() {
             const { hasOngoingBattle, battleId: activeBattleId } = await hasOngoingClanBattle();
             if (hasOngoingBattle && activeBattleId) {
                 setBattleId(activeBattleId);
-                
                 // Get battle details for synchronized timer
                 const { battle } = await getBattle(activeBattleId);
                 if (battle && battle.start_time) {
                     const startTime = new Date(battle.start_time);
                     setBattleStartTime(startTime);
                     setBattleDuration(battle.duration_seconds);
-                    
                     // Calculate initial time left
                     const currentTime = new Date();
                     const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
                     const remainingSeconds = Math.max(0, battle.duration_seconds - elapsedSeconds);
                     setTimeLeft(remainingSeconds);
                 }
+                // Fetch participants to get handles1 and handles2
+                setProblemsLoading(true);
+                setProblemsError(null);
+                try {
+                    const { participants } = await import('../utilities/ClanBattleManager').then(mod => mod.getBattleParticipants(activeBattleId));
+                    if (!participants || participants.length === 0) throw new Error('No participants found');
+                    // Group handles by clan_id
+                    const clanMap = {};
+                    participants.forEach(p => {
+                        if (!clanMap[p.clan_id]) clanMap[p.clan_id] = [];
+                        clanMap[p.clan_id].push(p.users?.cf_handle);
+                    });
+                    const clanIds = Object.keys(clanMap);
+                    const handles1 = clanMap[clanIds[0]] || [];
+                    const handles2 = clanMap[clanIds[1]] || [];
+                    const fetchedProblems = await fetchClanWarProblems(handles1, handles2);
+                    setProblems(fetchedProblems);
+                } catch (error) {
+                    setProblemsError('Failed to load problems. Please try again.');
+                } finally {
+                    setProblemsLoading(false);
+                }
             }
         }
-        fetchBattleId();
+        fetchBattleIdAndProblems();
     }, []);
 
     // Timer countdown - synchronized across tabs
     useEffect(() => {
         if (!battleStartTime || timeLeft <= 0) return;
-
         const timer = setInterval(() => {
             const now = new Date();
             const elapsedSeconds = Math.floor((now - battleStartTime) / 1000);
             const remaining = Math.max(0, battleDuration - elapsedSeconds);
             setTimeLeft(remaining);
-            
             if (remaining <= 0) {
                 setBattleEnded(true);
                 clearInterval(timer);
             }
         }, 1000);
-
         return () => clearInterval(timer);
-    }, [battleStartTime, battleDuration]);
+    }, [battleStartTime, battleDuration, timeLeft]);
 
     // Complete battle when timer ends
     useEffect(() => {
@@ -130,12 +157,7 @@ export default function ProblemSolving() {
         return (timeLeft / initialTime) * 100;
     };
 
-    const getTimeColor = () => {
-        const percentage = getTimePercentage();
-        if (percentage > 66) return '#00FF7F'; // Green
-        if (percentage > 33) return '#FFD700'; // Yellow/Gold
-        return '#FF4444'; // Red
-    };
+    // Removed unused getTimeColor
 
     const handleMouseDown = () => {
         setIsDragging(true);
@@ -225,6 +247,22 @@ export default function ProblemSolving() {
         setShowDropdown(!showDropdown);
     };
 
+    // Loading and error states for problems
+    if (problemsLoading) {
+        return (
+            <div className="problem-solving-page loading-state">
+                <div className="loader">Loading problems...</div>
+            </div>
+        );
+    }
+    if (problemsError || !problem) {
+        return (
+            <div className="problem-solving-page error-state">
+                <div className="error-message">{problemsError || 'Problem not found.'}</div>
+            </div>
+        );
+    }
+
     return (
         <div 
             className="problem-solving-page"
@@ -239,7 +277,7 @@ export default function ProblemSolving() {
                         <img src={ccaLogo} alt="Code Clash" className="logo-icon" />
                     </div>
                     <h1 className="problem-title-nav">{problem.title}</h1>
-                    <div className="problem-progress">1/5</div>
+                    <div className="problem-progress">{problemId}/5</div>
                 </div>
                 <div className="nav-right">
                     <div className="score-display">
@@ -262,12 +300,18 @@ export default function ProblemSolving() {
                         <div className="statement-header">
                             <h2 className="statement-title">Problem Statement :</h2>
                         </div>
-                        
                         <p className="problem-description">{problem.description}</p>
-
+                        {problem.constraints && problem.constraints.length > 0 && (
+                            <div className="constraints-section">
+                                <h4>Constraints:</h4>
+                                <ul>
+                                    {problem.constraints.map((c, i) => <li key={i}>{c}</li>)}
+                                </ul>
+                            </div>
+                        )}
                         <div className="examples-section">
                             <h3 className="examples-title">EXAMPLES :</h3>
-                            {problem.examples.map((example, index) => (
+                            {problem.examples && problem.examples.length > 0 ? problem.examples.map((example, index) => (
                                 <div key={index} className="example-box">
                                     <p className="example-text">
                                         <span className="example-label">Input:</span><br/>
@@ -277,8 +321,14 @@ export default function ProblemSolving() {
                                         <span className="example-label">Output:</span> {example.output}
                                     </p>
                                 </div>
-                            ))}
+                            )) : <div>No examples available.</div>}
                         </div>
+                        {/* Tags removed: Only show problem name/title, not tags or type */}
+                        {problem.link && (
+                            <div className="problem-link">
+                                <a href={problem.link} target="_blank" rel="noopener noreferrer">View on Codeforces</a>
+                            </div>
+                        )}
                     </div>
                 </div>
 

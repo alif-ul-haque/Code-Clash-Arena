@@ -32,6 +32,7 @@ export async function signUpUser({ email, password, cfhandle }) {
         return { user: null, error: { message: "Codeforces handle already exists." } };
     }
 
+    let rating;
     //validating the cfhandle by calling codeforces api
     async function isValidCFHandle(handle) {
         try {
@@ -39,6 +40,7 @@ export async function signUpUser({ email, password, cfhandle }) {
             if (!res.ok) return false;
 
             const data = await res.json();
+            rating = parseInt(data.result[0].rating);
             return data.status === "OK";
         } catch (_) {
             return false;
@@ -63,7 +65,7 @@ export async function signUpUser({ email, password, cfhandle }) {
     // Insert additional data into 'users' table
     const { error: dbError } = await supabase
         .from('users')
-        .insert([{ id: data.user.id, cf_handle: cfhandle, email: data.user.email }]);
+        .insert([{ id: data.user.id, cf_handle: cfhandle, email: data.user.email , rating: rating}]);
 
     if (dbError) {
         return { user: null, error: dbError };

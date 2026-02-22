@@ -32,7 +32,7 @@ export async function createClanBattle(clan1Id, clan2Id, clan1Members, clan2Memb
                 clan1_id: clan1Id,
                 clan2_id: clan2Id,
                 status: 'preparing',
-                duration_seconds: 120 // 2 minutes
+                duration_seconds: 600 // 10 minutes
             })
             .select()
             .single();
