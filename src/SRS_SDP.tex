@@ -1,0 +1,730 @@
+width=0.5\linewidthimage.png\documentclass[12pt,a4paper]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{placeins}
+
+% Compact section spacing
+\titlespacing*{\section}{0pt}{12pt plus 4pt minus 2pt}{6pt plus 2pt minus 2pt}
+\titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{4pt plus 2pt minus 2pt}
+
+\onehalfspacing
+
+\begin{document}
+
+% ==================================================
+% COVER PAGE
+% ==================================================
+\begin{titlepage}
+\centering
+
+\vspace*{2cm}
+
+{\Huge \textbf{Software Requirements Specification}}\\[0.5cm]
+{\LARGE \textbf{CodeClash Arena}}\\[2cm]
+
+\textbf{Group Number: XX}\\[0.5cm]
+\textbf{Member Names and IDs}\\[3cm]
+
+\textbf{Department of Computer Science and Engineering}\\
+\textbf{University Name}\\[1cm]
+
+\textbf{\today}
+
+\vfill
+\end{titlepage}
+
+% ==================================================
+% TABLE OF CONTENTS
+% ==================================================
+\tableofcontents
+\newpage
+
+% ==================================================
+\section{Preface}
+
+Competitive programming platforms provide structured problem-solving environments but often lack real-time interaction, collaboration, and engagement mechanisms. Traditional systems mainly focus on individual practice where learners solve problems independently without competitive motivation or teamwork experience. This limitation reduces long-term engagement and makes learning monotonous for beginners.
+
+CodeClash Arena is motivated by the idea of transforming coding practice into a competitive and game-like environment similar to multiplayer online games. The system introduces real-time 1v1 coding battles and clan-based competitions where users compete, learn, and improve together. By integrating AI-assisted logical hints and fair ranking mechanisms, the platform aims to bridge the gap between learning and competition while maintaining motivation and continuous participation.
+
+% ==================================================
+\section{Introduction}
+
+CodeClash Arena is a web-based gamified competitive programming platform developed to convert traditional coding practice into an interactive real-time competitive experience. The primary purpose of this system is to enhance problem-solving skills through live head-to-head coding battles where participants solve identical programming problems simultaneously. Unlike existing platforms that emphasize solo participation, CodeClash Arena integrates multiplayer interaction, ranking progression, and community collaboration into a unified learning ecosystem.
+
+The system is intended for students, beginner programmers, competitive coding enthusiasts, and academic institutions seeking an engaging environment for algorithmic skill development. Users participate in global matchmaking battles or local battle modes while earning ratings and experience points based on performance. Clan or guild systems further enable team-based competitions that promote collaboration, peer learning, and community engagement.
+
+The operational scope of CodeClash Arena includes user authentication, matchmaking services, real-time battle synchronization, Codeforces problem integration using iframe embedding, submission forwarding for official judging, leaderboard generation, and AI-driven logical hint assistance. The system does not store external problem statements locally to maintain copyright compliance and instead displays problems directly from official sources.
+
+Several technical concepts are fundamental to understanding the system. The ELO Rating System represents a mathematical ranking mechanism used to evaluate player skill after each battle. A 1v1 Battle refers to synchronous competitive problem solving between two participants. Clan Battles denote organized team competitions involving multiple members. AI Logical Hint refers to guidance generated using pretrained machine learning models that assist users in identifying logical approaches without revealing direct solutions. Sandbox Execution represents secure isolated code execution environments ensuring system safety during program evaluation.
+
+% ==================================================
+\section{Glossary}
+
+This section provides definitions of key terms and concepts used throughout the CodeClash Arena platform to ensure clear understanding of technical terminology and system-specific concepts.
+
+\begin{description}
+\item[Arena] A virtual space where players participate in coding competitions and battles.
+
+\item[Battle] A real-time or timed coding competition where players solve the same programming problem.
+
+\item[Matchmaking] The system that pairs players together based on skill level, rank, or availability.
+
+\item[Rank] A competitive level assigned to a player according to performance and rating.
+
+\item[Leaderboard] A ranked list displaying players based on scores, ratings, or achievements.
+
+\item[Challenge] A programming problem that players must solve during practice or battles.
+
+\item[Clan War] A programming contest between two clans.
+
+\item[Submission] Code sent by a player as a solution to a programming challenge.
+
+\item[Code Judge] An automated system that evaluates submitted code by compiling and running it against test cases.
+
+\item[Test Case] Input data used to verify whether a submitted solution works correctly.
+
+\item[Execution Time] The amount of time required for a program to run.
+
+\item[Accepted (AC)] A submission that successfully passes all test cases.
+
+\item[Wrong Answer (WA)] A submission that produces incorrect output.
+
+\item[Time Limit Exceeded (TLE)] A submission that takes longer than the allowed execution time.
+
+\item[API Gateway] The entry point that receives client requests and routes them within the system.
+
+\item[WebSocket] A communication technology that enables real-time updates between server and client during battles.
+
+\item[Player] A registered user who participates in coding battles and challenges.
+
+\item[Profile] A user's public page containing statistics, achievements, and activity history.
+
+\item[Rating] A numerical value representing a player's skill level.
+
+\item[XP (Experience Points)] Points earned through participation and achievements on the platform.
+\end{description}
+
+% ==================================================
+\section{Requirements Discovery}
+
+A comprehensive review of existing platforms such as Codeforces and similar competitive programming systems indicates strong judging capabilities but limited real-time interaction and gamification features. To understand the landscape of gamified programming platforms, a comparative literature review was conducted analyzing several existing systems. Interviews conducted among students revealed that motivation decreases when coding practice lacks competition or collaborative engagement. Survey responses highlighted demand for multiplayer battles, ranking progression, and guided learning assistance.
+
+\subsection{Literature Review}
+
+An analysis of existing gamified competitive programming platforms reveals various approaches to engagement, skill development, and community building. The following table summarizes key platforms, their features, and identified gaps that CodeClash Arena aims to address.
+
+\begin{longtable}{|p{2cm}|p{2.5cm}|p{2cm}|p{2cm}|p{3cm}|p{2.5cm}|}
+\hline
+\textbf{Platform} & \textbf{Gamification Features} & \textbf{Supported Languages} & \textbf{Competitive Aspects} & \textbf{Literature Review Summary} & \textbf{Gaps} \\
+\hline
+\endhead
+
+CodinGame[1] & Multiplayer arenas (Clash of Code), AI bot coding games, themed puzzles, tiered leagues (Wood to Legend), international contests & 25+ (Python, Java, C++, etc.) & Live contests, rankings & Transforms CP into engaging games, boosting motivation via multiplayer and visuals; studies show improved engagement but limited formal CP depth. & Complex UI that can be overwhelming for new users \\
+\hline
+
+AlgoArena[2] & Real-time 1v1 battles, ELO leaderboard, 5000+ problems, instant judges & Python, Java, C++, etc. & Head-to-head, ELO & Enhances rivalry with real-time duels, fostering quick thinking; emerging platform with potential for skill-building research. & No Clan System implemented. Only head 1v1 battle system. \\
+\hline
+
+CodeCombat[3] & Game levels with Python/JS coding, battling enemies via scripts & Python, JavaScript & Single-player progression & Educational gamification for beginners, effective for learning syntax but less for advanced algorithms. & Only two languages that are not used for competitive programming generally \\
+\hline
+
+Codewars[4] & Kata challenges with belt rankings, progress tracking & Many (Python, JS, etc.) & Dojo rankings & Community-driven katas promote practice, research highlights retention gains from gamified progression. & All Competitive Programming platforms normally use ELO ranking method \\
+\hline
+
+\end{longtable}
+
+\subsection{Key Findings and Implications}
+
+The literature review reveals several important insights:
+
+\begin{itemize}
+\item \textbf{Gamification Effectiveness:} Research consistently shows that gamification elements such as points, badges, leaderboards, and competitive challenges significantly improve user engagement and learning outcomes in programming education [1][3].
+
+\item \textbf{Real-time Competition Gap:} While platforms like AlgoArena[2] implement real-time battles, most existing systems lack comprehensive team-based competition mechanisms such as clan wars, limiting collaborative learning opportunities.
+
+\item \textbf{Rating System Standardization:} The ELO rating system, widely adopted in competitive gaming and chess, provides a fair and mathematically sound approach to skill assessment. However, platforms like Codewars[4] use alternative ranking methods that may not accurately reflect competitive programming skill levels.
+
+\item \textbf{Language Support:} Comprehensive language support (C++, Java, Python, JavaScript) is essential for competitive programming platforms, yet some educational platforms like CodeCombat[3] limit language choices, restricting their applicability to serious competitive programming practice.
+
+\item \textbf{Social Learning:} Platforms emphasizing community features, clan systems, and collaborative problem-solving demonstrate higher retention rates and sustained user engagement compared to purely individual-focused systems.
+\end{itemize}
+
+The findings suggest that integrating competitive gaming mechanics with programming education significantly improves participation frequency and learning effectiveness. CodeClash Arena addresses identified gaps by combining real-time 1v1 battles, clan-based team competitions, comprehensive language support, standardized ELO rating, and AI-assisted learning guidance into a unified platform.
+
+% ==================================================
+\section{User Requirements}
+
+\subsection{Authentication and Account Management}
+\begin{itemize}
+\item Users shall be able to register and log in securely using email and password.
+\item Users shall be able to link their Codeforces account handle to their profile.
+\item Users shall be able to view and update their profile information including rating, level, and XP.
+\end{itemize}
+
+\subsection{Global Battle Mode}
+\begin{itemize}
+\item Users shall be able to join a global matchmaking queue and be automatically paired with opponents of similar skill level (rating within $\pm$200 points).
+\item Users shall be able to configure battle settings including problem difficulty rating (800-2000) and time limit (10-30 minutes).
+\item Users shall see real-time battle synchronization including opponent's submission status, countdown timer, and live score updates.
+\end{itemize}
+
+\subsection{Local/Friend Battle Mode}
+\begin{itemize}
+\item Users shall be able to challenge friends directly by username search and send customizable battle invitations.
+\item Users shall be able to accept or decline incoming battle requests from friends.
+\item Users shall be able to select specific problems and configure custom time limits for friend battles.
+\end{itemize}
+
+\subsection{Clan/Guild System}
+\begin{itemize}
+\item Users shall be able to create or join clans with unique names, descriptions, and search for clans using filters.
+\item Users shall be able to participate in clan war battles where multiple clan members compete simultaneously against rival clans.
+\item Users shall be able to view clan statistics, leaderboards, and communicate with clan members through clan chat.
+\end{itemize}
+
+\subsection{Practice Gym Mode}
+\begin{itemize}
+\item Users shall be able to access solo practice mode with Codeforces problem archive including multi-criteria filtering (difficulty, tags, rating range).
+\item Users shall be able to set custom time limits for practice sessions and request AI-generated logical hints for approach guidance.
+\item Users shall earn experience points for completing practice problems and track their practice history.
+\end{itemize}
+
+\subsection{Code Submission and Judging}
+\begin{itemize}
+\item Users shall be able to write and submit code using an integrated editor with syntax highlighting for multiple programming languages (C++, Java, Python, JavaScript, etc.).
+\item Users shall receive immediate verdict feedback from Codeforces judge (Accepted, Wrong Answer, TLE, etc.) after submission.
+\item Users shall be able to test code locally using Piston API in practice mode and view detailed submission history.
+\end{itemize}
+
+\subsection{Rating and Progression System}
+\begin{itemize}
+\item Users shall have a visible ELO-based rating that changes after each competitive battle based on opponent strength and outcome.
+\item Users shall earn experience points (XP) from all platform activities and level up when reaching progressive XP thresholds.
+\item Users shall be able to view rating history graphs, progression statistics, and earn visual badges based on rating tiers.
+\end{itemize}
+
+\subsection{Leaderboards and Rankings}
+\begin{itemize}
+\item Users shall be able to view global leaderboards showing top-rated players and clan leaderboards ranking teams by total points.
+\item Users shall be able to filter leaderboards by time period (daily, weekly, all-time) and see their own position highlighted.
+\item Users shall see leaderboards update in real-time as battles conclude.
+\end{itemize}
+
+\subsection{Statistics and Battle History}
+\begin{itemize}
+\item Users shall be able to view comprehensive personal statistics including total battles fought, win rate, problems solved, and activity streaks.
+\item Users shall be able to access detailed battle history showing opponent information, match results, and performance metrics.
+\item Users shall be able to view other players' public profiles with their statistics and battle records.
+\end{itemize}
+
+\subsection{User Interface and Experience}
+\begin{itemize}
+\item Users shall experience a responsive interface that adapts seamlessly to mobile, tablet, and desktop devices.
+\item Users shall receive clear error messages, loading indicators, and visual feedback for all interactive actions.
+\item Users shall be able to navigate between major features within 3 clicks and see consistent design patterns across all pages.
+\end{itemize}
+
+% ==================================================
+\section{System Architecture}
+
+Code Clash Arena is built on a modern \textbf{3-Tier Architecture} pattern, implementing a full-stack web application using the \textbf{PERN stack} (PostgreSQL, Express, React, Node.js).
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.75\textwidth]{system_archi.png}
+\caption{System Architecture Diagram}
+\label{fig:System_archi}
+\end{figure}
+
+\subsection{Presentation Layer}
+
+The frontend is developed using React 19.2.0 with Vite 7.2.4 as the build tool and React Router 7.11.0 for client-side routing. The application is deployed on Vercel's cloud infrastructure. The user interface is organized into five major modules: Authentication (homepage/login/signup), Main Dashboard (clan management and user profiles), PvP Battle System (1v1 matchmaking), Practice Gym (self-paced learning), and Clan War Arena (team-based competitions).
+
+\subsection{Application Layer}
+
+The backend is powered by Node.js with Express 4.18.2, running on port 3001. This tier handles all business logic including matchmaking algorithms, rating calculations, and battle management. A critical component is the Codeforces submission server, which manages code submission by maintaining user sessions, extracting CSRF tokens, and proxying submissions to the Codeforces platform—mimicking the behavior of online judges like VJudge.
+
+\subsection{Data Layer}
+
+Persistent storage is provided by Supabase, a Backend-as-a-Service platform built on PostgreSQL. The database schema comprises 15+ tables organized into four domains: User Management (users, friends), Clan System (7 tables for clans, battles, and participants), PvP Battles (matchmaking queue and battle records), and Problem Management (problem repository and submissions). Data access is handled through the Supabase JavaScript client library with Row Level Security policies enforcing data protection.
+
+\subsection{External Integration}
+
+The system integrates with the Codeforces platform for problem sourcing and code submission verification. This integration uses session-based authentication with HTTP requests to submit code, poll for verdicts, and retrieve problem metadata.
+
+\subsection{Key Architectural Features}
+
+The system implements RESTful API communication, real-time data synchronization via Supabase subscriptions, separation of concerns across distinct modules, and horizontal scalability through cloud-based deployment. Security is maintained through Row Level Security policies at the database level.
+
+\FloatBarrier
+
+% ==================================================
+\section{System Requirements Specification}
+
+\subsection{Functional Requirements}
+
+\subsubsection{User Authentication and Profile Management}
+\begin{itemize}
+\item \textbf{FR-1.1:} The system shall provide user registration with email and password validation.
+\item \textbf{FR-1.2:} The system shall authenticate users securely using Supabase Auth with JWT token management.
+\item \textbf{FR-1.3:} The system shall maintain user profiles including username, Codeforces handle, rating, XP, level, and clan affiliation.
+\item \textbf{FR-1.4:} The system shall allow users to update their profile information including Codeforces handle.
+\item \textbf{FR-1.5:} The system shall implement session persistence across page refreshes and browser sessions.
+\item \textbf{FR-1.6:} The system shall provide password reset and account recovery mechanisms.
+\end{itemize}
+
+\subsubsection{Battle System - Global Matchmaking}
+\begin{itemize}
+\item \textbf{FR-2.1:} The system shall implement a global matchmaking queue that pairs players based on rating proximity ($\pm$200 rating difference).
+\item \textbf{FR-2.2:} The system shall support automatic opponent finding within 30 seconds or provide manual opponent selection.
+\item \textbf{FR-2.3:} The system shall synchronize battle state in real-time using Supabase Realtime subscriptions.
+\item \textbf{FR-2.4:} The system shall fetch random problems from Codeforces API with configurable difficulty ratings (800-2000).
+\item \textbf{FR-2.5:} The system shall display identical problems to both participants simultaneously via iframe embedding.
+\item \textbf{FR-2.6:} The system shall implement a countdown timer (10-30 minutes) visible to both participants.
+\item \textbf{FR-2.7:} The system shall track submission count and acceptance status for each participant in real-time.
+\item \textbf{FR-2.8:} The system shall automatically end battles when timer expires or both players complete all problems.
+\item \textbf{FR-2.9:} The system shall calculate battle results based on problems solved, time taken, and submission attempts.
+\end{itemize}
+
+\subsubsection{Battle System - Local/Friend Mode}
+\begin{itemize}
+\item \textbf{FR-3.1:} The system shall enable users to challenge friends directly by username search.
+\item \textbf{FR-3.2:} The system shall send battle invitations with problem selection and time limit configuration.
+\item \textbf{FR-3.3:} The system shall allow invitees to accept or decline battle requests.
+\item \textbf{FR-3.4:} The system shall support custom problem selection from Codeforces problem set.
+\item \textbf{FR-3.5:} The system shall maintain friend lists and recent opponent history.
+\end{itemize}
+
+\subsubsection{Clan/Guild System}
+\begin{itemize}
+\item \textbf{FR-4.1:} The system shall allow users to create clans with unique names, descriptions, and icons.
+\item \textbf{FR-4.2:} The system shall implement clan discovery with search and filtering capabilities.
+\item \textbf{FR-4.3:} The system shall manage clan membership with join requests and leader approval.
+\item \textbf{FR-4.4:} The system shall assign clan roles including leader, co-leader, and members with corresponding permissions.
+\item \textbf{FR-4.5:} The system shall support clan battles where multiple members represent their clan simultaneously.
+\item \textbf{FR-4.6:} The system shall aggregate individual battle scores into clan-level points.
+\item \textbf{FR-4.7:} The system shall maintain clan statistics including total battles, wins, losses, and member count.
+\item \textbf{FR-4.8:} The system shall provide clan chat and communication features for member coordination.
+\item \textbf{FR-4.9:} The system shall implement clan leaderboards based on total clan points and battle performance.
+\end{itemize}
+
+\subsubsection{Practice Gym Mode}
+\begin{itemize}
+\item \textbf{FR-5.1:} The system shall provide solo practice mode with access to Codeforces problem archive.
+\item \textbf{FR-5.2:} The system shall implement multi-criteria problem filtering (difficulty, tags, rating range).
+\item \textbf{FR-5.3:} The system shall allow users to set custom time limits for practice sessions.
+\item \textbf{FR-5.4:} The system shall display problem statements via iframe from Codeforces platform.
+\item \textbf{FR-5.5:} The system shall track practice history including attempted problems and success rates.
+\item \textbf{FR-5.6:} The system shall award experience points for completed practice problems.
+\end{itemize}
+
+\subsubsection{Code Submission and Judging}
+\begin{itemize}
+\item \textbf{FR-6.1:} The system shall provide an integrated code editor with syntax highlighting and auto-completion.
+\item \textbf{FR-6.2:} The system shall support multiple programming languages (C++, Java, Python, JavaScript, etc.).
+\item \textbf{FR-6.3:} The system shall forward code submissions to Codeforces judge via automated form submission.
+\item \textbf{FR-6.4:} The system shall retrieve and display verdict results (Accepted, Wrong Answer, TLE, etc.).
+\item \textbf{FR-6.5:} The system shall implement local code execution via Piston API for practice mode testing.
+\item \textbf{FR-6.6:} The system shall display compilation errors and runtime errors to users.
+\item \textbf{FR-6.7:} The system shall track submission history with timestamps and verdict status.
+\item \textbf{FR-6.8:} The system shall enforce rate limiting to comply with Codeforces API restrictions (500 requests per 2 minutes).
+\end{itemize}
+
+\subsubsection{Rating and Progression System}
+\begin{itemize}
+\item \textbf{FR-7.1:} The system shall implement ELO-based rating calculation after each competitive battle.
+\item \textbf{FR-7.2:} The system shall award rating points based on opponent strength and battle outcome.
+\item \textbf{FR-7.3:} The system shall maintain separate rating pools for different game modes.
+\item \textbf{FR-7.4:} The system shall implement an experience point (XP) system for all activities.
+\item \textbf{FR-7.5:} The system shall calculate user levels based on accumulated XP with progressive thresholds.
+\item \textbf{FR-7.6:} The system shall display rating history graphs and progression statistics.
+\item \textbf{FR-7.7:} The system shall assign visual badges and ranks based on rating tiers.
+\end{itemize}
+
+\subsubsection{Leaderboard and Statistics}
+\begin{itemize}
+\item \textbf{FR-8.1:} The system shall maintain global leaderboards sorted by rating.
+\item \textbf{FR-8.2:} The system shall provide clan leaderboards ranking teams by total points.
+\item \textbf{FR-8.3:} The system shall display top performers on homepage with real-time updates.
+\item \textbf{FR-8.4:} The system shall track and display individual user statistics (battles fought, win rate, problems solved).
+\item \textbf{FR-8.5:} The system shall generate battle history with detailed match records.
+\item \textbf{FR-8.6:} The system shall provide filtering options for leaderboards (daily, weekly, all-time).
+\end{itemize}
+
+\subsubsection{AI Assistance Features}
+\begin{itemize}
+\item \textbf{FR-9.1:} The system shall provide AI-generated logical hints during practice sessions.
+\item \textbf{FR-9.2:} The system shall limit hint access to prevent solution disclosure (hints provide approach guidance only).
+\item \textbf{FR-9.3:} The system shall track hint usage and potentially penalize excessive reliance on hints.
+\end{itemize}
+
+\subsubsection{Social and Communication Features}
+\begin{itemize}
+\item \textbf{FR-10.1:} The system shall implement a mail/notification system for battle invitations and clan activities.
+\item \textbf{FR-10.2:} The system shall notify users of clan battle schedules and upcoming events.
+\item \textbf{FR-10.3:} The system shall provide player profile views showing statistics and battle history.
+\item \textbf{FR-10.4:} The system shall enable users to view opponent profiles during matchmaking.
+\end{itemize}
+
+\subsection{Non-Functional Requirements}
+
+\subsubsection{Performance Requirements}
+\begin{itemize}
+\item \textbf{NFR-1.1:} The system shall load all pages within 3 seconds on standard broadband connections (10 Mbps).
+\item \textbf{NFR-1.2:} Battle state synchronization shall occur with latency under 500 milliseconds for real-time updates.
+\item \textbf{NFR-1.3:} Database query response time shall be under 200 milliseconds for 95\% of requests.
+\item \textbf{NFR-1.4:} The matchmaking algorithm shall find opponents within 30 seconds or provide alternative options.
+\item \textbf{NFR-1.5:} Code execution results shall return within 5 seconds for practice mode testing.
+\item \textbf{NFR-1.6:} The system shall support at least 100 concurrent active battles without performance degradation.
+\item \textbf{NFR-1.7:} Problem fetching from Codeforces API shall complete within 2 seconds.
+\item \textbf{NFR-1.8:} Leaderboard updates shall reflect changes within 1 second of battle completion.
+\end{itemize}
+
+\subsubsection{Scalability Requirements}
+\begin{itemize}
+\item \textbf{NFR-2.1:} The system architecture shall support horizontal scaling to handle increased user load.
+\item \textbf{NFR-2.2:} Database design shall accommodate at least 10,000 registered users initially with growth capacity.
+\item \textbf{NFR-2.3:} The system shall handle up to 500 simultaneous matchmaking queue entries.
+\item \textbf{NFR-2.4:} Real-time subscription mechanisms shall scale to support 1,000 concurrent connections.
+\item \textbf{NFR-2.5:} The clan system shall support up to 100 clans with 50 members each without performance issues.
+\end{itemize}
+
+\subsubsection{Availability and Reliability}
+\begin{itemize}
+\item \textbf{NFR-3.1:} The system shall maintain 99.5\% uptime excluding scheduled maintenance.
+\item \textbf{NFR-3.2:} Database services shall provide 99.9\% availability through Supabase infrastructure.
+\item \textbf{NFR-3.3:} All API calls shall implement error handling with graceful degradation.
+\item \textbf{NFR-3.4:} Battle data shall be persisted automatically to prevent loss during network interruptions.
+\item \textbf{NFR-3.5:} The system shall implement retry mechanisms with exponential backoff for failed external API calls.
+\item \textbf{NFR-3.6:} Critical operations shall have fallback mechanisms to ensure service continuity.
+\item \textbf{NFR-3.7:} The matchmaking queue shall auto-clean stale entries older than 5 minutes.
+\end{itemize}
+
+\subsubsection{Security Requirements}
+\begin{itemize}
+\item \textbf{NFR-4.1:} User passwords shall be hashed using bcrypt algorithm with minimum 10 salt rounds via Supabase Auth.
+\item \textbf{NFR-4.2:} Authentication tokens shall expire after 24 hours and require re-authentication.
+\item \textbf{NFR-4.3:} The system shall implement Row-Level Security (RLS) policies to restrict unauthorized data access.
+\item \textbf{NFR-4.4:} All database queries shall use parameterized statements to prevent SQL injection attacks.
+\item \textbf{NFR-4.5:} Code execution shall occur in sandboxed environments to prevent malicious code execution.
+\item \textbf{NFR-4.6:} API endpoints shall implement CORS policies to restrict cross-origin requests.
+\item \textbf{NFR-4.7:} User session data shall be stored securely with HTTPOnly and Secure cookie flags.
+\item \textbf{NFR-4.8:} The system shall validate and sanitize all user inputs to prevent XSS attacks.
+\item \textbf{NFR-4.9:} Sensitive credentials (API keys, database passwords) shall be stored as environment variables.
+\item \textbf{NFR-4.10:} Rate limiting shall be enforced on submission endpoints to prevent abuse (maximum 50 submissions per minute per user).
+\end{itemize}
+
+\subsubsection{Usability Requirements}
+\begin{itemize}
+\item \textbf{NFR-5.1:} The user interface shall be responsive and adapt to mobile, tablet, and desktop screen sizes.
+\item \textbf{NFR-5.2:} All interactive elements shall provide visual feedback within 100 milliseconds of user action.
+\item \textbf{NFR-5.3:} Error messages shall be clear, user-friendly, and provide actionable guidance.
+\item \textbf{NFR-5.4:} Navigation between major features shall require no more than 3 clicks.
+\item \textbf{NFR-5.5:} The system shall maintain consistent color scheme and design patterns across all pages.
+\item \textbf{NFR-5.6:} Loading states shall be indicated with animations or progress indicators for operations exceeding 500ms.
+\item \textbf{NFR-5.7:} Form validation shall provide real-time feedback during user input.
+\item \textbf{NFR-5.8:} The code editor shall support syntax highlighting for all supported programming languages.
+\item \textbf{NFR-5.9:} Battle interfaces shall display all critical information (timer, score, problems) without scrolling.
+\end{itemize}
+
+\subsubsection{Maintainability Requirements}
+\begin{itemize}
+\item \textbf{NFR-6.1:} The codebase shall follow modular component-based architecture for easy maintenance.
+\item \textbf{NFR-6.2:} Code shall adhere to ESLint standards as defined in project configuration.
+\item \textbf{NFR-6.3:} All major features shall be documented with README files in respective module directories.
+\item \textbf{NFR-6.4:} Database schema changes shall be tracked through migration scripts in version control.
+\item \textbf{NFR-6.5:} Function and component names shall be descriptive and follow consistent naming conventions.
+\item \textbf{NFR-6.6:} Complex algorithms shall include inline comments explaining logic and decision rationale.
+\item \textbf{NFR-6.7:} Bug fixes shall be documented with detailed explanation files (e.g., MATCHMAKING\_BUG\_FIX\_EXPLAINED.md).
+\end{itemize}
+
+\subsubsection{Portability and Compatibility}
+\begin{itemize}
+\item \textbf{NFR-7.1:} The system shall function correctly on modern browsers (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+).
+\item \textbf{NFR-7.2:} The application shall be compatible with Windows, macOS, and Linux operating systems.
+\item \textbf{NFR-7.3:} Mobile browsers (iOS Safari 14+, Chrome Mobile 90+) shall be fully supported.
+\item \textbf{NFR-7.4:} The system shall support minimum screen resolution of 320x568 pixels (iPhone SE).
+\item \textbf{NFR-7.5:} Build configuration shall support deployment on Vercel and similar hosting platforms.
+\end{itemize}
+
+\subsubsection{Data Integrity and Persistence}
+\begin{itemize}
+\item \textbf{NFR-8.1:} All battle results shall be permanently stored with complete audit trails.
+\item \textbf{NFR-8.2:} Rating calculations shall be atomic and transaction-safe to prevent inconsistencies.
+\item \textbf{NFR-8.3:} The system shall maintain referential integrity for all foreign key relationships.
+\item \textbf{NFR-8.4:} Database backups shall be performed automatically by Supabase infrastructure.
+\item \textbf{NFR-8.5:} User data deletion shall cascade properly through all related tables.
+\end{itemize}
+
+\subsubsection{Interoperability Requirements}
+\begin{itemize}
+\item \textbf{NFR-9.1:} The system shall integrate seamlessly with Codeforces API v1.0 for problem fetching.
+\item \textbf{NFR-9.2:} Code submission shall be compatible with Codeforces judge requirements and formats.
+\item \textbf{NFR-9.3:} The system shall utilize Piston API v2 for local code execution in practice mode.
+\item \textbf{NFR-9.4:} Real-time features shall leverage Supabase Realtime WebSocket protocol.
+\item \textbf{NFR-9.5:} Authentication shall integrate with Supabase Auth service using OAuth 2.0 standards.
+\end{itemize}
+
+\subsubsection{Compliance and Legal}
+\begin{itemize}
+\item \textbf{NFR-10.1:} The system shall not store copyrighted problem statements locally, displaying them via iframe instead.
+\item \textbf{NFR-10.2:} User-generated content (code submissions) shall remain the intellectual property of users.
+\item \textbf{NFR-10.3:} The system shall comply with Codeforces terms of service regarding API usage.
+\item \textbf{NFR-10.4:} Data collection shall be minimal and limited to essential user information (email, username, Codeforces handle).
+\item \textbf{NFR-10.5:} The system shall implement session cleanup to prevent indefinite data retention.
+\end{itemize}
+
+\subsection{Requirements Classification}
+
+\begin{longtable}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Category} & \textbf{Functional Requirements} & \textbf{Non-Functional Requirements} \\
+\hline
+\endhead
+
+Authentication & User registration, login, profile management (FR-1.1 to FR-1.6) & Session security, password hashing, token expiration (NFR-4.1, NFR-4.2, NFR-4.7) \\
+\hline
+
+Battle System & Global matchmaking, local battles, real-time sync (FR-2.1 to FR-3.5) & Low latency synchronization (<500ms), concurrent battle support (NFR-1.2, NFR-1.6) \\
+\hline
+
+Clan Management & Clan creation, member management, clan battles (FR-4.1 to FR-4.9) & Scalability for 100 clans, data integrity (NFR-2.5, NFR-8.1) \\
+\hline
+
+Code Submission & Multi-language editor, Codeforces integration, verdict display (FR-6.1 to FR-6.8) & Sandbox execution, rate limiting, secure code handling (NFR-4.5, NFR-4.10) \\
+\hline
+
+Rating System & ELO calculation, XP progression, level assignment (FR-7.1 to FR-7.7) & Atomic transactions, calculation accuracy (NFR-8.2) \\
+\hline
+
+Leaderboards & Global rankings, clan rankings, statistics (FR-8.1 to FR-8.6) & Real-time updates (<1s), query performance (<200ms) (NFR-1.3, NFR-1.8) \\
+\hline
+
+Practice Mode & Problem filtering, custom timers, solo practice (FR-5.1 to FR-5.6) & Fast problem fetching (<2s), execution response (<5s) (NFR-1.5, NFR-1.7) \\
+\hline
+
+AI Features & Logical hint generation, approach guidance (FR-9.1 to FR-9.3) & Response time, hint quality assurance (NFR-1.1) \\
+\hline
+
+User Interface & Responsive design, visual feedback, error messages (FR-10.1 to FR-10.4) & Cross-platform compatibility, mobile support, accessibility (NFR-5.1 to NFR-5.9, NFR-7.1 to NFR-7.4) \\
+\hline
+
+Data Management & Battle history, user statistics, data persistence (FR-8.4, FR-8.5) & Data integrity, automatic backups, cascade deletion (NFR-8.1 to NFR-8.5) \\
+\hline
+
+System Reliability & Error handling, retry mechanisms, queue cleanup (FR-2.8, FR-6.6) & 99.5\% uptime, graceful degradation, auto-recovery (NFR-3.1 to NFR-3.7) \\
+\hline
+
+External Integration & Codeforces API, Piston API, Supabase services (FR-6.3, FR-5.2) & API compliance, rate limit adherence, interoperability standards (NFR-9.1 to NFR-9.5) \\
+\hline
+
+Security & Input validation, SQL injection prevention (FR-1.2, FR-6.1) & RLS policies, XSS prevention, CORS configuration, credential management (NFR-4.3 to NFR-4.9) \\
+\hline
+
+Code Quality & Modular architecture, documentation, naming conventions & ESLint compliance, maintainability, version control (NFR-6.1 to NFR-6.7) \\
+\hline
+
+Legal Compliance & Copyright compliance, ToS adherence (FR-2.5) & No local problem storage, minimal data collection (NFR-10.1 to NFR-10.5) \\
+\hline
+
+\end{longtable}
+
+% ==================================================
+\section{System Model}
+
+\subsection{Context Diagram}
+
+The context diagram illustrates the high-level system boundaries of CodeClash Arena and its interactions with external entities. At the center lies the CodeClash Arena system, which serves as the orchestration layer managing all platform functionalities. The primary external actor is the User, who initiates various operations including authentication requests (login), battle participation (request battle, submit code), clan management (initiate clan war, approve requests), and AI assistance requests. The system integrates with the Codeforces API as the primary source of programming problems, retrieving problem sets, test cases, and contestant-specific data through user handles. The Judge Engine acts as an external evaluation service that receives source code submissions from the system and returns verdict statuses (Accepted, Wrong Answer, TLE, etc.). An AI Model component provides intelligent hint generation by processing user requests and returning logical guidance without revealing complete solutions. The Rating Engine processes battle outcomes, calculates ELO rating adjustments based on match results, and provides real-time data for leaderboard updates. Finally, the Database entity represents the persistent storage layer (Supabase/PostgreSQL) that stores critical information including battle logs, submission histories, user profiles, clan data, and system state. All interactions flow through the central CodeClash Arena system, which enforces business logic, security policies, and data validation while maintaining system integrity and coordinating communication between external services.
+
+\FloatBarrier
+\subsubsection{Context Diagram}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.75\textwidth]{context.png}
+\caption{Context Diagram}
+\label{fig:context_diagram}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Use Case Diagrams}
+
+The system provides three primary use case scenarios representing different modes of interaction.
+
+\subsubsection{1V1 Battle Use Case}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.75\textwidth]{1v1_use.png}
+\caption{1V1 Battle Use Case Diagram}
+\label{fig:1v1_battle}
+\end{figure}
+
+This use case diagram illustrates the interactions involved in one-on-one competitive battles between two users. The primary actors include the registered users and the Codeforces API system. Key use cases encompass joining the global matchmaking queue, configuring battle settings such as difficulty level and time limits, real-time battle state synchronization, problem fetching from Codeforces, code submission and evaluation, and post-battle rating updates using the ELO algorithm. Users can also view opponent profiles, track submission progress in real-time, and receive immediate verdict feedback. The system integrates with external services including the Codeforces judge for problem verification and the Supabase database for persistent storage of battle results and user statistics.
+
+\begin{center}
+\begin{tabular}{|p{2.5cm}|p{9.5cm}|}
+\hline
+\textbf{Field} & \textbf{Details} \\
+\hline
+Actor & User, Friend, Server, System (Judge \& Matchmaking) \\
+\hline
+Description & Competitive module where users engage in real-time battles. System supports local friend-based challenges and global matchmaking. Handles code submission, real-time mode synchronization, winner evaluation, and rating updates. \\
+\hline
+Data & Battle requests, invitation status, source code submissions, mode selection (Real/Time Rush), verdict analysis results, updated user ratings \\
+\hline
+Stimulus & User selects "Participate in 1v1 Battle" and triggers either a local battle request or enters the global matchmaking queue \\
+\hline
+Response & System initiates battle environment, evaluates submissions through judge, performs verdict analysis, and calculates rating updates \\
+\hline
+Comments & "1v1 global battle" process includes mandatory selection of "Real Mode" or "Time Rush Mode". "Evaluate Winner" use case includes "Verdict Analysis" and extends to "Rating Update" upon completion. \\
+\hline
+\end{tabular}
+\end{center}
+
+\FloatBarrier
+\subsubsection{Clan Battle Use Case}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.75\textwidth]{Clan_use.png}
+\caption{Clan Battle Use Case Diagram}
+\label{fig:clan_battle}
+\end{figure}
+
+This use case diagram represents the clan-based team competitions where multiple members participate simultaneously. The actors involved include clan members with different roles (leader, co-leader, regular members), rival clans, and external systems. Primary use cases include clan creation and management, member recruitment through search and filtering, role assignment with corresponding permissions, initiating clan war battles, warrior selection for specific matches, and real-time score aggregation from individual member performances. Clan leaders can manage membership requests, configure clan settings, and schedule battles against opposing clans. The system maintains comprehensive clan statistics including total battles fought, win-loss records, member contribution metrics, and clan point accumulation. Communication features enable coordination through clan chat, battle notifications, and event scheduling. The clan leaderboard system ranks teams based on accumulated points and overall performance metrics.
+
+\begin{center}
+\begin{tabular}{|p{2.5cm}|p{9.5cm}|}
+\hline
+\textbf{Field} & \textbf{Details} \\
+\hline
+Actor & Clan Leader, Opponent Clan Leader, Clan Member, System (Judge), Server \\
+\hline
+Description & Team-based competitive mode where clan leaders initiate wars. Members solve coding problems; system evaluates code and updates clan ratings. \\
+\hline
+Data & Member list, 5 problems, code submissions, execution metrics, clan ratings \\
+\hline
+Stimulus & Clan Leader initiates war and selects participating members \\
+\hline
+Response & Match found, winner announced, ratings updated \\
+\hline
+Comments & Winner determination automatically includes announcement and rating calculation. Each member solves one problem. \\
+\hline
+\end{tabular}
+\end{center}
+
+\FloatBarrier
+\subsubsection{Practice Mode Use Case}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.75\textwidth]{practice_use.png}
+\caption{Practice Mode Use Case Diagram}
+\label{fig:practice}
+\end{figure}
+
+This use case diagram depicts the solo practice mode where users solve problems individually without competitive pressure. The primary actor is the individual user who interacts with the Codeforces problem archive and the AI assistance system. Key use cases include accessing the complete Codeforces problem repository, applying multi-criteria filters based on difficulty rating (800-3500), topic tags (dynamic programming, graphs, greedy algorithms, etc.), and problem categories. Users can set custom time limits to simulate competitive conditions, request AI-generated logical hints for strategic guidance without revealing complete solutions, and utilize local code execution via Piston API for rapid testing before official submission. The system tracks comprehensive practice history including attempted problems, success rates, time spent per problem, and topic-wise performance analytics. Experience points are awarded upon successful problem completion, contributing to overall user progression and level advancement. This mode serves as a training ground for skill development and preparation for competitive battles.
+
+\begin{center}
+\begin{tabular}{|p{2.5cm}|p{9.5cm}|}
+\hline
+\textbf{Field} & \textbf{Details} \\
+\hline
+Actor & User, Admin, System (Evaluator), AI Hint API \\
+\hline
+Description & Solo training mode where users solve problems individually without competitive pressure. Users filter problems by difficulty and topic, set time limits, and request AI hints for guidance. \\
+\hline
+Data & Codeforces problem archive (difficulty 800-3500), topic tags (dynamic programming, graphs), source code, time limits, performance analytics \\
+\hline
+Stimulus & User accesses repository and applies filters for difficulty or topic \\
+\hline
+Response & System presents filtered problems, tracks history, awards XP on completion \\
+\hline
+Comments & "Solve Problem" includes "Start Practice" and "Request AI Hint". AI hints processed via API to ensure logical guidance without full solutions. \\
+\hline
+\end{tabular}
+\end{center}
+
+\FloatBarrier
+
+\subsection{Activity Diagrams}
+
+The system workflow is represented through three primary activity diagrams that illustrate different battle modes and their execution flows.
+
+\subsubsection{Clan War Activity Diagram}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.75\textwidth]{Clan_war.png}
+\caption{Clan War Activity Diagram}
+\label{fig:clan_war_activity}
+\end{figure}
+
+This diagram depicts the complete workflow of clan-based competitive battles. The process begins with selecting clan war mode followed by warrior selection and clan search. Once a suitable opponent clan is found, the system displays problems, remaining time, and current clan scores simultaneously. Participants view problem statements and submit solutions which are forwarded to the Codeforces API for verdict determination. Based on acceptance or rejection, battle points are either increased or decreased respectively. Upon battle completion, clan points are updated and recorded in the system database.
+
+\FloatBarrier
+\subsubsection{1V1 Local Mode Activity Diagram}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.75\textwidth]{1v1_local_mode_activity_diagram.png}
+\caption{1V1 Local Mode Activity Diagram}
+\label{fig:1v1_local_activity}
+\end{figure}
+
+This diagram illustrates the friend-based local battle mode workflow. Users initiate the process by selecting a friend and choosing local battle mode. After selecting a specific problem number, a battle request is sent. If the challenge is accepted, both participants simultaneously view the problem statement and remaining time. Solutions are submitted through the Codeforces API for evaluation. Accepted submissions award points while rejected submissions result in point deduction. The next problem appears automatically until time expires, at which point player experience points are updated and the battle concludes.
+
+\FloatBarrier
+\subsubsection{Practice Mode Activity Diagram}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.75\textwidth]{Practice Mode Activity Diagram.png}
+\caption{Practice Mode Activity Diagram}
+\label{fig:practice_mode_activity}
+\end{figure}
+
+This diagram represents the self-paced practice workflow. Upon entering practice mode, Codeforces problems are fetched and displayed with optional filter application. Users select a problem and set a time bound for completion. The problem statement appears alongside a countdown timer. During problem solving, users may optionally request AI-based logical hints for guidance. Submitted solutions are evaluated via the Codeforces API, returning acceptance or rejection verdicts. Upon time expiration, player experience points are updated based on performance throughout the practice session.
+
+\FloatBarrier
+
+% ==================================================
+\section{Appendix}
+
+Interview summaries, survey responses, and literature findings supporting system design decisions are included here.
+
+\subsection{System Limitations}
+
+\begin{itemize}
+\item \textbf{External API Dependency}: The platform's core functionality depends entirely on Codeforces platform availability and API rate limits (500 requests per 2 minutes). System downtime or maintenance of Codeforces directly impacts battle functionality, problem display, and code submission capabilities. Users must maintain valid Codeforces accounts to participate in battles.
+
+\item \textbf{Matchmaking and Scalability Constraints}: Global matchmaking enforces a rating difference constraint of $\pm$100 points between opponents, which may result in extended queue times for players at extreme rating ranges. The system supports approximately 100 concurrent active battles, beyond which database query performance and real-time synchronization may degrade. Queue search automatically terminates after 60 seconds requiring manual rejoin.
+
+\item \textbf{Feature Implementation Gaps}: Several planned features remain unimplemented including the AI-powered logical hint system (FR-9.1 to FR-9.3), battle replay functionality, spectator mode for clan wars, and comprehensive analytics dashboard. The platform operates exclusively through web browsers with no native mobile applications, limiting offline capabilities and device-specific optimizations.
+\end{itemize}
+
+% ==================================================
+\section{References}
+
+\begin{enumerate}
+\item CodinGame - Multiplayer Programming Game Platform \\
+\texttt{https://www.codingame.com}
+
+\item AlgoArena - Real-time Competitive Programming Battles \\
+\texttt{https://www.algoarena.net}
+
+\item CodeCombat - Learn Programming Through Gaming \\
+\texttt{https://codecombat.com}
+
+\item Codewars - Kata-based Programming Challenges \\
+\texttt{https://www.codewars.com}
+\end{enumerate}
+
+\end{document}
