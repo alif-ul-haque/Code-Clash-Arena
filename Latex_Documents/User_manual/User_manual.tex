@@ -9,6 +9,7 @@
 \usepackage{hyperref}
 \usepackage{placeins}
 \usepackage{enumitem}
+\usepackage{amssymb}
 
 % Compact section spacing
 \titlespacing*{\section}{0pt}{12pt plus 4pt minus 2pt}{6pt plus 2pt minus 2pt}
@@ -593,7 +594,7 @@ CodeClash Arena is accessible through any modern web browser without requiring s
 \textbf{Steps to Access:}
 \begin{enumerate}
 \item Open your preferred web browser (Chrome 84+, Firefox 103+, Edge 84+, or Safari 15+)
-\item Navigate to the CodeClash Arena URL: \texttt{[https://code-clash-arena-six.vercel.app/]}
+\item Navigate to the CodeClash Arena URL: \url{https://code-clash-arena-six.vercel.app/}
 \item Ensure JavaScript is enabled in your browser settings
 \item The homepage will load, displaying the main landing page
 \end{enumerate}
@@ -1051,14 +1052,16 @@ The Player vs Player (PvP) battle system is the core competitive feature of Code
 \begin{enumerate}
 \item From the Main Dashboard, locate the \textbf{"Attack"} button on the left navigation menu
 \item Click the \textbf{"Attack"} button to open the battle mode selection overlay
-\item The overlay menu displays three options: Global Battle, Local Battle, and Practice Gym
-\item Click on \textbf{"Global Battle"} option (typically marked with a globe or trophy icon)
+\item The overlay menu displays two modes: \textbf{1v1} and \textbf{Practice}
+\item Click on \textbf{"1v1"} mode
+\item A submenu appears with two options: \textbf{Global} and \textbf{Local}
+\item Click on \textbf{"Global"} option (for matchmaking with similar-rated opponents)
 \item The Global Battle interface loads
 \end{enumerate}
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Main Dashboard with Attack button highlighted]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{Homepage_attack_highlighted.png}
 \caption{Main Dashboard - Click Attack button to access battle modes}
 \label{fig:attack_button}
 \end{figure}
@@ -1075,7 +1078,7 @@ The Player vs Player (PvP) battle system is the core competitive feature of Code
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Global Battle matchmaking screen with "Find Match" button highlighted]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{global_mode_searching.png}
 \caption{Global Battle - Enter matchmaking queue}
 \label{fig:global_matchmaking}
 \end{figure}
@@ -1096,7 +1099,7 @@ The Player vs Player (PvP) battle system is the core competitive feature of Code
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Match found screen showing opponent details and countdown]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{global_match_found.png}
 \caption{Match Found - Opponent details and battle initialization}
 \label{fig:match_found}
 \end{figure}
@@ -1116,7 +1119,7 @@ The Player vs Player (PvP) battle system is the core competitive feature of Code
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Battle arena showing problem statement on left, code editor on right, timer at top]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{battle_arena.png}
 \caption{Battle Arena - Split-screen interface with problem and editor}
 \label{fig:battle_arena}
 \end{figure}
@@ -1134,13 +1137,6 @@ The Player vs Player (PvP) battle system is the core competitive feature of Code
 \item Fix any errors or logic issues identified during testing
 \item Refine your solution for edge cases
 \end{enumerate}
-
-\begin{figure}[!htb]
-\centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Code editor with language dropdown highlighted and Run Code button marked]\vspace{3cm}}}
-\caption{Code Editor - Language selection and local testing}
-\label{fig:code_editor_test}
-\end{figure}
 
 \textbf{Step 6: Submitting Solution}
 \begin{enumerate}
@@ -1161,7 +1157,7 @@ The Player vs Player (PvP) battle system is the core competitive feature of Code
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Submit button highlighted and verdict display showing "Accepted"]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{cf_interface.png}
 \caption{Code Submission - Submit button and verdict display}
 \label{fig:code_submit}
 \end{figure}
@@ -1188,7 +1184,7 @@ The Player vs Player (PvP) battle system is the core competitive feature of Code
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Battle result screen showing winner, rating change, and XP earned]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{local_battle_ended.png}
 \caption{Battle Result - Winner announcement and statistics}
 \label{fig:battle_result}
 \end{figure}
@@ -1227,14 +1223,16 @@ The Player vs Player (PvP) battle system is the core competitive feature of Code
 \textbf{Step 1: Access Local Battle Mode}
 \begin{enumerate}
 \item From the Main Dashboard, click the \textbf{"Attack"} button on the left navigation menu
-\item The battle mode selection overlay appears
-\item Click on \textbf{"Local Battle"} option (typically marked with a duel icon or crossed swords)
+\item The battle mode selection overlay displays two modes: \textbf{1v1} and \textbf{Practice}
+\item Click on \textbf{"1v1"} mode
+\item A submenu appears with two options: \textbf{Global} and \textbf{Local}
+\item Click on \textbf{"Local"} option (for challenging specific friends)
 \item The Local Battle configuration page loads
 \end{enumerate}
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Battle mode overlay with Local Battle option highlighted]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{select_local_battle.png}
 \caption{Battle Mode Selection - Local Battle option}
 \label{fig:local_battle_select}
 \end{figure}
@@ -1269,7 +1267,7 @@ The Player vs Player (PvP) battle system is the core competitive feature of Code
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Local Battle configuration page with opponent field, difficulty selector, and time limit options marked]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{local_friend.png}
 \caption{Local Battle Configuration - Battle settings customization}
 \label{fig:local_battle_config}
 \end{figure}
@@ -1313,7 +1311,7 @@ The Player vs Player (PvP) battle system is the core competitive feature of Code
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Local Battle arena showing custom settings in header (time limit displayed)]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{battle_arena.png}
 \caption{Local Battle Arena - Customized battle in progress}
 \label{fig:local_battle_arena}
 \end{figure}
@@ -1343,7 +1341,7 @@ When you receive a Local Battle invitation from another player:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Incoming battle invitation popup with Accept and Decline buttons highlighted]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{incoming_battle_request.png}
 \caption{Incoming Battle Invitation - Accept or Decline}
 \label{fig:battle_invitation_received}
 \end{figure}
@@ -1382,13 +1380,14 @@ When you receive a Local Battle invitation from another player:
 \textbf{Step 1: Access Practice Gym}
 \begin{enumerate}
 \item From the Main Dashboard, click the \textbf{"Attack"} button
-\item In the battle mode overlay, click \textbf{"Practice Gym"} option (typically marked with a dumbbell or training icon)
+\item The battle mode selection overlay displays two modes: \textbf{1v1} and \textbf{Practice}
+\item Click on \textbf{"Practice"} option (for solo practice without time pressure)
 \item Practice Gym interface loads showing problem browser
 \end{enumerate}
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Battle mode overlay with Practice Gym option highlighted]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{select_practice_mode.png}
 \caption{Battle Mode Selection - Practice Gym option}
 \label{fig:practice_gym_select}
 \end{figure}
@@ -1415,7 +1414,7 @@ When you receive a Local Battle invitation from another player:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Practice Gym problem browser with difficulty filter, tag filter, and problem list visible]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{practice_dashboard.png}
 \caption{Practice Gym - Problem browser with filtering options}
 \label{fig:practice_gym_browser}
 \end{figure}
@@ -1437,7 +1436,7 @@ When you receive a Local Battle invitation from another player:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Problem statement view with "Start Solving" button highlighted]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{practice_problem_statement.png}
 \caption{Practice Gym - Problem statement display}
 \label{fig:practice_problem_view}
 \end{figure}
@@ -1455,13 +1454,6 @@ When you receive a Local Battle invitation from another player:
 \item No time limit - work at your own pace
 \item Code editor supports syntax highlighting, auto-indentation, and basic autocomplete
 \end{enumerate}
-
-\begin{figure}[!htb]
-\centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Practice solving interface with problem on left, code editor on right]\vspace{3cm}}}
-\caption{Practice Gym - Solving interface}
-\label{fig:practice_solving}
-\end{figure}
 
 \textbf{Step 5: Local Testing}
 \begin{enumerate}
@@ -1482,13 +1474,6 @@ When you receive a Local Battle invitation from another player:
 \item Run multiple tests with different inputs
 \end{enumerate}
 
-\begin{figure}[!htb]
-\centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Local testing panel showing input, expected output, actual output, and Run button highlighted]\vspace{3cm}}}
-\caption{Practice Gym - Local code testing}
-\label{fig:practice_testing}
-\end{figure}
-
 \textbf{Step 6: AI Hint System (Optional)}
 \begin{enumerate}
 \item If stuck on the problem, click the \textbf{"Get Hint"} button (lightbulb icon)
@@ -1505,7 +1490,7 @@ When you receive a Local Battle invitation from another player:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Hint button highlighted and hint popup showing logical guidance]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{AI_hint.png}
 \caption{Practice Gym - AI hint system}
 \label{fig:practice_hints}
 \end{figure}
@@ -1533,13 +1518,6 @@ When you receive a Local Battle invitation from another player:
     \item Unlimited submission attempts
   \end{itemize}
 \end{enumerate}
-
-\begin{figure}[!htb]
-\centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Submit button and verdict display showing "Accepted" with XP earned]\vspace{3cm}}}
-\caption{Practice Gym - Submission and verdict}
-\label{fig:practice_submit}
-\end{figure}
 
 \textbf{Step 8: Return to Problem Browser}
 \begin{enumerate}
@@ -1599,7 +1577,7 @@ The Clan System enables team-based competitive coding through collaborative clan
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Clan menu showing Create Clan and Find Clan options]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{create_or_join_clan.png}
 \caption{Clan Menu - Create or Join options for users without clan}
 \label{fig:clan_menu_no_clan}
 \end{figure}
@@ -1627,7 +1605,7 @@ The Clan System enables team-based competitive coding through collaborative clan
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Clan creation form with fields for name, tag, description, type, and Create button highlighted]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{clan_create_form.png}
 \caption{Clan Creation - Form with all required fields}
 \label{fig:clan_creation_form}
 \end{figure}
@@ -1648,7 +1626,7 @@ The Clan System enables team-based competitive coding through collaborative clan
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Newly created clan page showing clan details, your name as leader, and empty statistics]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{newly_formed_clan.png}
 \caption{New Clan Page - Clan leader view after creation}
 \label{fig:new_clan_page}
 \end{figure}
@@ -1676,7 +1654,7 @@ The Clan System enables team-based competitive coding through collaborative clan
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Clan browser showing list of available clans with details and "Request to Join" buttons]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{join_clan.png}
 \caption{Clan Browser - List of available clans to join}
 \label{fig:clan_browser}
 \end{figure}
@@ -1698,7 +1676,7 @@ The Clan System enables team-based competitive coding through collaborative clan
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Clan detail page with "Request to Join" button highlighted]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{clan_join_request_sent.png}
 \caption{Clan Details - Request to join a clan}
 \label{fig:clan_request_join}
 \end{figure}
@@ -1728,7 +1706,7 @@ The Clan System enables team-based competitive coding through collaborative clan
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Clan page showing member list with your name included, clan stats, and chat]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{clan_members.png}
 \caption{Your Clan Page - Member view after joining}
 \label{fig:clan_member_view}
 \end{figure}
@@ -1766,7 +1744,7 @@ If you are a clan leader, additional management options are available:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Clan leader view showing join requests panel with Accept/Reject buttons and member management options]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{incoming_clan_join_request.png}
 \caption{Clan Leader Interface - Managing requests and members}
 \label{fig:clan_leader_management}
 \end{figure}
@@ -1815,7 +1793,7 @@ If you are a clan leader, additional management options are available:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Clan Battle button highlighted on dashboard with notification badge]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{select_clan_battle.png}
 \caption{Main Dashboard - Clan Battle access}
 \label{fig:clan_battle_access}
 \end{figure}
@@ -1835,7 +1813,7 @@ If you are a clan leader, additional management options are available:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Warrior selection interface showing clan member list with checkboxes and Confirm button highlighted]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{warrior_selection.png}
 \caption{Clan Battle - Warrior selection by leader}
 \label{fig:warrior_selection}
 \end{figure}
@@ -1856,7 +1834,7 @@ If you are a clan leader, additional management options are available:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Matchmaking screen showing "Searching for opponent clan" with loading animation]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{loading_clan_battle.png}
 \caption{Clan Battle - Matchmaking in progress}
 \label{fig:clan_matchmaking}
 \end{figure}
@@ -1877,7 +1855,7 @@ If you are a clan leader, additional management options are available:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Opponent clan found screen showing clan names, warrior lists, and countdown timer]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{clan_battle_found.png}
 \caption{Clan Battle - Opponent found and battle initialization}
 \label{fig:clan_opponent_found}
 \end{figure}
@@ -1902,7 +1880,7 @@ For selected warriors (regular members):
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Clan battle arena showing clan names, scores, problem list, and teammate status]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{clan_war_battle_arena.png}
 \caption{Clan Battle Arena - Warrior view with problem selection}
 \label{fig:clan_battle_arena}
 \end{figure}
@@ -1931,13 +1909,6 @@ For selected warriors (regular members):
 \item Real-time score updates: "Your Clan: 4 - Opponent Clan: 3"
 \end{enumerate}
 
-\begin{figure}[!htb]
-\centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Problem being solved in clan battle, showing code editor and teammate solving another problem in status panel]\vspace{3cm}}}
-\caption{Clan Battle - Warriors solving problems collaboratively}
-\label{fig:clan_battle_solving}
-\end{figure}
-
 \textbf{Step 7: Clan Battle Conclusion}
 \begin{enumerate}
 \item Battle ends when:
@@ -1958,13 +1929,6 @@ For selected warriors (regular members):
 \item Clan leaderboards updated with new points
 \item Click \textbf{"Return to Clan Page"} or \textbf{"Back to Dashboard"}
 \end{enumerate}
-
-\begin{figure}[!htb]
-\centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Clan battle result screen showing Victory, final score, warrior contributions, and points earned]\vspace{3cm}}}
-\caption{Clan Battle Result - Victory screen with statistics}
-\label{fig:clan_battle_result}
-\end{figure}
 
 \textbf{Non-Selected Members During Battle:}
 
@@ -2025,7 +1989,7 @@ If you are a clan member but not selected for current battle:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Main Dashboard with ClashConnect button highlighted, showing notification badge]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{clash_connect_dashboard.png}
 \caption{Main Dashboard - ClashConnect access with notifications}
 \label{fig:clashconnect_access}
 \end{figure}
@@ -2045,7 +2009,7 @@ If you are a clan member but not selected for current battle:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: ClashConnect friend list showing usernames, online status, and action buttons]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{local_friend.png}
 \caption{ClashConnect - Friend list with online status}
 \label{fig:friend_list}
 \end{figure}
@@ -2064,13 +2028,6 @@ If you are a clan member but not selected for current battle:
 \item Click \textbf{"Add Friend"} button next to desired user
 \item Confirmation: "Friend request sent to [username]"
 \end{enumerate}
-
-\begin{figure}[!htb]
-\centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Find Friends search interface with search bar and "Add Friend" buttons highlighted]\vspace{3cm}}}
-\caption{ClashConnect - Search for new friends}
-\label{fig:find_friends}
-\end{figure}
 
 \textbf{Step 4: Manage Friend Requests}
 \begin{enumerate}
@@ -2092,7 +2049,7 @@ If you are a clan member but not selected for current battle:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Pending friend requests with Accept and Reject buttons highlighted]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{manage_clash_connect.png}
 \caption{ClashConnect - Managing incoming friend requests}
 \label{fig:friend_requests}
 \end{figure}
@@ -2121,7 +2078,7 @@ If you are a clan leader, ClashConnect also displays clan join requests:
 
 \begin{figure}[!htb]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Clan join requests panel showing applicant details with Accept/Reject buttons (clan leader view)]\vspace{3cm}}}
+\includegraphics[width=0.9\textwidth]{incoming_clan_join_request.png}
 \caption{ClashConnect - Clan join requests (leader view)}
 \label{fig:clan_requests_leader}
 \end{figure}
@@ -2148,13 +2105,6 @@ If you are a clan leader, ClashConnect also displays clan join requests:
   \end{itemize}
 \item Click \textbf{"Back"} to return to ClashConnect
 \end{enumerate}
-
-\begin{figure}[!htb]
-\centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Player profile page showing stats, rating, clan, battle history, and action buttons]\vspace{3cm}}}
-\caption{Player Profile - Detailed statistics and social actions}
-\label{fig:player_profile}
-\end{figure}
 
 \textbf{Input Requirements:}
 \begin{itemize}[leftmargin=*]
@@ -2184,96 +2134,72 @@ If you are a clan leader, ClashConnect also displays clan join requests:
 \FloatBarrier
 
 % ==================================================
-\subsection{Leaderboards}
+% SECTION 6: NAVIGATION GUIDE
+% ==================================================
 
-\textbf{Purpose:} View global and clan rankings to track top performers, compare your standing with other players, and monitor clan competition.
+\section{Navigation Guide}
 
-\textbf{Step-by-Step Usage:}
+This section provides a comprehensive guide to navigating CodeClash Arena's interface. After logging in, you will be directed to the Main Dashboard, which serves as the central hub for accessing all platform features.
 
-\textbf{Step 1: Access Leaderboards}
-\begin{enumerate}
-\item From Main Dashboard, locate the \textbf{"Leaderboards"} button (may be in navigation menu or separate section)
-\item Click \textbf{"Leaderboards"} to open ranking interface
-\item Leaderboard page loads showing ranking tabs
-\end{enumerate}
+\subsection{Main Dashboard Overview}
 
-\begin{figure}[!htb]
-\centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Navigation menu with Leaderboards button highlighted]\vspace{3cm}}}
-\caption{Access Leaderboards from navigation}
-\label{fig:leaderboards_access}
-\end{figure}
+The Main Dashboard features an animated background with coding-themed particles and a vertical menu bar on the left side. At the top of the menu, you will see your XP bar displaying your current level, experience points, and username. Below the XP bar are five main navigation buttons and a logout option.
 
-\textbf{Step 2: Global Player Leaderboard}
-\begin{enumerate}
-\item Default view shows \textbf{"Global Player Rankings"}
-\item Leaderboard displays ranked list of players:
-  \begin{itemize}
-    \item \textbf{Rank}: Position number (1st, 2nd, 3rd, etc.)
-    \item \textbf{Username}: Player name (clickable to view profile)
-    \item \textbf{Rating}: Current ELO rating
-    \item \textbf{Level}: Player level
-    \item \textbf{XP}: Total experience points
-    \item \textbf{Win/Loss}: Battle record
-    \item \textbf{Clan Tag}: Clan affiliation (if any)
-  \end{itemize}
-\item Top 3 players highlighted with special badges (gold, silver, bronze)
-\item Your own rank is highlighted in different color for easy identification
-\item Pagination: Navigate through pages to see more players
-\end{enumerate}
+\subsection{Navigation Options}
 
-\begin{figure}[!htb]
-\centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Global leaderboard showing ranked player list with columns for rank, username, rating, level, and win/loss]\vspace{3cm}}}
-\caption{Global Player Leaderboard - Top ranked players}
-\label{fig:global_leaderboard}
-\end{figure}
+\subsubsection{Your Clan}
 
-\textbf{Step 3: Clan Leaderboard}
-\begin{enumerate}
-\item Click on \textbf{"Clan Rankings"} tab
-\item Leaderboard switches to clan rankings showing:
-  \begin{itemize}
-    \item \textbf{Rank}: Clan position
-    \item \textbf{Clan Name and Tag}: Clan identifier
-    \item \textbf{Clan Points}: Total clan rating/points
-    \item \textbf{Members}: Total member count
-    \item \textbf{Battles}: Total clan battles fought
-    \item \textbf{Win Rate}: Percentage of battles won
-    \item \textbf{Leader}: Clan leader username
-  \end{itemize}
-\item Top clans highlighted with special styling
-\item Your clan (if you're in one) is highlighted
-\item Click on clan name to view clan details page
-\end{enumerate}
+Access your clan management interface and view clan details. If you are not currently in a clan, clicking this button opens the clan browsing menu where you can search for clans to join or create your own clan. If you are already a clan member, this opens your clan's information page showing member list, clan statistics, total points, and war history.
 
-\begin{figure}[!htb]
-\centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}[Screenshot: Clan leaderboard showing ranked clans with points, members, and win rates]\vspace{3cm}}}
-\caption{Clan Leaderboard - Top ranked clans}
-\label{fig:clan_leaderboard}
-\end{figure}
+\subsubsection{ClashConnect}
 
-\textbf{Step 4: Filter and Sort Options}
-\begin{enumerate}
-\item Use filter/sort options to customize leaderboard view:
-  \begin{itemize}
-    \item \textbf{Time Period}: All-Time, Monthly, Weekly rankings
-    \item \textbf{Category}: Rating, XP, Battles Won, Problems Solved
-    \item \textbf{Region}: Global, or by specific region (if implemented)
-  \end{itemize}
-\item Select filter/sort criteria
-\item Leaderboard updates dynamically to show filtered results
-\end{enumerate}
+Open the social hub to manage your connections and invitations. This feature allows you to search for other players, send and accept friend requests, view incoming clan join requests (if you are a clan leader), and manage your friend list. A notification badge appears on this button when you have pending friend requests or clan join requests.
 
-\textbf{Step 5: View Detailed Player/Clan Profile}
-\begin{enumerate}
-\item Click on any player username or clan name in the leaderboard
-\item Redirected to detailed profile/clan page
-\item View complete statistics and battle history
-\item Option to add friend, challenge, or join clan (depending on context)
-\item Click \textbf{"Back to Leaderboard"} to return
-\end{enumerate}
+\subsubsection{Clan Battle}
+
+Navigate to the clan battle interface for team-based competitions. If you are a clan leader, clicking this button takes you to the team selection page where you can choose warriors and initiate matchmaking for clan battles. If you are a regular clan member and a battle is ongoing, you will be directed to the battle arena; otherwise, you will see a "No Battle Ongoing" message. A notification badge appears when there is an active clan battle.
+
+\subsubsection{Attack}
+
+Launch the PvP battle menu to compete in 1v1 coding challenges. This button opens an overlay menu with multiple battle mode options: Global Battle Mode (matchmaking with players of similar rating), Local Battle Mode (challenge specific friends), and Practice Gym (solo practice without competition). Select your preferred mode to begin competitive coding.
+
+\subsubsection{Battle History}
+
+View your complete battle record and performance statistics. This section displays all your past 1v1 battles and clan battles, showing opponents faced, problems solved, battle outcomes (win/loss), time taken, and rating changes. Use this feature to analyze your performance trends and track your improvement over time.
+
+\subsubsection{Log Out}
+
+Securely end your current session and return to the homepage. Clicking this button clears your authentication tokens and logs you out of the platform. Always use this option when accessing CodeClash Arena from shared or public computers to protect your account security.
+
+\FloatBarrier
+
+% ==================================================
+% SECTION 7: ERROR HANDLING AND MESSAGES
+% ==================================================
+
+\section{Error Handling and Messages}
+
+CodeClash Arena displays color-coded alerts to communicate system status: green alerts for successful actions (e.g., "Sign in successful!") and red alerts for errors. Alerts disappear automatically after a few seconds or can be manually closed.
+
+\subsection{Authentication Errors}
+
+\textbf{Invalid Login Credentials}
+
+\textit{Error Message:} "Invalid login credentials" or "Invalid email or password"
+
+\textit{Solutions:} Verify email and password are correct; check Caps Lock is off; ensure no extra spaces; use correct email (not Codeforces handle); verify email has been confirmed after signup.
+
+\textbf{Email Not Confirmed/Verified}
+
+\textit{Error Message:} "Email not confirmed" or "Error fetching user data"
+
+\textit{Solutions:} Check inbox and spam folder for verification email from Supabase; look for subject "Confirm Your Email"; click verification link; return to log in page after verification; contact support if link expired (24 hours).
+
+\textbf{Account Locked}
+
+\textit{Error Message:} "Too many login attempts"
+
+\textit{Solutions:} Wait 15-30 minutes before retrying; use password reset if needed; avoid multiple attempts during lockout.
 
 \textbf{Input Requirements:}
 \begin{itemize}[leftmargin=*]
@@ -2637,7 +2563,7 @@ When entering any battle or practice session, the code editor appears with:
   \end{itemize}
 \item Final verdict appears (typically within 5-15 seconds):
   \begin{itemize}
-    \item \textbf{Accepted (AC)}: All test cases passed ✓ (green color)
+    \item \textbf{Accepted (AC)}: All test cases passed \checkmark{} (green color)
     \item \textbf{Wrong Answer (WA)}: Failed on test case X (red color)
     \item \textbf{Time Limit Exceeded (TLE)}: Code too slow on test X (yellow/orange)
     \item \textbf{Runtime Error (RE)}: Code crashed on test X (red color)
