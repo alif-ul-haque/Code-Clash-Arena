@@ -1029,17 +1029,180 @@ Registered users are subject to the following restrictions to maintain platform 
 \FloatBarrier
 
 % ==================================================
-% PLACEHOLDER SECTIONS (To be completed)
+% SECTION 5: FEATURES AND FUNCTIONALITY
 % ==================================================
 
 \section{Features and Functionality}
 % To be completed in next iteration
 
+\FloatBarrier
+
+% ==================================================
+% SECTION 6: NAVIGATION GUIDE
+% ==================================================
+
 \section{Navigation Guide}
-% To be completed in next iteration
+
+This section provides a comprehensive guide to navigating CodeClash Arena's interface. After logging in, you will be directed to the Main Dashboard, which serves as the central hub for accessing all platform features.
+
+\subsection{Main Dashboard Overview}
+
+The Main Dashboard features an animated background with coding-themed particles and a vertical menu bar on the left side. At the top of the menu, you will see your XP bar displaying your current level, experience points, and username. Below the XP bar are five main navigation buttons and a logout option.
+
+\subsection{Navigation Options}
+
+\subsubsection{Your Clan}
+
+Access your clan management interface and view clan details. If you are not currently in a clan, clicking this button opens the clan browsing menu where you can search for clans to join or create your own clan. If you are already a clan member, this opens your clan's information page showing member list, clan statistics, total points, and war history.
+
+\subsubsection{ClashConnect}
+
+Open the social hub to manage your connections and invitations. This feature allows you to search for other players, send and accept friend requests, view incoming clan join requests (if you are a clan leader), and manage your friend list. A notification badge appears on this button when you have pending friend requests or clan join requests.
+
+\subsubsection{Clan Battle}
+
+Navigate to the clan battle interface for team-based competitions. If you are a clan leader, clicking this button takes you to the team selection page where you can choose warriors and initiate matchmaking for clan battles. If you are a regular clan member and a battle is ongoing, you will be directed to the battle arena; otherwise, you will see a "No Battle Ongoing" message. A notification badge appears when there is an active clan battle.
+
+\subsubsection{Attack}
+
+Launch the PvP battle menu to compete in 1v1 coding challenges. This button opens an overlay menu with multiple battle mode options: Global Battle Mode (matchmaking with players of similar rating), Local Battle Mode (challenge specific friends), and Practice Gym (solo practice without competition). Select your preferred mode to begin competitive coding.
+
+\subsubsection{Battle History}
+
+View your complete battle record and performance statistics. This section displays all your past 1v1 battles and clan battles, showing opponents faced, problems solved, battle outcomes (win/loss), time taken, and rating changes. Use this feature to analyze your performance trends and track your improvement over time.
+
+\subsubsection{Log Out}
+
+Securely end your current session and return to the homepage. Clicking this button clears your authentication tokens and logs you out of the platform. Always use this option when accessing CodeClash Arena from shared or public computers to protect your account security.
+
+\FloatBarrier
+
+% ==================================================
+% SECTION 7: ERROR HANDLING AND MESSAGES
+% ==================================================
 
 \section{Error Handling and Messages}
-% To be completed in next iteration
+
+CodeClash Arena displays color-coded alerts to communicate system status: green alerts for successful actions (e.g., "Sign in successful!") and red alerts for errors. Alerts disappear automatically after a few seconds or can be manually closed.
+
+\subsection{Authentication Errors}
+
+\textbf{Invalid Login Credentials}
+
+\textit{Error Message:} "Invalid login credentials" or "Invalid email or password"
+
+\textit{Solutions:} Verify email and password are correct; check Caps Lock is off; ensure no extra spaces; use correct email (not Codeforces handle); verify email has been confirmed after signup.
+
+\textbf{Email Not Confirmed/Verified}
+
+\textit{Error Message:} "Email not confirmed" or "Error fetching user data"
+
+\textit{Solutions:} Check inbox and spam folder for verification email from Supabase; look for subject "Confirm Your Email"; click verification link; return to login page after verification; contact support if link expired (24 hours).
+
+\textbf{Account Locked}
+
+\textit{Error Message:} "Too many login attempts"
+
+\textit{Solutions:} Wait 15-30 minutes before retrying; use password reset if needed; avoid multiple attempts during lockout.
+
+\textbf{Email Already Registered}
+
+\textit{Error Message:} "User already registered" or "Email already exists"
+
+\textit{Solutions:} Use login page if account exists; use password reset if password forgotten; try different email for new account.
+
+\textbf{Invalid Codeforces Handle}
+
+\textit{Error Message:} Field validation error or "Invalid handle"
+
+\textit{Solutions:} Verify handle at \url{https://codeforces.com/profile/your-handle}; ensure exact spelling and capitalization; create Codeforces account first if needed.
+
+\textbf{Weak Password}
+
+\textit{Error Message:} "Password must be at least 8 characters"
+
+\textit{Solutions:} Use minimum 8 characters with mix of uppercase, lowercase, numbers, and special characters; avoid common passwords.
+
+\subsection{Network and Connectivity Errors}
+
+\textbf{Network Error:} "Network error" or "Failed to fetch"
+
+\textit{Solutions:} Check internet connection; refresh page (F5); verify firewall settings; disable VPN temporarily; clear browser cache; try different browser.
+
+\textbf{Timeout Error:} "Request timeout" or "Connection timeout"
+
+\textit{Solutions:} Ensure stable connection (5+ Mbps for battles); close bandwidth-consuming applications; switch to wired connection; try again after a moment.
+
+\subsection{Battle-Related Errors}
+
+\textbf{Battle Disconnection:} "Connection lost" or "Battle disconnected"
+
+\textit{Note:} Automatic forfeit if reconnection fails.
+
+\textit{Prevention:} Use wired Ethernet connection; ensure stable internet before battles; close unnecessary applications; avoid battles during network instability.
+
+\textbf{Submission Failed:} "Submission failed" or "Error submitting code"
+
+\textit{Solutions:} Check internet connection; verify Codeforces handle is correctly linked; ensure Codeforces account is in good standing; retry after a few seconds; verify correct programming language selected.
+
+\subsection{Clan-Related Errors}
+
+\textbf{Cannot Join Clan:} "Already in a clan" or "Join request failed"
+
+\textit{Solutions:} Leave current clan before joining another; wait for pending requests to be processed; verify clan is accepting members and you meet requirements.
+
+\textbf{Cannot Start Clan Battle:} "Insufficient permissions" or "Only clan leader can start battles"
+
+\textit{Solutions:} Contact clan leader to start battle; create your own clan for leadership permissions.
+
+\subsection{Common Error Messages Quick Reference}
+
+\begin{longtable}{|p{6cm}|p{8cm}|}
+\hline
+\textbf{Error Message} & \textbf{Quick Solution} \\
+\hline
+\endhead
+
+"Invalid login credentials" & Check email and password; ensure credentials correct; verify email confirmed \\
+\hline
+
+"Email not confirmed" / "Error fetching user data" & Check inbox for verification email; click verification link; check spam folder \\
+\hline
+
+"Network error" & Check internet; refresh page; verify firewall settings \\
+\hline
+
+"User already registered" & Use login instead; try different email; reset password if needed \\
+\hline
+
+"Too many login attempts" & Wait 15-30 minutes before retry \\
+\hline
+
+"Submission failed" & Check internet; verify Codeforces handle linked; retry submission \\
+\hline
+
+"Connection timeout" & Improve internet stability; use wired connection; close other apps \\
+\hline
+
+"Battle disconnected" & Ensure stable internet before battles; use wired connection \\
+\hline
+
+"Already in a clan" & Leave current clan first \\
+\hline
+
+"Only clan leader can start battles" & Contact clan leader or create own clan \\
+\hline
+
+"Password must be at least 8 characters" & Use longer password with mixed characters (uppercase, lowercase, numbers, symbols) \\
+\hline
+
+\end{longtable}
+
+\subsection{Getting Additional Help}
+
+If errors persist after trying solutions: take screenshot of error message; note exact steps leading to error; check browser console (F12 → Console) for details; contact platform support; verify system meets requirements in Section 2.
+
+\FloatBarrier
 
 % ==================================================
 \end{document}
