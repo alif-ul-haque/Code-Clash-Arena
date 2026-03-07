@@ -347,23 +347,43 @@ const OneVOneLocalPage = () => {
                 const userId = currentUserData.id;
                 setCurrentUserId(userId);
 
-                // Step 2: Get friend IDs from friends table
-                const { data: friendData } = await supabase
+                // Step 2: Get friend IDs from friends table (CHECK BOTH DIRECTIONS)
+                // Direction 1: Where current user is u_id (I added them as friend)
+                const { data: friendData1 } = await supabase
                     .from('friends')
                     .select('f_id')
-                    .eq('u_id', userId);
+                    .eq('u_id', userId)
+                    .eq('status', 'accepted');
+
+                // Direction 2: Where current user is f_id (They added me as friend)
+                const { data: friendData2 } = await supabase
+                    .from('friends')
+                    .select('u_id')
+                    .eq('f_id', userId)
+                    .eq('status', 'accepted');
+
+                // Combine friend IDs from both directions
+                const friendIds = [
+                    ...(friendData1 || []).map(f => f.f_id),
+                    ...(friendData2 || []).map(f => f.u_id)
+                ];
+
+                // Remove duplicates (in case bidirectional friendships exist)
+                const uniqueFriendIds = [...new Set(friendIds)];
 
                 // Step 3: Get detailed friend information from users table
-                const friendIds = friendData.map(f => f.f_id);
+                if (uniqueFriendIds.length === 0) {
+                    setFriendsList([]);
+                } else {
+                    const { data: friendsInfo } = await supabase
+                        .from('users')
+                        .select('cf_handle, email, xp, rating, id')
+                        .in('id', uniqueFriendIds);
 
-                const { data: friendsInfo } = await supabase
-                    .from('users')
-                    .select('cf_handle, email, xp, rating, id')
-                    .in('id', friendIds);
-
-                // Store friends info in state
-                if (friendsInfo) {
-                    setFriendsList(friendsInfo);
+                    // Store friends info in state
+                    if (friendsInfo) {
+                        setFriendsList(friendsInfo);
+                    }
                 }
 
                 // Check for existing incoming battle requests
