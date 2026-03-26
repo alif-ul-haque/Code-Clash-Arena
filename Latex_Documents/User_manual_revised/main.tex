@@ -12,6 +12,7 @@
 \usepackage{array}
 \usepackage[none]{hyphenat}
 \usepackage{ragged2e} 
+\usepackage[colorlinks=true, linkcolor=black]{hyperref}
 \titlespacing*{\subsubsection}{0pt}{3.25ex plus 1ex minus .2ex}{.7ex}
 
 % Make figure numbers include subsection
@@ -28,7 +29,11 @@
 \setstretch{0.95}   % Reduce line spacing slightly
 
 \begin{document}
-
+\pagestyle{empty}
+\tableofcontents
+\clearpage
+\pagestyle{plain}
+\setcounter{page}{1} 
 \section{Navigation Guide}
 \subsection{Menu Structure}
 After login, the user lands on the main menu dashboard of the game. At the top of the screen, the user’s profile information is displayed, showing the player name, the current level, and a progress bar indicating the player’s advancement toward the next level.
