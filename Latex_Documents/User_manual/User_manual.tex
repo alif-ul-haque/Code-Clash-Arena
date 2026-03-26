@@ -585,42 +585,30 @@ Stable Internet (Wired connection preferred) & \textbf{RECOMMENDED} \\
 % ==================================================
 \section{Getting Started}
 
-This section provides step-by-step instructions for new users to access CodeClash Arena, create an account, log in, and navigate the initial setup process.
+Quick setup guide to access CodeClash Arena and create your account.
+
+\setlength{\parindent}{0pt}
 
 \subsection{Accessing the Platform}
 
-CodeClash Arena is accessible through any modern web browser without requiring software installation.
+\subsubsection{To Access the Platform:}
 
-\textbf{Steps to Access:}
-\begin{enumerate}
-\item Open your preferred web browser (Chrome 84+, Firefox 103+, Edge 84+, or Safari 15+)
-\item Navigate to the CodeClash Arena URL: \url{https://code-clash-arena-six.vercel.app/}
-\item Ensure JavaScript is enabled in your browser settings
-\item The homepage will load, displaying the main landing page
-\end{enumerate}
-
-\textbf{First-Time Visitors:} Upon accessing the platform for the first time, you will see the homepage featuring:
 \begin{itemize}[leftmargin=*]
-\item Main title: "HELLO CODERS, WELCOME!"
-\item \textbf{GET STARTED} button - Click to proceed to the Login page
-\item \textbf{About us} link in the header - Learn about the platform
-\item \textbf{Learn More} link in the header - Discover features and capabilities
-\item Animated particle effects for visual engagement
+\item Open a supported web browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+)
+\item Navigate to: \url{https://code-clash-arena-six.vercel.app/}
+\item Ensure JavaScript is enabled
+\item The homepage loads with title "HELLO CODERS, WELCOME!"
+\item On the Homepage, you will see: \textbf{GET STARTED} button, \textbf{About us} link, and \textbf{Learn More} link
 \end{itemize}
 
 \subsection{Sign-Up Process}
 
-New users must create a CodeClash Arena account to access platform features. The sign-up process is straightforward and requires basic information.
-
-\subsubsection{Sign-Up Steps}
+\subsubsection{To Sign Up:}
 
 \textbf{Step 1: Navigate to Sign-Up Page}
 \begin{itemize}[leftmargin=*]
-\item From the homepage, click the \textbf{"GET STARTED"} button
-\item You will be redirected to the Login page first
-\item On the Login page, locate the text at the bottom: \textbf{"Don't have an account?"}
-\item Click the \textbf{"Sign Up"} link (highlighted in gold/yellow color)
-\item The Sign-Up page will load with registration form
+\item Click \textbf{"GET STARTED"} on the homepage
+\item Click \textbf{"Sign Up"} link at the bottom of the Login page
 \end{itemize}
 
 \begin{figure}[!htb]
@@ -630,36 +618,15 @@ New users must create a CodeClash Arena account to access platform features. The
 \label{fig:homepage}
 \end{figure}
 
+\FloatBarrier
+\setlength{\parindent}{0pt}
+
 \textbf{Step 2: Enter Registration Information}
-
-Fill in all three required fields in the sign-up form:
-
 \begin{itemize}[leftmargin=*]
-\item \textbf{Email}: Provide a valid email address
-  \begin{itemize}
-    \item Used for account verification and password recovery
-    \item Must be unique (not already registered in the system)
-    \item Ensure you have access to this email for verification
-    \item Format: username@domain.com
-  \end{itemize}
-\item \textbf{Codeforces Handle}: Enter your existing Codeforces username
-  \begin{itemize}
-    \item \textbf{This is your Codeforces account username} - not a new username
-    \item Must be a valid, existing Codeforces handle
-    \item This handle is linked immediately during registration
-    \item Used for all code submissions and battle participation
-    \item If you don't have a Codeforces account, create one first at \url{https://codeforces.com/register}
-  \end{itemize}
-\item \textbf{Password}: Create a strong password for your CodeClash Arena account
-  \begin{itemize}
-    \item Minimum 8 characters required
-    \item Recommended: Include uppercase, lowercase, numbers, and special characters
-    \item Password is case-sensitive
-    \item This is separate from your Codeforces password
-  \end{itemize}
+\item \textbf{Email} - For verification and password recovery; must be unique
+\item \textbf{Codeforces Handle} - Your existing Codeforces username (create at \url{https://codeforces.com/register} if needed)
+\item \textbf{Password} - Minimum 8 characters; keep separate from Codeforces password
 \end{itemize}
-
-\textbf{Important Note:} Unlike typical registrations, CodeClash Arena requires your Codeforces handle during sign-up because the platform integrates directly with Codeforces for problem sourcing and code submission.
 
 \begin{figure}[!htb]
 \centering
@@ -668,19 +635,14 @@ Fill in all three required fields in the sign-up form:
 \label{fig:signup_form}
 \end{figure}
 
-\textbf{Step 3: Submit Registration}
+\FloatBarrier
+\setlength{\parindent}{0pt}
 
+\textbf{Step 3: Submit Registration}
 \begin{itemize}[leftmargin=*]
-\item Click the \textbf{"SignUp"} button (green/teal colored button)
-\item The system will validate all entered information
-\item If validation fails, field labels will turn red indicating errors:
-  \begin{itemize}
-    \item Red label on Email - Check email format or email may already be registered
-    \item Red label on Codeforces Handle - Verify handle exists on Codeforces
-    \item Red label on Password - Ensure password meets minimum requirements (8+ characters)
-    \item Empty fields are highlighted in red when attempting to submit
-  \end{itemize}
-\item Upon successful validation, account creation begins
+\item Click \textbf{"SignUp"} button
+\item If validation fails, red field labels appear; correct errors and resubmit
+\item Success message: \textbf{"Signup successful! Check your email"}
 \end{itemize}
 
 \begin{figure}[!htb]
@@ -690,71 +652,45 @@ Fill in all three required fields in the sign-up form:
 \label{fig:signup_submit}
 \end{figure}
 
-\textbf{Step 4: Email Verification Alert}
+\FloatBarrier
+\setlength{\parindent}{0pt}
 
+\textbf{Step 4: Email Verification}
 \begin{itemize}[leftmargin=*]
-\item After successful registration, a success alert popup appears with the message: \textbf{"Signup successful! Welcome, check your email [your-email@domain.com]"}
-\item The page automatically redirects to the Homepage after 1.5 seconds
-\item Check your email inbox for a verification message from Supabase (CodeClash Arena's authentication provider)
-\item Subject line typically: "Confirm Your Email" or "Verify Your Email"
-\item Email may take 1-5 minutes to arrive
-\item Check spam/junk folder if email is not received within 5 minutes
+\item Check email inbox for verification message from Supabase
+\item Email may take 1-5 minutes to arrive; check spam folder if needed
+\item Click \textbf{"Verify Email Address"} link in the email
+\item Your account is now activated
 \end{itemize}
 
 \begin{figure}[!htb]
 \centering
 \includegraphics[width=0.9\textwidth]{verification_email.png}
-\caption{Email Verification }
+\caption{Email Verification - Click verification link}
 \label{fig:verification_prompt}
 \end{figure}
 
-\textbf{Step 5: Verify Email Address}
+\FloatBarrier
+\setlength{\parindent}{0pt}
 
+\textbf{Step 5: Login to Complete Setup}
 \begin{itemize}[leftmargin=*]
-\item Open the verification email
-\item Click on the \textbf{"Verify Email Address"} button or link
-\item Browser will open and redirect to CodeClash Arena
-\item Verification confirmation page appears
-\item Account is now fully activated
-\end{itemize}
-
-\textbf{Step 6: Login to Complete Setup}
-
-After email verification:
-\begin{itemize}[leftmargin=*]
-\item Navigate to the Login page
-\item Login using your registered email and password
-\item Your Codeforces handle is already linked from registration
-\item You can now access all platform features including battles, practice gym, and clan wars
-\end{itemize}
-
-\textbf{Important Notes:}
-\begin{itemize}[leftmargin=*]
-\item \textbf{Codeforces Handle Required First}: You must have an existing Codeforces account before signing up on CodeClash Arena
-\item \textbf{Verification Link Expiry}: Email verification links typically expire after 24 hours
-\item \textbf{Unverified Accounts}: You must verify your email to login and access platform features
-\item \textbf{Handle Validation}: The system stores your Codeforces handle but doesn't validate its existence during registration - ensure you enter it correctly
-\item \textbf{Account Security}: Never share your CodeClash Arena password with anyone (keep it separate from your Codeforces password)
-\item \textbf{Success Alert}: Green alert popup confirms successful registration
-\item \textbf{Error Alert}: Red alert popup displays error messages if registration fails
+\item Navigate to Login page and use your registered email and password
+\item Your Codeforces handle is automatically linked from registration
+\item Requirements: Existing Codeforces account and verified email before login
 \end{itemize}
 
 \FloatBarrier
+\setlength{\parindent}{0pt}
 
 \subsection{Login Process}
 
-Existing users can access their accounts through the login page. The process is quick and secure.
-
-\subsubsection{Login Steps}
+\subsubsection{To Login:}
 
 \textbf{Step 1: Navigate to Login Page}
-
 \begin{itemize}[leftmargin=*]
-\item From the homepage, click the \textbf{"GET STARTED"} button
-\item You will be automatically redirected to the Login page
-\item Alternatively, navigate directly via your browser if you know the URL
-\item The login page displays with the CodeClash Arena logo at the top
-\item A \textbf{"← Back"} button is available in the top-left corner to return to the homepage
+\item Click \textbf{"GET STARTED"} on the homepage
+\item You are redirected to the Login page
 \end{itemize}
 
 \begin{figure}[!htb]
@@ -764,34 +700,22 @@ Existing users can access their accounts through the login page. The process is 
 \label{fig:homepage_login}
 \end{figure}
 
+\FloatBarrier
+\setlength{\parindent}{0pt}
+
 \textbf{Step 2: Enter Login Credentials}
-
 \begin{itemize}[leftmargin=*]
-\item \textbf{Email Field}: Enter the email address used during registration
-  \begin{itemize}
-    \item Labeled as "Email" with a user icon on the left
-    \item Email is case-insensitive
-    \item Ensure no extra spaces before or after email
-    \item Floating label design - label moves up when you start typing
-  \end{itemize}
-\item \textbf{Password Field}: Enter your account password
-  \begin{itemize}
-    \item Labeled as "Password" with floating label design
-    \item Password is case-sensitive
-    \item Click on the password field to focus it
-    \item When focused, an \textbf{eye icon} appears on the right side
-    \item Click the eye icon to toggle password visibility (show/hide)
-    \item Closed eye icon = password hidden; Open eye icon = password visible
-  \end{itemize}
+\item Enter your registered email address (case-insensitive)
+\item Enter your account password (case-sensitive)
+\item A visibility icon appears in the password field to show/hide password
 \end{itemize}
+\setlength{\parindent}{0pt}
 
-\textbf{Step 3: Submit Login}
-
+\textbf{Step 3: Submit and Authenticate}
 \begin{itemize}[leftmargin=*]
-\item Click the \textbf{"Log In"} button (golden/yellow colored button with login icon)
-\item System validates credentials with Supabase authentication service
-\item Authentication typically completes within 1-2 seconds
-\item Success or error alert popup will appear
+\item Click \textbf{"Log In"} button
+\item System validates credentials with Supabase
+\item Success message: \textbf{"Sign in successful!"}
 \end{itemize}
 
 \begin{figure}[!htb]
@@ -801,14 +725,14 @@ Existing users can access their accounts through the login page. The process is 
 \label{fig:login_success}
 \end{figure}
 
-\textbf{Step 4: Successful Login - Redirection}
+\FloatBarrier
+\setlength{\parindent}{0pt}
 
+\textbf{Step 4: Access Dashboard}
 \begin{itemize}[leftmargin=*]
-\item Upon successful authentication, a green success alert appears: \textbf{"Sign in successful!"}
-\item After 1.5 seconds, you are automatically redirected to the \textbf{Main Dashboard} (/main)
-\item Your Codeforces handle is automatically loaded from the database and stored in browser localStorage
-\item Navigation bar updates to show logged-in status with your profile information
-\item Access to all platform features is now available: PvP Battles, Practice Gym, Clan Wars, Leaderboards
+\item After 1.5 seconds, you are redirected to the Main Dashboard
+\item Your Codeforces handle is automatically loaded from your account
+\item All platform features are accessible: PvP Battles, Practice Gym, Clan Wars, Leaderboards
 \end{itemize}
 
 \begin{figure}[!htb]
@@ -817,71 +741,29 @@ Existing users can access their accounts through the login page. The process is 
 \caption{Main Dashboard - After successful login}
 \label{fig:dashboard}
 \end{figure}
+\setlength{\parindent}{0pt}
 
-\textbf{Common Login Errors and Solutions:}
-
-\begin{longtable}{|p{5cm}|p{8.5cm}|}
-\hline
-\textbf{Error Message} & \textbf{Solution} \\
-\hline
-\endhead
-
-"Invalid email or password" or authentication error & Verify email and password are correct; check for typos; ensure Caps Lock is off; verify email has been verified via link sent during signup \\
-\hline
-
-"Email not verified" & Check your email inbox for verification link; you must verify email before logging in; check spam/junk folder \\
-\hline
-
-"Account not found" & Email may not be registered; try signing up or verify correct email address \\
-\hline
-
-"Too many login attempts" & Wait 15 minutes before trying again; security measure against brute force attacks \\
-\hline
-
-"Network error" & Check internet connection; ensure stable connectivity; try refreshing page \\
-\hline
-
-\end{longtable}
-
-\subsubsection{First-Time Login - Account Setup Complete}
-
-After your first successful login:
-
-\textbf{Codeforces Account Already Linked:}
+\textbf{Troubleshooting:}
 \begin{itemize}[leftmargin=*]
-\item Your Codeforces handle was linked during the sign-up process
-\item No additional Codeforces setup is required
-\item The system automatically retrieves your cf\_handle from the database upon login
-\item This handle is used for all code submissions to Codeforces during battles
-\item You can proceed immediately to explore the platform features
+\item \textbf{Invalid credentials} - Verify email and password are correct; check for typos
+\item \textbf{Email not verified} - Check email inbox for verification link; check spam folder
+\item \textbf{Too many attempts} - Wait 15 minutes before trying again
+\item \textbf{Network error} - Check internet connection and refresh page
+\item \textbf{Forgot password} - Use password reset option on login page
 \end{itemize}
 
-\textbf{If You Need to Update Codeforces Handle:}
-\begin{enumerate}
-\item Navigate to \textbf{Profile Settings} or \textbf{User Profile} section
-\item Locate the \textbf{"Codeforces Handle"} field
-\item Update your Codeforces username/handle if needed
-\item Save changes
-\item Note: Handle changes may be rate-limited to prevent abuse
-\end{enumerate}
-
-
-\textbf{Important}: Without a linked Codeforces account, you cannot participate in competitive battles or submit code solutions.
-
 \FloatBarrier
+\setlength{\parindent}{0pt}
 
-\subsection{Logout Process}
+\subsection{Logout}
 
-Users can securely log out of their accounts at any time to end their session.
-
-\subsubsection{Logout Steps}
-
-\textbf{Step 1: Access User Menu}
+\subsubsection{To Logout:}
 
 \begin{itemize}[leftmargin=*]
-\item Locate your username or profile icon in the top-right corner of the navigation bar
-\item Click on the username/profile icon to open the dropdown menu
-\item User menu will display with various options
+\item Click your username or profile icon in the top-right corner
+\item Select \textbf{"Logout"} or \textbf{"Sign Out"} from the dropdown menu
+\item Confirm logout if prompted
+\item You are redirected to the homepage with all session data cleared
 \end{itemize}
 
 \begin{figure}[!htb]
@@ -891,100 +773,20 @@ Users can securely log out of their accounts at any time to end their session.
 \label{fig:user_menu}
 \end{figure}
 
-\textbf{Step 2: Select Logout Option}
-
-\begin{itemize}[leftmargin=*]
-\item From the dropdown menu, locate and click \textbf{"Logout"} or \textbf{"Sign Out"}
-\item Option is typically at the bottom of the menu
-\item May be represented by a logout icon (exit door or arrow)
-\end{itemize}
-
-\textbf{Step 3: Confirm Logout (if applicable)}
-
-\begin{itemize}[leftmargin=*]
-\item Confirmation dialog may appear: "Are you sure you want to logout?"
-\item Click \textbf{"Yes"} or \textbf{"Confirm"} to proceed
-\item Click \textbf{"Cancel"} to remain logged in
-\item Some implementations may log out immediately without confirmation
-\end{itemize}
-
-\textbf{Step 4: Logout Completion}
-
-\begin{itemize}[leftmargin=*]
-\item Session is terminated on the server
-\item Authentication tokens are cleared from browser
-\item You are redirected to the homepage or login page
-\item Confirmation message appears: "Successfully logged out"
-\item All session data is cleared for security
-\end{itemize}
-
-
-
-\textbf{Important Security Notes:}
-\begin{itemize}[leftmargin=*]
-\item \textbf{Always logout on shared computers}: Prevent unauthorized access to your account
-\item \textbf{Battle interruption}: If logged out during an active battle, it counts as forfeit
-\item \textbf{Unsaved changes}: Any unsaved draft code in editor may be lost
-\item \textbf{Session persistence}: "Remember Me" option keeps you logged in until explicit logout
-\item \textbf{Automatic logout}: Sessions may expire after extended inactivity (typically 24-48 hours)
-\end{itemize}
+\textbf{Security:} Always logout on shared computers to prevent unauthorized access.
 
 \FloatBarrier
+\setlength{\parindent}{0pt}
 
-\subsection{Troubleshooting Common Issues}
+\subsection{Next Steps}
 
-\subsubsection{Cannot Receive Verification/Reset Emails}
+\subsubsection{Continue Your Journey:}
 
-\textbf{Solutions:}
 \begin{itemize}[leftmargin=*]
-\item Check spam/junk folder for emails from Supabase
-\item Verify email address was entered correctly during signup
-\item Wait 5-10 minutes (email delivery may be delayed)
-\item Whitelist emails from your authentication provider
-\item Check email provider's filtering settings
-\item Contact platform support if verification email is never received
-\end{itemize}
-
-\subsubsection{Account Locked After Multiple Failed Login Attempts}
-
-\textbf{Solutions:}
-\begin{itemize}[leftmargin=*]
-\item Wait 15-30 minutes before attempting to login again
-\item Ensure correct email and password are being used
-\item Use password reset if password is forgotten
-\item Contact support if issue persists after waiting period
-\end{itemize}
-
-\subsubsection{Browser Compatibility Issues}
-
-\textbf{Solutions:}
-\begin{itemize}[leftmargin=*]
-\item Update browser to minimum required version (Chrome 84+, Firefox 103+, Safari 15+)
-\item Enable JavaScript in browser settings
-\item Clear browser cache and cookies
-\item Disable browser extensions that may interfere
-\item Try using a different supported browser
-\end{itemize}
-
-\subsection{Next Steps After Getting Started}
-
-Once successfully logged in, proceed to:
-
-\begin{enumerate}
-\item \textbf{Explore Main Dashboard}: Familiarize yourself with navigation menu and available features - PvP Battles, Practice Gym, Clan Wars, and more
-\item \textbf{Verify Codeforces Handle}: Your Codeforces handle was linked during signup - verify it appears correctly in your profile
-\item \textbf{Complete Profile}: Add additional information, avatar, or bio (if available in profile settings)
-\item \textbf{Browse Practice Gym}: Start with practice problems to familiarize yourself with the code editor and problem-solving interface
-\item \textbf{Join or Create a Clan}: Team up with other coders for clan battles and collaborative competitions (optional)
-\item \textbf{Enter First Battle}: Once comfortable, try a 1v1 PvP battle to experience competitive real-time coding
-\end{enumerate}
-
-\textbf{Recommended First Actions:}
-\begin{itemize}[leftmargin=*]
-\item Visit the \textbf{Practice Gym} to try solving a problem without time pressure
-\item Check the \textbf{Leaderboard} to see top-ranked players
-\item Read platform tutorials or help section (if available)
-\item Configure notification preferences in settings
+\item Verify your Codeforces handle in your profile settings
+\item Explore the \textbf{Practice Gym} to familiarize yourself with the code editor
+\item Join or create a \textbf{Clan} for team-based competitions
+\item Join your first \textbf{1v1 Battle} to start competing
 \end{itemize}
 
 \FloatBarrier
