@@ -34,6 +34,187 @@
 \clearpage
 \pagestyle{plain}
 \setcounter{page}{1} 
+\section{Getting Started}
+
+\subsection{Accessing the Platform}
+
+\begin{itemize}[leftmargin=*]
+\item Open a supported web browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+)
+\item Navigate to the CodeClash Arena platform
+\item Ensure JavaScript is enabled
+\item The homepage loads with title "HELLO CODERS, WELCOME!"
+\item On the homepage, you will see: \textbf{GET STARTED} button, \textbf{About us} link, and \textbf{Learn More} link
+\end{itemize}
+
+\subsection{Sign-Up Process}
+
+\subsubsection{Step 1: Navigate to Sign-Up Page}
+
+\begin{itemize}[leftmargin=*]
+\item Click \textbf{"GET STARTED"} on the homepage
+\item Click \textbf{"Sign Up"} link at the bottom of the Login page
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{homepage.png}
+\caption{CodeClash Arena Loginpage - Locate Sign Up button}
+\label{fig:homepage}
+\end{figure}
+
+\subsubsection{Step 2: Enter Registration Information}
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Email} - For verification and password recovery; must be unique
+\item \textbf{Codeforces Handle} - Your existing Codeforces username (create at \url{https://codeforces.com/register} if needed)
+\item \textbf{Password} - Minimum 8 characters; keep separate from Codeforces password
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{signup_form.png}
+\caption{Sign-Up Form - Enter registration details}
+\label{fig:signup_form}
+\end{figure}
+
+\subsubsection{Step 3: Submit Registration}
+
+\begin{itemize}[leftmargin=*]
+\item Click \textbf{"SignUp"} button
+\item If validation fails, red field labels appear; correct errors and resubmit
+\item Success message: \textbf{"Signup successful! Check your email"}
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{signup_submit.png}
+\caption{Sign-Up Form Completion - Click SignUp button}
+\label{fig:signup_submit}
+\end{figure}
+
+\subsubsection{Step 4: Email Verification}
+
+\begin{itemize}[leftmargin=*]
+\item Check email inbox for verification message from Supabase
+\item Email may take 1-5 minutes to arrive; check spam folder if needed
+\item Click \textbf{"Verify Email Address"} link in the email
+\item Your account is now activated
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{verification_email.png}
+\caption{Email Verification - Click verification link}
+\label{fig:verification_prompt}
+\end{figure}
+
+\subsubsection{Step 5: Login to Complete Setup}
+
+\begin{itemize}[leftmargin=*]
+\item Navigate to Login page and use your registered email and password
+\item Your Codeforces handle is automatically linked from registration
+\item Requirements: Existing Codeforces account and verified email before login
+\end{itemize}
+
+\subsection{Login Process}
+
+\subsubsection{Step 1: Navigate to Login Page}
+
+\begin{itemize}[leftmargin=*]
+\item Click \textbf{"GET STARTED"} on the homepage
+\item You are redirected to the Login page
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{loginpage.png}
+\caption{Loginpage - Navigate to Login}
+\label{fig:homepage_login}
+\end{figure}
+
+\subsubsection{Step 2: Enter Login Credentials}
+
+\begin{itemize}[leftmargin=*]
+\item Enter your registered email address (case-insensitive)
+\item Enter your account password (case-sensitive)
+\item A visibility icon appears in the password field to show/hide password
+\end{itemize}
+
+\subsubsection{Step 3: Submit and Authenticate}
+
+\begin{itemize}[leftmargin=*]
+\item Click \textbf{"Log In"} button
+\item System validates credentials with Supabase
+\item Success message: \textbf{"Sign in successful!"}
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{login_submit.png}
+\caption{Login successful - Success alert displayed}
+\label{fig:login_success}
+\end{figure}
+
+\subsubsection{Step 4: Access Dashboard}
+
+\begin{itemize}[leftmargin=*]
+\item After successful login, you are redirected to the Main Dashboard
+\item Your Codeforces handle is automatically loaded from your account
+\item All platform features are accessible: PvP Battles, Practice Gym, Clan Wars, and Leaderboards
+\end{itemize}
+
+\subsubsection{Troubleshooting}
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Invalid credentials} - Verify email and password are correct; check for typos
+\item \textbf{Email not verified} - Check email inbox for verification link; check spam folder
+\item \textbf{Too many attempts} - Wait 15 minutes before trying again
+\end{itemize}
+
+\section{User Roles}
+
+CodeClash Arena is designed exclusively for authenticated registered users to ensure fair participation in competitive coding battles. Access to the platform requires account creation, email verification, and a linked Codeforces handle. There are no guest or admin roles in the system - all users have equal access to platform features and compete on a level playing field based on their coding skills and performance.
+
+\subsection{Registered User}
+
+A registered user is any individual who has successfully completed the sign-up process, verified their email address, and linked a valid Codeforces handle to their account. This is the only role on the platform, and all authenticated users operate with the same base permissions.
+
+\subsubsection{Permissions}
+
+Registered users have access to the following platform features:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Account Management} - Register an account with email and Codeforces handle, log in and log out securely, update profile information and preferences
+
+\item \textbf{Real-Time 1v1 Coding Battles} - Participate in Local battles (challenge specific friends with custom settings), participate in Global battles (matchmaking with players of similar skill level), compete in time-based coding challenges with live synchronization
+
+\item \textbf{Clan System} - Create a new clan or join existing clans, participate in clan battles when selected by clan leader, contribute to clan rankings and statistics, manage clan memberships (leaders can approve/reject join requests)
+
+\item \textbf{Code Submission} - Submit code solutions in multiple programming languages (C++, Java, Python, JavaScript, etc.), receive automated verdicts from Codeforces judge (Accepted, Wrong Answer, Time Limit Exceeded, etc.), test code locally using integrated code editor
+
+\item \textbf{Statistics and Rankings} - View personal battle history and performance metrics, track XP, level, and ELO-based rating progression, access global and clan leaderboards, view detailed submission verdicts and problem-solving statistics
+
+\item \textbf{Practice Mode} - Access Practice Gym with thousands of Codeforces problems, filter problems by difficulty, tags, and rating range, receive AI-based logical hints for approach guidance (without revealing full solutions), solve problems without time pressure for skill improvement
+
+\item \textbf{Social Features} - Send and accept friend requests, view friend profiles and statistics, receive notifications for clan join requests and battle invitations
+\end{itemize}
+
+\subsubsection{Restrictions}
+
+Registered users are subject to the following restrictions to maintain platform integrity and fair competition:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{No System Modifications} - Users cannot modify system configurations, settings, or platform code
+
+\item \textbf{No Ranking Manipulation} - Direct manipulation of ratings, XP, leaderboards, or battle outcomes is strictly prohibited
+
+\item \textbf{No Private Data Access} - Users cannot access other users' private information, submission code, or system database records
+
+\item \textbf{No Unauthorized Authentication} - Users cannot share accounts or use multiple accounts to gain unfair advantages
+
+\item \textbf{Fair Play Requirements} - Code submissions must be original work; plagiarism or copying solutions is not permitted
+\end{itemize}
+
 \section{Navigation Guide}
 \subsection{Menu Structure}
 After login, the user lands on the main menu dashboard of the game. At the top of the screen, the user’s profile information is displayed, showing the player name, the current level, and a progress bar indicating the player’s advancement toward the next level.
