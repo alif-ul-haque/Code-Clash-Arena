@@ -44,7 +44,7 @@
 This user manual serves as a comprehensive guide for users of CodeClash Arena, a gamified competitive programming platform designed to transform traditional coding practice into an interactive and engaging experience. The manual provides detailed instructions on how to use the platform effectively, from account creation to participating in competitive battles and clan wars.
 
 This document is intended for:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Beginner programmers seeking to improve their algorithmic skills through competitive practice
 \item CSE students looking for engaging coding challenges
 \item Competitive programming enthusiasts wanting real-time head-to-head battles
@@ -61,7 +61,7 @@ CodeClash Arena is a web-based competitive programming platform that combines th
 \subsubsection{Core Concept}
 
 Unlike traditional coding platforms that focus solely on individual practice, CodeClash Arena introduces real-time competitive elements including:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{1v1 Coding Battles}: Challenge other coders in head-to-head real-time competitions
 \item \textbf{Clan System}: Form or join teams and participate in clan-based battles
 \item \textbf{Rating System}: Track your progress through an ELO-based ranking mechanism
@@ -69,10 +69,11 @@ Unlike traditional coding platforms that focus solely on individual practice, Co
 \item \textbf{Matchmaking}: Automatic pairing with opponents of similar skill levels
 \end{itemize}
 
+\clearpage
 \subsubsection{Key Differentiators}
 
 CodeClash Arena addresses limitations of conventional coding platforms by providing:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Direct head-to-head competition with other coders in real-time
 \item Clan-based team competitions fostering collaboration and community
 \item Personalized contest creation with custom difficulty and time settings
@@ -84,7 +85,7 @@ CodeClash Arena addresses limitations of conventional coding platforms by provid
 \subsubsection{Technical Foundation}
 
 The platform is built using modern web technologies:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Frontend}: React 19.2.0 with Vite 7.2.4 for fast, responsive user interface
 \item \textbf{Backend}: Node.js with Express 4.18.2 for server-side logic
 \item \textbf{Database}: Supabase (PostgreSQL) for data management
@@ -138,28 +139,38 @@ This section outlines the technical prerequisites and environmental requirements
 
 CodeClash Arena is a web-based application accessible through modern web browsers. For the best experience, we recommend using the latest stable versions of the following browsers:
 
-\begin{table}[ht]
-\centering
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}X}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{\dimexpr\textwidth-5cm-6\tabcolsep\relax}}
 \toprule
 \multicolumn{1}{c}{\textbf{Browser}} &
 \multicolumn{1}{c}{\textbf{Minimum Version}} &
 \multicolumn{1}{c}{\textbf{Recommended Features}} \\
 \midrule
+\endfirsthead
+\multicolumn{3}{c}{\textit{Table continued from previous page}} \\
+\toprule
+\multicolumn{1}{c}{\textbf{Browser}} &
+\multicolumn{1}{c}{\textbf{Minimum Version}} &
+\multicolumn{1}{c}{\textbf{Recommended Features}} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{\textit{Continued on next page}} \\
+\endfoot
+\bottomrule
+\endlastfoot
 Google Chrome & Version 84+ & Best performance with V8 JavaScript engine, full CSS Grid and Flexbox gap support, excellent developer tools \\
 \vspace{0.3pt}Mozilla Firefox & \vspace{0.3pt}Version 103+ & \vspace{0.3pt}Strong privacy features, backdrop-filter support, reliable WebSocket connections, modern CSS features \\
 \vspace{0.3pt}Microsoft Edge & \vspace{0.3pt}Version 84+ & \vspace{0.3pt}Chromium-based engine, native Windows integration, excellent performance, full modern CSS support \\
 \vspace{0.3pt}Safari & \vspace{0.3pt}Version 15+ & \vspace{0.3pt}Optimized for macOS/iOS devices, complete modern CSS/JS feature support including aspect-ratio and flex gap \\
 \vspace{0.3pt}Opera & \vspace{0.3pt}Version 84+ & \vspace{0.3pt}Chromium-based, built-in VPN support, efficient resource usage, modern web standards compliance \\
 \vspace{0.3pt}Brave & \vspace{0.3pt}Version 1.42+ & \vspace{0.3pt}Privacy-focused, Chromium-based, full ES2020+ support, modern CSS Grid and Flexbox features \\
-\bottomrule
-\end{tabularx}
-\caption{Supported browsers and minimum version requirements}
-\end{table}
+\end{longtable}
+\begin{minipage}{\textwidth}
+\captionof{table}{Supported browsers and minimum version requirements}
+\end{minipage}
 
-\clearpage
 \textbf{Important Browser Requirements:}
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{JavaScript}: Must be enabled (required for React 19.2.0 and ES2020+ features)
 \item \textbf{Cookies}: Must be enabled for session management and authentication
 \item \textbf{Local Storage}: Browser must support HTML5 local storage (for user preferences and cached data)
@@ -172,7 +183,7 @@ Google Chrome & Version 84+ & Best performance with V8 JavaScript engine, full C
 \end{itemize}
 
 \textbf{Not Recommended or Not Supported:}
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Internet Explorer (any version) - not supported, lacks modern JavaScript ES6+ features, CSS Grid, and CSS variables
 \item Safari versions below 15 - missing critical features like aspect-ratio, full flex gap support, and modern JavaScript operators
 \item Firefox versions below 103 - missing backdrop-filter support resulting in visual degradation
@@ -210,7 +221,7 @@ Desktop Computer & Windows 10+, macOS 11+, Linux & \textbf{Optimal Experience} -
   
 
 \textbf{Important Device Notes:}
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Older Tablets}: iPads running iOS 14 or Android tablets below version 10.0 may experience visual issues (missing backdrop blur effects, layout problems with flex gap)
 \item \textbf{Browser Requirements}: Tablets must use Chrome 84+ (Android) or Safari 15+ (iOS) for full functionality
 \item \textbf{Tablet Mode Windows}: Surface devices and 2-in-1 laptops work best in desktop mode with physical keyboard attached
@@ -220,7 +231,7 @@ Desktop Computer & Windows 10+, macOS 11+, Linux & \textbf{Optimal Experience} -
 \end{tcolorbox}
 
 \textbf{Screen Resolution Recommendations:}
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Minimum}: 1024x768 pixels (basic functionality, some layout compromises on smaller screens)
 \item \textbf{Recommended}: 1920x1080 pixels or higher (optimal experience with full CSS Grid layouts)
 \item \textbf{Competitive Battle}: 1440x900 pixels minimum (comfortable split-screen view for problem and editor)
@@ -229,7 +240,7 @@ Desktop Computer & Windows 10+, macOS 11+, Linux & \textbf{Optimal Experience} -
 \end{itemize}
 
 \textbf{Input Device Recommendations:}
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Physical Keyboard}: Mandatory for competitive battles, required for efficient code input during timed contests
 \item \textbf{Mouse/Trackpad}: Strongly recommended for navigation, code selection, and editor interaction
 \item \textbf{Touch Screen}: Supported for browsing and navigation but not optimal for code editing; on-screen keyboards significantly slow down coding speed
@@ -238,7 +249,7 @@ Desktop Computer & Windows 10+, macOS 11+, Linux & \textbf{Optimal Experience} -
 \end{itemize}
 
 \textbf{Tablet-Specific Requirements:}
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{iPad Users}: Requires iOS 15+ with Safari 15+, external keyboard mandatory for battles, landscape orientation recommended
 \item \textbf{Android Tablet Users}: Requires Android 10.0+ with Chrome 84+ installed, external keyboard strongly recommended
 \item \textbf{Stylus Support}: Not utilized by the platform, keyboard input is primary interaction method
@@ -270,7 +281,7 @@ General Browsing & 1 Mbps & Basic navigation, viewing profiles, accessing leader
 
 \subsubsection{Connection Stability}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Latency}: Less than 200ms ping for optimal real-time battle experience
 \item \textbf{Packet Loss}: Less than 1\% for stable WebSocket connections
 \item \textbf{Connection Type}:
@@ -283,7 +294,7 @@ General Browsing & 1 Mbps & Basic navigation, viewing profiles, accessing leader
 
 \subsubsection{Critical Connectivity Features}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Real-Time Synchronization}: During battles, the system uses WebSocket connections to synchronize:
   \begin{itemize}
     \item Opponent submission status
@@ -308,7 +319,7 @@ General Browsing & 1 Mbps & Basic navigation, viewing profiles, accessing leader
 \end{itemize}
 
 \textbf{Important Note}: Unstable or slow internet connections may result in:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Battle disconnections (automatic forfeit if reconnection fails)
 \item Delayed submission verdicts
 \item Real-time updates lag
@@ -321,7 +332,7 @@ General Browsing & 1 Mbps & Basic navigation, viewing profiles, accessing leader
 
 \textbf{Required for}: Access to all platform features
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Registration Information Needed}:
   \begin{itemize}
     \item Valid email address (for account verification and password recovery)
@@ -349,7 +360,7 @@ General Browsing & 1 Mbps & Basic navigation, viewing profiles, accessing leader
 
 \textbf{Requirement Level}: Mandatory for competitive battles and official problem solving
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Why Codeforces Account is Needed}:
   \begin{itemize}
     \item CodeClash Arena integrates with Codeforces for problem sourcing
@@ -380,7 +391,7 @@ General Browsing & 1 Mbps & Basic navigation, viewing profiles, accessing leader
 \end{itemize}
 
 \textbf{Important Notes}:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Without a linked Codeforces account, users cannot:
   \begin{itemize}
     \item Submit code during battles (automatic forfeit)
@@ -402,7 +413,7 @@ General Browsing & 1 Mbps & Basic navigation, viewing profiles, accessing leader
 
 \subsubsection{Additional Permissions}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Browser Permissions}:
   \begin{itemize}
     \item Cookies: Required for session management and authentication persistence
@@ -423,7 +434,7 @@ General Browsing & 1 Mbps & Basic navigation, viewing profiles, accessing leader
 
 CodeClash Arena is a cross-platform web application compatible with any operating system that supports modern web browsers:
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Windows}: Windows 10 or later (Windows 11 recommended)
 \item \textbf{macOS}: macOS 11 (Big Sur) or later (required for Safari 15+)
 \item \textbf{Linux}: Any modern distribution (Ubuntu 20.04+, Fedora 33+, etc.)
@@ -434,7 +445,7 @@ CodeClash Arena is a cross-platform web application compatible with any operatin
 
 \subsubsection{No Installation Required}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item CodeClash Arena is entirely browser-based
 \item No desktop application or mobile app download necessary
 \item No system administrative privileges required
@@ -443,7 +454,7 @@ CodeClash Arena is a cross-platform web application compatible with any operatin
 
 \subsubsection{Optional Enhancements}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Code Editor Extensions}: While the platform provides an integrated code editor, advanced users may prefer:
   \begin{itemize}
     \item Copying code to external IDEs (VS Code, Sublime Text) for complex solutions
@@ -480,7 +491,7 @@ Processor & Dual-core 2.0 GHz & Quad-core 2.5 GHz+ & Fast page rendering, smooth
 
 \subsection{Network Security Considerations}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Corporate Networks}: Some corporate firewalls may block:
   \begin{itemize}
     \item WebSocket connections (required for real-time battles)
@@ -497,7 +508,7 @@ Processor & Dual-core 2.0 GHz & Quad-core 2.5 GHz+ & Fast page rendering, smooth
 
 \subsection{Accessibility Requirements}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Visual}: Minimum 768px width viewport for usable interface
 \item \textbf{Color Scheme}: System adapts to different lighting conditions; custom themes may be implemented in future versions
 \item \textbf{Font Rendering}: Browser must support standard web fonts for proper code editor display
@@ -507,7 +518,7 @@ Processor & Dual-core 2.0 GHz & Quad-core 2.5 GHz+ & Fast page rendering, smooth
 
 CodeClash Arena utilizes cutting-edge web technologies that require modern browser support. The following features are implemented:
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{CSS Features}: Grid Layout, Flexbox with gap property, CSS Custom Properties (variables), backdrop-filter for blur effects, transforms and transitions
 \item \textbf{JavaScript Features}: ES2020+ syntax including optional chaining, nullish coalescing, async/await, arrow functions, destructuring, template literals
 \item \textbf{Web APIs}: WebSocket (real-time communication), Fetch API (HTTP requests), Local Storage API, History API (routing), Clipboard API
@@ -515,7 +526,7 @@ CodeClash Arena utilizes cutting-edge web technologies that require modern brows
 \end{itemize}
 
 \textbf{Minimum Browser Versions for Full Compatibility:}
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Chrome/Edge 84+ (for Flexbox gap support)
 \item Firefox 103+ (for backdrop-filter support)
 \item Safari 15+ (for complete modern CSS/JS features)
@@ -547,8 +558,6 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 \caption{Summary of mandatory and recommended system requirements}
 \end{table}
 
-\textbf{Note}: Mobile devices (tablets, phones) can be used for browsing profiles, viewing leaderboards, and monitoring battles, but Desktop/Laptop with Physical Keyboard is mandatory for participating in competitive coding battles.
-
 \FloatBarrier
 
 \clearpage
@@ -556,7 +565,7 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 
 \subsection{Accessing the Platform}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Open a supported web browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+)
 \item Navigate to the CodeClash Arena platform
 \item Ensure JavaScript is enabled
@@ -568,7 +577,7 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 
 \subsubsection{Step 1: Navigate to Sign-Up Page}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Click \textbf{"GET STARTED"} on the homepage
 \item Click \textbf{"Sign Up"} link at the bottom of the Login page
 \end{itemize}
@@ -582,7 +591,7 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 
 \subsubsection{Step 2: Enter Registration Information}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Email} - For verification and password recovery; must be unique
 \item \textbf{Codeforces Handle} - Your existing Codeforces username (create at \url{https://codeforces.com/register} if needed)
 \item \textbf{Password} - Minimum 8 characters; keep separate from Codeforces password
@@ -597,7 +606,7 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 
 \subsubsection{Step 3: Submit Registration}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Click \textbf{"SignUp"} button
 \item If validation fails, red field labels appear; correct errors and resubmit
 \item Success message: \textbf{"Signup successful! Check your email"}
@@ -612,7 +621,7 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 
 \subsubsection{Step 4: Email Verification}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Check email inbox for verification message from Supabase
 \item Email may take 1-5 minutes to arrive; check spam folder if needed
 \item Click \textbf{"Verify Email Address"} link in the email
@@ -628,7 +637,7 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 
 \subsubsection{Step 5: Login to Complete Setup}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Navigate to Login page and use your registered email and password
 \item Your Codeforces handle is automatically linked from registration
 \item Requirements: Existing Codeforces account and verified email before login
@@ -638,7 +647,7 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 
 \subsubsection{Step 1: Navigate to Login Page}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Click \textbf{"GET STARTED"} on the homepage
 \item You are redirected to the Login page
 \end{itemize}
@@ -653,7 +662,7 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 \newpage
 \subsubsection{Step 2: Enter Login Credentials}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Enter your registered email address (case-insensitive)
 \item Enter your account password (case-sensitive)
 \item A visibility icon appears in the password field to show/hide password
@@ -661,7 +670,7 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 
 \subsubsection{Step 3: Submit and Authenticate}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Click \textbf{"Log In"} button
 \item System validates credentials with Supabase
 \item Success message: \textbf{"Sign in successful!"}
@@ -676,7 +685,7 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 
 \subsubsection{Step 4: Access Dashboard}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item After successful login, you are redirected to the Main Dashboard
 \item Your Codeforces handle is automatically loaded from your account
 \item All platform features are accessible: PvP Battles, Practice Gym, Clan Wars, and Leaderboards
@@ -684,7 +693,7 @@ Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor
 
 \subsubsection{Troubleshooting}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Invalid credentials} - Verify email and password are correct; check for typos
 \item \textbf{Email not verified} - Check email inbox for verification link; check spam folder
 \item \textbf{Too many attempts} - Wait 15 minutes before trying again
@@ -702,7 +711,7 @@ A registered user is any individual who has successfully completed the sign-up p
 
 Registered users have access to the following platform features:
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Account Management} - Register an account with email and Codeforces handle, log in and log out securely, update profile information and preferences
 
 \item \textbf{Real-Time 1v1 Coding Battles} - Participate in Local battles (challenge specific friends with custom settings), participate in Global battles (matchmaking with players of similar skill level), compete in time-based coding challenges with live synchronization
@@ -723,7 +732,7 @@ Registered users have access to the following platform features:
 
 Registered users are subject to the following restrictions to maintain platform integrity and fair competition:
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{No System Modifications} - Users cannot modify system configurations, settings, or platform code
 
 \item \textbf{No Ranking Manipulation} - Direct manipulation of ratings, XP, leaderboards, or battle outcomes is strictly prohibited
