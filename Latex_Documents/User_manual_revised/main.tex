@@ -754,7 +754,7 @@ Registered users are subject to the following restrictions to maintain platform 
 This section explains how the core modules of CodeClash Arena operate in real usage. It focuses on practical workflows, required inputs, observable outputs, common states, and recommended behavior during competition and practice.
 
 The feature set is grouped into four major modules:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{PvP Battle System} for real-time one-versus-one coding contests.
 \item \textbf{Practice Gym} for solo training with filters, testing, and AI hints.
 \item \textbf{Clan System} for team formation, management, and clan-war battles.
@@ -765,7 +765,7 @@ The feature set is grouped into four major modules:
 \subsection{PvP Battle System}
 
 The PvP system is the primary competitive mode of the platform. It supports two 1v1 formats:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Global Battle}: Automatic matchmaking with players of similar rating.
 \item \textbf{Local Battle}: Direct challenge mode for specific friends with custom settings.
 \end{itemize}
@@ -786,16 +786,16 @@ PvP battles measure coding performance under time constraints. The mode is desig
 \item Continue improving and resubmitting until Accepted or battle timer ends.
 \item View final battle result, rating/XP change, and battle-history update.
 \end{enumerate}
-
+\clearpage
 \subsubsection{Global vs Local Behavior}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
 \toprule
-\textbf{Mode} & \textbf{How Opponent Is Selected} & \textbf{Typical Usage Scenario} \\
+\textbf{Mode} & \textbf{How Opponent Is Selected} & \textbf{Typical Usage Scenario} \\ 
 \midrule
-Global & System-driven matchmaking based on rating proximity and queue availability & Ranked competitive progression, fair pairing, and regular performance tracking \\
+Global & System-driven matchmaking based on rating proximity and queue availability & Ranked competitive progression, fair pairing, and regular performance tracking \\ \\
 Local & User-selected friend/opponent through invitation flow & Practice scrims, custom challenges, and low-pressure skill comparison \\
 \bottomrule
 \end{tabularx}
@@ -810,10 +810,10 @@ Local & User-selected friend/opponent through invitation flow & Practice scrims,
 \toprule
 \textbf{Category} & \textbf{Primary Inputs} & \textbf{Primary Outputs} \\
 \midrule
-Match Setup & Mode selection, opponent context, optional local settings & Arena initialization and synchronized timer \\
-Coding Cycle & Source code, language selection, test-case input & Local execution output and diagnostics \\
-Submission Cycle & Final code submission to judge & Verdict states (AC/WA/TLE/RE/CE), test status, completion state \\
-Result Cycle & Final accepted state or timer expiration & Win/Loss/Draw, rating movement, XP gain, history record \\
+Match Setup & Mode selection, opponent context, optional local settings & Arena initialization and synchronized timer \\ \\
+Coding Cycle & Source code, language selection, test-case input & Local execution output and diagnostics \\ \\
+Submission Cycle & Final code submission to judge & Verdict states (AC/WA/TLE/RE/CE), test status, completion state \\ \\
+Result Cycle & Final accepted state or timer expiration & Win/Loss/Draw, rating movement, XP gain, history record \\ \\
 \bottomrule
 \end{tabularx}
 \caption{PvP data flow from match setup to final result}
@@ -822,7 +822,7 @@ Result Cycle & Final accepted state or timer expiration & Win/Loss/Draw, rating 
 \subsubsection{Battle States and Lifecycle}
 
 During battle execution, users normally observe the following lifecycle states:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Waiting/Queueing}: opponent search in progress.
 \item \textbf{Matched}: opponent identified and battle session initialized.
 \item \textbf{Active Coding}: timer running, solution development ongoing.
@@ -832,9 +832,10 @@ During battle execution, users normally observe the following lifecycle states:
 
 These states are important for user awareness because every transition may affect strategy. For example, seeing opponent submission activity can influence decision-making between safe incremental submissions and risky full optimizations.
 
+\clearpage
 \subsubsection{Competitive Strategy Guidelines}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Start with a correct baseline solution before optimization.
 \item Use quick local tests to eliminate syntax and trivial logic issues.
 \item Prefer stable, known language/toolchain combinations in timed matches.
@@ -863,7 +864,7 @@ Practice Gym is the dedicated solo learning module. It is optimized for delibera
 \subsubsection{Purpose and Learning Focus}
 
 The mode is designed to support:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Topic-focused training through filtered problem selection.
 \item Iterative coding with local testing and immediate output feedback.
 \item Guided thinking using AI hint levels that avoid full solution disclosure.
@@ -872,7 +873,7 @@ The mode is designed to support:
 
 \subsubsection{Primary Functions}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Filter problems by difficulty, tags, solved status, or keyword search.
 \item Solve with integrated editor and local test execution.
 \item Request progressive AI hints when stuck.
@@ -899,10 +900,10 @@ The mode is designed to support:
 \toprule
 \textbf{Category} & \textbf{Inputs} & \textbf{Outputs} \\
 \midrule
-Discovery & Difficulty range, tags, search phrase, solved filter & Filtered problem list and candidate set \\
-Development & Language selection, source code, local test inputs & Runtime output, compile/runtime diagnostics \\
-Hinting & Optional hint request level & Progressive conceptual hints (no full code dump) \\
-Submission & Final code for official evaluation & Judge verdict and solved-status update \\
+Discovery & Difficulty range, tags, search phrase, solved filter & Filtered problem list and candidate set \\ \\
+Development & Language selection, source code, local test inputs & Runtime output, compile/runtime diagnostics \\ \\
+Hinting & Optional hint request level & Progressive conceptual hints (no full code dump) \\ \\
+Submission & Final code for official evaluation & Judge verdict and solved-status update \\ \\ 
 Progress & Completed attempts and accepted problems & XP increments and cumulative practice statistics \\
 \bottomrule
 \end{tabularx}
@@ -911,7 +912,7 @@ Progress & Completed attempts and accepted problems & XP increments and cumulati
 
 \subsubsection{Recommended Practice Structure}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Session Warm-up (15--20 min)}: solve one easy problem quickly to build momentum.
 \item \textbf{Core Session (45--60 min)}: work on medium problems in a single topic cluster.
 \item \textbf{Review Block (10--15 min)}: inspect failed attempts, edge cases, and missed constraints.
@@ -943,7 +944,7 @@ The clan system transforms individual coding into organized team competition. It
 \subsubsection{Purpose and Team Dynamics}
 
 Clan functionality is intended to:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Build long-term communities around competitive programming.
 \item Enable coordinated battles where team outcome depends on collective contributions.
 \item Create leadership workflows for member approval and warrior selection.
@@ -952,23 +953,23 @@ Clan functionality is intended to:
 
 \subsubsection{Core Operations}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Create clans or request to join existing clans.
 \item Leaders manage requests and member participation.
 \item Clan Battle mode allows selected warriors to solve problems for team points.
 \item Final clan result updates clan statistics, rankings, and member XP.
 \end{itemize}
-
+\clearpage
 \subsubsection{Role Responsibilities}
 
-\begin{table}[ht]
+\begin{table}[h]
 \centering
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
 \toprule
 \textbf{Role} & \textbf{Main Responsibilities} & \textbf{Typical Actions} \\
 \midrule
-Leader & Clan direction, request approval, battle lineup decisions & Accept/reject joins, configure selections, initiate matchmaking \\
-Member & Active participation and contribution to clan goals & Request join, participate when selected, contribute solved points \\
+Leader & Clan direction, request approval, battle lineup decisions & Accept/reject joins, configure selections, initiate matchmaking \\ \\
+Member & Active participation and contribution to clan goals & Request join, participate when selected, contribute solved points \\ \\
 Non-selected Member & Monitoring and preparation for future battles & Track status, review outcomes, stay available for next lineup \\
 \bottomrule
 \end{tabularx}
@@ -994,10 +995,10 @@ Non-selected Member & Monitoring and preparation for future battles & Track stat
 \toprule
 \textbf{Stage} & \textbf{Inputs} & \textbf{Outputs} \\
 \midrule
-Clan Setup & Name, tag, type, membership constraints & Created clan identity and base member structure \\
-Membership & Join requests and leader decisions & Accepted/rejected membership status \\
-Battle Setup & Warrior lineup and matchmaking request & Opponent clan assignment and battle session start \\
-Battle Execution & Team code submissions and solve events & Score increments and solved-problem state updates \\
+Clan Setup & Name, tag, type, membership constraints & Created clan identity and base member structure \\ \\
+Membership & Join requests and leader decisions & Accepted/rejected membership status \\ \\
+Battle Setup & Warrior lineup and matchmaking request & Opponent clan assignment and battle session start \\ \\
+Battle Execution & Team code submissions and solve events & Score increments and solved-problem state updates \\ \\
 Battle Closure & Final score and completion condition & Clan points, XP distribution, history and ranking updates \\
 \bottomrule
 \end{tabularx}
@@ -1006,7 +1007,7 @@ Battle Closure & Final score and completion condition & Clan points, XP distribu
 
 \subsubsection{Coordination Best Practices}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Assign at least one fallback warrior for difficult problems.
 \item Avoid duplicate effort on low-yield problems when score is close.
 \item Share quick status updates to reduce overlap and wasted time.
@@ -1037,7 +1038,7 @@ The module improves collaboration and engagement by enabling users to discover p
 
 \subsubsection{Available Actions}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Find users and send/receive friend requests.
 \item View profiles, ratings, and recent activity.
 \item Send local battle challenges from friend connections.
@@ -1063,9 +1064,9 @@ The module improves collaboration and engagement by enabling users to discover p
 \toprule
 \textbf{Process} & \textbf{Inputs} & \textbf{Outputs} \\
 \midrule
-User Discovery & Username fragment or direct handle search & Matching users with profile context \\
-Friend Actions & Request send/cancel/accept/reject actions & Relationship status transition and notifications \\
-Challenge Actions & Friend selection and invitation action & Local-battle request status and response update \\
+User Discovery & Username fragment or direct handle search & Matching users with profile context \\ \\
+Friend Actions & Request send/cancel/accept/reject actions & Relationship status transition and notifications \\ \\
+Challenge Actions & Friend selection and invitation action & Local-battle request status and response update \\ \\
 Leader Actions & Clan request approval/rejection decision & Membership update and applicant notification \\
 \bottomrule
 \end{tabularx}
@@ -1074,7 +1075,7 @@ Leader Actions & Clan request approval/rejection decision & Membership update an
 
 \subsubsection{Social Reliability and Etiquette}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item Send battle invites with clear context (practice/ranked intent).
 \item Keep request lists clean by canceling stale outgoing requests.
 \item Review profile stats before sending high-difficulty challenges.
@@ -1112,7 +1113,7 @@ This subsection describes how users combine modules in practical workflows.
 \end{enumerate}
 
 \textbf{Cross-feature indicators:}
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
 \item \textbf{Practice Accuracy}: accepted ratio after local validation.
 \item \textbf{Battle Stability}: reduced submission and timeout failures.
 \item \textbf{Team Impact}: consistent contribution in clan events.
@@ -1121,24 +1122,34 @@ This subsection describes how users combine modules in practical workflows.
 
 \textbf{Recommendation:} treat practice, battle, team play, and social coordination as one loop. Users who review battle history and then feed that insight back into targeted practice generally improve faster than users who use features in isolation.
 
+
 \subsubsection{Operational Checklist Before Competitive Sessions}
 
-\begin{table}[ht]
-\centering
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{3cm}}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3cm} >{\raggedright\arraybackslash}p{\dimexpr\textwidth-6cm-6\tabcolsep\relax} >{\raggedright\arraybackslash}p{3cm}}
 \toprule
 \textbf{Area} & \textbf{Checklist Item} & \textbf{Expected Benefit} \\
 \midrule
+\endfirsthead
+\multicolumn{3}{c}{\textit{Table continued from previous page}} \\
+\toprule
+\textbf{Area} & \textbf{Checklist Item} & \textbf{Expected Benefit} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{\textit{Continued on next page}} \\
+\endfoot
+\bottomrule
+\endlastfoot
 Environment & Stable internet, browser refreshed, unnecessary tabs closed & Reduced disconnect and lag risk \\
 Problem Solving & Recent practice on target difficulty bracket completed & Higher correctness under timer pressure \\
 Submission Safety & Language/runtime selected correctly before first submit & Fewer avoidable technical failures \\
 Team Readiness & Clan communication channel checked before lineup lock & Better role coordination and lower overlap \\
 Social Queue & Pending requests and invitations reviewed & Faster challenge acceptance and smoother scheduling \\
 Post-Session Review & Battle history checked and weak topics recorded & Continuous, measurable improvement loop \\
-\bottomrule
-\end{tabularx}
-\caption{Cross-feature readiness checklist for consistent performance}
-\end{table}
+\end{longtable}
+\begin{minipage}{\textwidth}
+\captionof{table}{Cross-feature readiness checklist for consistent performance}
+\end{minipage}
 
 \subsubsection{Common Multi-Feature Mistakes}
 
