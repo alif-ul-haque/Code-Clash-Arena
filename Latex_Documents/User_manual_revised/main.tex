@@ -7,6 +7,7 @@
 \usepackage{float}
 \usepackage{titlesec}
 \usepackage{tabularx}
+\usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{enumitem}
 \usepackage{array}
@@ -93,31 +94,40 @@ The platform is built using modern web technologies:
 
 \subsubsection{Platform Features Summary}
 
-\begin{table}[ht]
-\centering
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.8cm} >{\raggedright\arraybackslash}X}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.8cm} >{\raggedright\arraybackslash}p{\dimexpr\textwidth-2.8cm-4\tabcolsep\relax}}
 \toprule
 \multicolumn{1}{c}{\textbf{Feature}} &
 \multicolumn{1}{c}{\textbf{Description}} \\
 \midrule
-Global Battle Mode & Join a matchmaking queue and compete against players of similar rating in real-time 1v1 battles \\
-Local Battle Mode & Challenge specific friends directly with customizable problem difficulty and time limits \\
-Clan Wars & Form teams, compete in clan-based tournaments, and track team performance \\
-Practice Gym & Access solo practice mode with filtering by difficulty, tags, and rating range \\
-Rating System & ELO-based skill rating that adapts based on opponent strength and battle outcomes \\
-Progression System & Earn experience points and level up through battles and problem solving \\
-Leaderboards & Global and clan rankings updated in real-time showing top performers \\
-Battle History & Comprehensive records of past matches, opponents, and performance metrics \\
-Code Editor & Integrated syntax-highlighted editor supporting C++, Java, Python, JavaScript, and more \\
-AI Hints & Logical approach guidance during practice sessions without revealing solutions \\
-Social Features & Friend lists, clan chat, mail system, and player profile viewing \\
+\endfirsthead
+\multicolumn{2}{c}{\textit{Table continued from previous page}} \\
+\toprule
+\multicolumn{1}{c}{\textbf{Feature}} &
+\multicolumn{1}{c}{\textbf{Description}} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{2}{r}{\textit{Continued on next page}} \\
+\endfoot
 \bottomrule
-\end{tabularx}
-\caption{Core features available in CodeClash Arena}
-\end{table}
-
+\endlastfoot
+Global Battle Mode & Join a matchmaking queue and compete against players of similar rating in real-time 1v1 battles \\
+\vspace{0.3pt}Local Battle Mode & \vspace{0.3pt}Challenge specific friends directly with customizable problem difficulty and time limits \\
+\vspace{0.3pt}Clan Wars & \vspace{0.3pt}Form teams, compete in clan-based tournaments, and track team performance \\
+\vspace{0.3pt}Practice Gym & \vspace{0.3pt}Access solo practice mode with filtering by difficulty, tags, and rating range \\
+\vspace{0.3pt}Rating System & \vspace{0.3pt}ELO-based skill rating that adapts based on opponent strength and battle outcomes \\
+\vspace{0.3pt}Progression System & \vspace{0.3pt}Earn experience points and level up through battles and problem solving \\
+\vspace{0.3pt}Leaderboards & \vspace{0.3pt}Global and clan rankings updated in real-time showing top performers \\
+\vspace{0.3pt}Battle History & \vspace{0.3pt}Comprehensive records of past matches, opponents, and performance metrics \\
+\vspace{0.3pt}Code Editor & \vspace{0.3pt}Integrated syntax-highlighted editor supporting C++, Java, Python, JavaScript, and more \\
+\vspace{0.3pt}AI Hints & \vspace{0.3pt}Logical approach guidance during practice sessions without revealing solutions \\
+\vspace{0.3pt}Social Features & \vspace{0.3pt}Friend lists, clan chat, mail system, and player profile viewing \\
+\end{longtable}
+\begin{minipage}{\textwidth}
+\captionof{table}{Core features available in CodeClash Arena}\label{tab:core-features}
+\end{minipage}
 \FloatBarrier
-\clearpage
+
 \section{System Requirements}
 
 This section outlines the technical prerequisites and environmental requirements necessary to access and use CodeClash Arena effectively. Ensuring your system meets these specifications will provide optimal performance and user experience.
@@ -137,16 +147,17 @@ CodeClash Arena is a web-based application accessible through modern web browser
 \multicolumn{1}{c}{\textbf{Recommended Features}} \\
 \midrule
 Google Chrome & Version 84+ & Best performance with V8 JavaScript engine, full CSS Grid and Flexbox gap support, excellent developer tools \\
-Mozilla Firefox & Version 103+ & Strong privacy features, backdrop-filter support, reliable WebSocket connections, modern CSS features \\
-Microsoft Edge & Version 84+ & Chromium-based engine, native Windows integration, excellent performance, full modern CSS support \\
-Safari & Version 15+ & Optimized for macOS/iOS devices, complete modern CSS/JS feature support including aspect-ratio and flex gap \\
-Opera & Version 84+ & Chromium-based, built-in VPN support, efficient resource usage, modern web standards compliance \\
-Brave & Version 1.42+ & Privacy-focused, Chromium-based, full ES2020+ support, modern CSS Grid and Flexbox features \\
+\vspace{0.3pt}Mozilla Firefox & \vspace{0.3pt}Version 103+ & \vspace{0.3pt}Strong privacy features, backdrop-filter support, reliable WebSocket connections, modern CSS features \\
+\vspace{0.3pt}Microsoft Edge & \vspace{0.3pt}Version 84+ & \vspace{0.3pt}Chromium-based engine, native Windows integration, excellent performance, full modern CSS support \\
+\vspace{0.3pt}Safari & \vspace{0.3pt}Version 15+ & \vspace{0.3pt}Optimized for macOS/iOS devices, complete modern CSS/JS feature support including aspect-ratio and flex gap \\
+\vspace{0.3pt}Opera & \vspace{0.3pt}Version 84+ & \vspace{0.3pt}Chromium-based, built-in VPN support, efficient resource usage, modern web standards compliance \\
+\vspace{0.3pt}Brave & \vspace{0.3pt}Version 1.42+ & \vspace{0.3pt}Privacy-focused, Chromium-based, full ES2020+ support, modern CSS Grid and Flexbox features \\
 \bottomrule
 \end{tabularx}
 \caption{Supported browsers and minimum version requirements}
 \end{table}
 
+\clearpage
 \textbf{Important Browser Requirements:}
 \begin{itemize}[leftmargin=*]
 \item \textbf{JavaScript}: Must be enabled (required for React 19.2.0 and ES2020+ features)
@@ -184,11 +195,11 @@ CodeClash Arena features a responsive design that adapts to various screen sizes
 \multicolumn{1}{c}{\textbf{User Experience Notes}} \\
 \midrule
 Desktop Computer & Windows 10+, macOS 11+, Linux & \textbf{Optimal Experience} - Full feature access (1920x1080+ recommended), dual-pane code editor, comfortable coding environment, all modern CSS/JS features supported, best for competitive battles \\ 
-Laptop & Windows 10+, macOS 11+, Linux & \textbf{Excellent Experience} - All features accessible (1366x768 minimum), suitable for coding and battles, portable competitive environment, modern browser support required \\ 
-iPad & iOS 15+ with Safari 15+ & \textbf{Good Experience} - 10-inch or larger recommended, touch-optimized interface, suitable for reading problems and light coding, external keyboard strongly recommended for battles, full modern CSS support \\ 
-Android Tablet & Android 10.0+ with Chrome 84+ & \textbf{Good Experience} - 10-inch or larger recommended, touch-optimized interface, suitable for practice mode, external keyboard recommended, may require Chrome browser installation \\ 
-iPhone & iOS 15+ with Safari 15+ & \textbf{Limited Experience} - Best for viewing profiles, leaderboards, and battle history; coding on mobile not recommended for competitive battles; requires modern Safari for full feature support \\ 
-Android Phone & Android 10.0+ with Chrome 84+ & \textbf{Limited Experience} - Best for browsing and monitoring; on-screen keyboard not suitable for competitive coding; install Chrome browser for best compatibility \\
+\vspace{0.3pt}Laptop & \vspace{0.3pt}Windows 10+, macOS 11+, Linux & \vspace{0.3pt}\textbf{Excellent Experience} - All features accessible (1366x768 minimum), suitable for coding and battles, portable competitive environment, modern browser support required \\ 
+\vspace{0.3pt}iPad & \vspace{0.3pt}iOS 15+ with Safari 15+ & \vspace{0.3pt}\textbf{Good Experience} - 10-inch or larger recommended, touch-optimized interface, suitable for reading problems and light coding, external keyboard strongly recommended for battles, full modern CSS support \\ 
+\vspace{0.3pt}Android Tablet & \vspace{0.3pt}Android 10.0+ with Chrome 84+ & \vspace{0.3pt}\textbf{Good Experience} - 10-inch or larger recommended, touch-optimized interface, suitable for practice mode, external keyboard recommended, may require Chrome browser installation \\ 
+\vspace{0.3pt}iPhone & \vspace{0.3pt}iOS 15+ with Safari 15+ & \vspace{0.3pt}\textbf{Limited Experience} - Best for viewing profiles, leaderboards, and battle history; coding on mobile not recommended for competitive battles; requires modern Safari for full feature support \\ 
+\vspace{0.3pt}Android Phone & \vspace{0.3pt}Android 10.0+ with Chrome 84+ & \vspace{0.3pt}\textbf{Limited Experience} - Best for browsing and monitoring; on-screen keyboard not suitable for competitive coding; install Chrome browser for best compatibility \\
 \bottomrule
 \end{tabularx}
 \caption{Device compatibility and expected user experience}
@@ -248,10 +259,10 @@ A stable internet connection is essential for CodeClash Arena as it operates ent
 \multicolumn{1}{c}{\textbf{Description}} \\
 \midrule
 General Browsing & 1 Mbps & Basic navigation, viewing profiles, accessing leaderboards \\ 
-Practice Mode & 2 Mbps & Loading problems, submitting code, receiving verdicts \\ 
-1v1 Battles & 5 Mbps & Real-time synchronization, live updates, timer synchronization \\ 
-Clan Wars & 5-10 Mbps & Multiple participants, real-time team coordination \\ 
-\textbf{Recommended} & \textbf{10 Mbps+} & Optimal performance for all features, minimal latency \\
+\vspace{0.3pt}Practice Mode & \vspace{0.3pt}2 Mbps & \vspace{0.3pt}Loading problems, submitting code, receiving verdicts \\ 
+\vspace{0.3pt}1v1 Battles & \vspace{0.3pt}5 Mbps & \vspace{0.3pt}Real-time synchronization, live updates, timer synchronization \\ 
+\vspace{0.3pt}Clan Wars & \vspace{0.3pt}5-10 Mbps & \vspace{0.3pt}Multiple participants, real-time team coordination \\ 
+\vspace{0.3pt}\textbf{Recommended} & \vspace{0.3pt}\textbf{10 Mbps+} & \vspace{0.3pt}Optimal performance for all features, minimal latency \\
 \bottomrule
 \end{tabularx}
 \caption{Minimum and recommended internet speeds by activity}
@@ -438,6 +449,7 @@ CodeClash Arena is a cross-platform web application compatible with any operatin
     \item Copying code to external IDEs (VS Code, Sublime Text) for complex solutions
     \item Using browser extensions for enhanced syntax highlighting
   \end{itemize}
+  \clearpage
 \item \textbf{Screen Management}: For optimal battle experience:
   \begin{itemize}
     \item Multiple monitor setup (problem on one screen, editor on another)
@@ -458,9 +470,9 @@ CodeClash Arena is a cross-platform web application compatible with any operatin
 \multicolumn{1}{c}{\textbf{Purpose}} \\
 \midrule
 Processor & Dual-core 2.0 GHz & Quad-core 2.5 GHz+ & Fast page rendering, smooth real-time updates \\
-\vspace{1pt}RAM & \vspace{1pt}4 GB & \vspace{1pt}8 GB or more & \vspace{1pt}Multiple browser tabs, smooth multitasking \\
-\vspace{1pt}Storage & \vspace{1pt}N/A (web-based) & \vspace{1pt}N/A & \vspace{1pt}No local installation required \\ 
-\vspace{1pt}Display & \vspace{1pt}1024x768 resolution & \vspace{1pt}1920x1080 or higher & \vspace{1pt}Comfortable coding environment, split-screen view \\ 
+\vspace{0.3pt}RAM & \vspace{0.3pt}4 GB & \vspace{0.3pt}8 GB or more & \vspace{0.3pt}Multiple browser tabs, smooth multitasking \\
+\vspace{0.3pt}Storage & \vspace{0.3pt}N/A (web-based) & \vspace{0.3pt}N/A & \vspace{0.3pt}No local installation required \\ 
+\vspace{0.3pt}Display & \vspace{0.3pt}1024x768 resolution & \vspace{0.3pt}1920x1080 or higher & \vspace{0.3pt}Comfortable coding environment, split-screen view \\ 
 \bottomrule
 \end{tabularx}
 \caption{Recommended hardware configuration for smooth platform usage}
@@ -475,7 +487,10 @@ Processor & Dual-core 2.0 GHz & Quad-core 2.5 GHz+ & Fast page rendering, smooth
     \item External API calls (Codeforces, Piston API)
     \item Iframe embedding (problem display)
   \end{itemize}
+
+\begin{tcolorbox}
   \textit{Solution}: Contact your network administrator to whitelist necessary domains
+\end{tcolorbox}
 \item \textbf{VPN Users}: VPN connections may introduce latency affecting real-time battle performance
 \item \textbf{Proxy Servers}: Ensure proxy configuration allows WebSocket (WSS) connections
 \end{itemize}
@@ -518,14 +533,14 @@ CodeClash Arena utilizes cutting-edge web technologies that require modern brows
 \multicolumn{1}{c}{\textbf{Status}} \\
 \midrule
 Modern Web Browser (Chrome 84+, Firefox 103+, Edge 84+, Safari 15+) & \textcolor{black}{MANDATORY} \\
-JavaScript Enabled (ES2020+ support) & \textcolor{black}{MANDATORY} \\
-Modern CSS Support (Grid, Flexbox gap, backdrop-filter) & \textcolor{black}{MANDATORY} \\
-Internet Connection (5+ Mbps recommended) & \textcolor{black}{MANDATORY} \\
-CodeClash Arena Account & \textcolor{black}{MANDATORY} \\
-Codeforces Account (linked handle) & \textcolor{black}{MANDATORY} \\
-Desktop/Laptop Device (for competitive battles) & \textcolor{black}{MANDATORY} \\
-Physical Keyboard (for competitive battles) & \textcolor{black}{MANDATORY} \\
-Stable Internet (Wired connection preferred) & \textbf{RECOMMENDED} \\
+\vspace{0.3pt}JavaScript Enabled (ES2020+ support) & \vspace{0.3pt}\textcolor{black}{MANDATORY} \\
+\vspace{0.3pt}Modern CSS Support (Grid, Flexbox gap, backdrop-filter) & \vspace{0.3pt}\textcolor{black}{MANDATORY} \\
+\vspace{0.3pt}Internet Connection (5+ Mbps recommended) & \vspace{0.3pt}\textcolor{black}{MANDATORY} \\
+\vspace{0.3pt}CodeClash Arena Account & \vspace{0.3pt}\textcolor{black}{MANDATORY} \\
+\vspace{0.3pt}Codeforces Account (linked handle) & \vspace{0.3pt}\textcolor{black}{MANDATORY} \\
+\vspace{0.3pt}Desktop/Laptop Device (for competitive battles) & \vspace{0.3pt}\textcolor{black}{MANDATORY} \\
+\vspace{0.3pt}Physical Keyboard (for competitive battles) & \vspace{0.3pt}\textcolor{black}{MANDATORY} \\
+\vspace{0.3pt}Stable Internet (Wired connection preferred) & \vspace{0.3pt}\textbf{RECOMMENDED} \\
 \bottomrule
 \end{tabularx}
 }
@@ -820,8 +835,8 @@ your account security.
 \multicolumn{1}{c}{\textbf{Solutions}} \\
 \midrule
 
-\vspace{1pt}``Invalid login credentials'' 
-& \vspace{1pt}The entered email or password is incorrect, or formatting issues like extra spaces or wrong capitalization exist.
+\vspace{0.3pt}``Invalid login credentials'' 
+& \vspace{0.3pt}The entered email or password is incorrect, or formatting issues like extra spaces or wrong capitalization exist.
 & \begin{itemize}
 \item Check email and password
 \item Ensure Caps Lock is off
@@ -830,30 +845,30 @@ your account security.
 \item Verify email after signup
 \end{itemize} \\ 
 
-\vspace{1pt}``Email not confirmed'' or ``Error fetching user data''
-& \vspace{1pt}The account has not been verified via email, preventing successful login.
+\vspace{0.3pt}``Email not confirmed'' or ``Error fetching user data''
+& \vspace{0.3pt}The account has not been verified via email, preventing successful login.
 & \begin{itemize}
 \item Check inbox or spam for verification email
 \item Click confirmation link
 \item Retry login after verification
 \end{itemize} \\ 
 
-\vspace{1pt}``Too many login attempts''
-& \vspace{1pt}Multiple failed login attempts have temporarily locked the account for security reasons.
+\vspace{0.3pt}``Too many login attempts''
+& \vspace{0.3pt}Multiple failed login attempts have temporarily locked the account for security reasons.
 & \begin{itemize}
 \item Wait 15--30 minutes before retrying
 \end{itemize} \\ 
 
-\vspace{1pt}``User already registered'' or ``Email already exists''
-& \vspace{1pt}The email is already associated with an existing account.
+\vspace{0.3pt}``User already registered'' or ``Email already exists''
+& \vspace{0.3pt}The email is already associated with an existing account.
 & \begin{itemize}
 \item Use login page
 \item Reset password if forgotten
 \item Use another email for new account
 \end{itemize} \\ 
 
-\vspace{1pt}Field validation error or ``Invalid handle''
-& \vspace{1pt}The Codeforces handle provided is incorrect or does not exist.
+\vspace{0.3pt}Field validation error or ``Invalid handle''
+& \vspace{0.3pt}The Codeforces handle provided is incorrect or does not exist.
 & \begin{itemize}
 \item Verify handle on Codeforces profile page
 \item Check spelling and capitalization
@@ -878,8 +893,8 @@ your account security.
 \multicolumn{1}{c}{\textbf{Solutions}} \\
 \midrule
 
-\vspace{1pt}``Network error'' or ``Failed to fetch'' 
-& \vspace{1pt}The browser or application could not connect to the server due to internet issues, VPN restrictions, firewall blocks, or cached data problems.
+\vspace{0.3pt}``Network error'' or ``Failed to fetch'' 
+& \vspace{0.3pt}The browser or application could not connect to the server due to internet issues, VPN restrictions, firewall blocks, or cached data problems.
 & \begin{itemize}
 \item Check internet connection
 \item Refresh page (F5)
@@ -889,8 +904,8 @@ your account security.
 \item Try a different browser
 \end{itemize} \\ \\
 
-\vspace{1pt}``Request timeout'' or ``Connection timeout'' 
-& \vspace{1pt}The server did not respond in time, often caused by slow or unstable internet, high bandwidth usage, or network congestion.
+\vspace{0.3pt}``Request timeout'' or ``Connection timeout'' 
+& \vspace{0.3pt}The server did not respond in time, often caused by slow or unstable internet, high bandwidth usage, or network congestion.
 & \begin{itemize}
 \item Ensure stable connection (5+ Mbps for battles)
 \item Close bandwidth-consuming applications
@@ -916,16 +931,16 @@ your account security.
 \multicolumn{1}{c}{\textbf{Solutions}} \\
 \midrule
 
-\vspace{1pt}``Already in a clan'' or ``Join request failed'' 
-& \vspace{1pt}The user is currently a member of another clan, or the target clan is not accepting new members or has pending requests. 
+\vspace{0.3pt}``Already in a clan'' or ``Join request failed'' 
+& \vspace{0.3pt}The user is currently a member of another clan, or the target clan is not accepting new members or has pending requests. 
 & \begin{itemize}
 \item Leave current clan before joining another
 \item Wait for pending requests to be processed
 \item Verify clan is accepting members and you meet requirements
 \end{itemize} \\ \\
 
-\vspace{1pt}``Insufficient permissions'' or ``Only clan leader can start battles'' 
-& \vspace{1pt}The user does not have the required leadership permissions to initiate a clan battle. 
+\vspace{0.3pt}``Insufficient permissions'' or ``Only clan leader can start battles'' 
+& \vspace{0.3pt}The user does not have the required leadership permissions to initiate a clan battle. 
 & \begin{itemize}
 \item Contact clan leader to start battle
 \item Create your own clan for leadership permissions
@@ -949,8 +964,8 @@ your account security.
 \multicolumn{1}{c}{\textbf{Solutions}} \\
 \midrule
 
-\vspace{1pt}``Connection lost'' or ``Battle disconnected'' 
-& \vspace{1pt}The connection between the client and server was interrupted, often due to unstable internet or network congestion. Failure to reconnect may result in automatic forfeit.
+\vspace{0.3pt}``Connection lost'' or ``Battle disconnected'' 
+& \vspace{0.3pt}The connection between the client and server was interrupted, often due to unstable internet or network congestion. Failure to reconnect may result in automatic forfeit.
 & \begin{itemize}
 \item Use wired Ethernet connection
 \item Ensure stable internet before battles
@@ -958,8 +973,8 @@ your account security.
 \item Avoid battles during network instability
 \end{itemize} \\ \\
 
-\vspace{1pt}``Submission failed'' or ``Error submitting code'' 
-& \vspace{1pt}The code submission could not reach the server or was rejected due to incorrect configuration, network issues, or account problems.
+\vspace{0.3pt}``Submission failed'' or ``Error submitting code'' 
+& \vspace{0.3pt}The code submission could not reach the server or was rejected due to incorrect configuration, network issues, or account problems.
 & \begin{itemize}
 \item Check internet connection
 \item Verify Codeforces handle is correctly linked
