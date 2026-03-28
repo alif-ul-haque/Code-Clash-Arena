@@ -10,6 +10,7 @@
 \usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{enumitem}
+\usepackage{placeins}
 \usepackage{array}
 \usepackage[none]{hyphenat}
 \usepackage{ragged2e} 
@@ -28,7 +29,6 @@
 % Control line spacing
 \usepackage{setspace}
 \setstretch{0.95}   % Reduce line spacing slightly
-\providecommand{\FloatBarrier}{\par}
 
 \begin{document}
 \pagestyle{empty}
@@ -743,6 +743,411 @@ Registered users are subject to the following restrictions to maintain platform 
 
 \item \textbf{Fair Play Requirements} - Code submissions must be original work; plagiarism or copying solutions is not permitted
 \end{itemize}
+\newpage
+
+% ==================================================
+% SECTION 5: FEATURES AND FUNCTIONALITY
+% ==================================================
+
+\section{Features and Functionality}
+
+This section explains how the core modules of CodeClash Arena operate in real usage. It focuses on practical workflows, required inputs, observable outputs, common states, and recommended behavior during competition and practice.
+
+The feature set is grouped into four major modules:
+\begin{itemize}[leftmargin=*]
+\item \textbf{PvP Battle System} for real-time one-versus-one coding contests.
+\item \textbf{Practice Gym} for solo training with filters, testing, and AI hints.
+\item \textbf{Clan System} for team formation, management, and clan-war battles.
+\item \textbf{Social Features (ClashConnect)} for friend, profile, and request management.
+\end{itemize}
+
+% ==================================================
+\subsection{PvP Battle System}
+
+The PvP system is the primary competitive mode of the platform. It supports two 1v1 formats:
+\begin{itemize}[leftmargin=*]
+\item \textbf{Global Battle}: Automatic matchmaking with players of similar rating.
+\item \textbf{Local Battle}: Direct challenge mode for specific friends with custom settings.
+\end{itemize}
+
+\subsubsection{Purpose and User Value}
+
+PvP battles measure coding performance under time constraints. The mode is designed to encourage fast problem understanding, efficient coding, and iterative debugging under pressure. Results are reflected in user progression through rating and XP updates.
+
+\subsubsection{Standard Battle Flow}
+
+\begin{enumerate}
+\item Open \textbf{Attack} from the dashboard and choose \textbf{1v1}.
+\item Select \textbf{Global} for rating-based matchmaking or \textbf{Local} for friend challenge setup.
+\item Confirm battle parameters (difficulty range, duration, and opponent context).
+\item Enter the arena, review the problem statement, and draft solution logic.
+\item Run local checks using the integrated editor and test runner.
+\item Submit to judge and monitor verdict states (queue, running, final verdict).
+\item Continue improving and resubmitting until Accepted or battle timer ends.
+\item View final battle result, rating/XP change, and battle-history update.
+\end{enumerate}
+
+\subsubsection{Global vs Local Behavior}
+
+\begin{table}[ht]
+\centering
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Mode} & \textbf{How Opponent Is Selected} & \textbf{Typical Usage Scenario} \\
+\midrule
+Global & System-driven matchmaking based on rating proximity and queue availability & Ranked competitive progression, fair pairing, and regular performance tracking \\
+Local & User-selected friend/opponent through invitation flow & Practice scrims, custom challenges, and low-pressure skill comparison \\
+\bottomrule
+\end{tabularx}
+\caption{Comparison of PvP battle modes}
+\end{table}
+
+\subsubsection{Inputs and Outputs}
+
+\begin{table}[ht]
+\centering
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Category} & \textbf{Primary Inputs} & \textbf{Primary Outputs} \\
+\midrule
+Match Setup & Mode selection, opponent context, optional local settings & Arena initialization and synchronized timer \\
+Coding Cycle & Source code, language selection, test-case input & Local execution output and diagnostics \\
+Submission Cycle & Final code submission to judge & Verdict states (AC/WA/TLE/RE/CE), test status, completion state \\
+Result Cycle & Final accepted state or timer expiration & Win/Loss/Draw, rating movement, XP gain, history record \\
+\bottomrule
+\end{tabularx}
+\caption{PvP data flow from match setup to final result}
+\end{table}
+
+\subsubsection{Battle States and Lifecycle}
+
+During battle execution, users normally observe the following lifecycle states:
+\begin{itemize}[leftmargin=*]
+\item \textbf{Waiting/Queueing}: opponent search in progress.
+\item \textbf{Matched}: opponent identified and battle session initialized.
+\item \textbf{Active Coding}: timer running, solution development ongoing.
+\item \textbf{Submission Processing}: remote judge receives and evaluates code.
+\item \textbf{Resolved}: winner determined or timeout reached.
+\end{itemize}
+
+These states are important for user awareness because every transition may affect strategy. For example, seeing opponent submission activity can influence decision-making between safe incremental submissions and risky full optimizations.
+
+\subsubsection{Competitive Strategy Guidelines}
+
+\begin{itemize}[leftmargin=*]
+\item Start with a correct baseline solution before optimization.
+\item Use quick local tests to eliminate syntax and trivial logic issues.
+\item Prefer stable, known language/toolchain combinations in timed matches.
+\item Submit early if correctness confidence is high and timer pressure is high.
+\item Avoid excessive rewrites late in the battle unless current approach is invalid.
+\end{itemize}
+
+\subsubsection{Reliability Notes}
+
+PvP mode is highly sensitive to latency and temporary disconnects because synchronization and verdict polling are real-time operations. A stable network and consistent browser performance significantly improve result reliability.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.82\textwidth]{battle_arena.png}
+\caption{PvP Battle Interface (Global and Local modes share the same arena structure)}
+\label{fig:ff_pvp}
+\end{figure}
+
+\FloatBarrier
+
+% ==================================================
+\subsection{Practice Gym}
+
+Practice Gym is the dedicated solo learning module. It is optimized for deliberate practice, concept reinforcement, and progressive improvement without the pressure of live opponents.
+
+\subsubsection{Purpose and Learning Focus}
+
+The mode is designed to support:
+\begin{itemize}[leftmargin=*]
+\item Topic-focused training through filtered problem selection.
+\item Iterative coding with local testing and immediate output feedback.
+\item Guided thinking using AI hint levels that avoid full solution disclosure.
+\item Consistent progression tracking through solved status and XP updates.
+\end{itemize}
+
+\subsubsection{Primary Functions}
+
+\begin{itemize}[leftmargin=*]
+\item Filter problems by difficulty, tags, solved status, or keyword search.
+\item Solve with integrated editor and local test execution.
+\item Request progressive AI hints when stuck.
+\item Submit to Codeforces and track solved status with XP progression.
+\end{itemize}
+
+\subsubsection{Typical Learning Workflow}
+
+\begin{enumerate}
+\item Choose a target skill area (for example, implementation, greedy, or DP).
+\item Apply filters to identify suitable problems by rating and tag.
+\item Read constraints and sample cases, then plan a solution outline.
+\item Implement and validate against sample and custom test cases.
+\item Request hint level 1/2/3 only if progress is blocked.
+\item Submit to judge and review verdict-specific feedback.
+\item Mark reflections (what worked, what failed) before moving to next problem.
+\end{enumerate}
+
+\subsubsection{Inputs and Outputs}
+
+\begin{table}[ht]
+\centering
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Category} & \textbf{Inputs} & \textbf{Outputs} \\
+\midrule
+Discovery & Difficulty range, tags, search phrase, solved filter & Filtered problem list and candidate set \\
+Development & Language selection, source code, local test inputs & Runtime output, compile/runtime diagnostics \\
+Hinting & Optional hint request level & Progressive conceptual hints (no full code dump) \\
+Submission & Final code for official evaluation & Judge verdict and solved-status update \\
+Progress & Completed attempts and accepted problems & XP increments and cumulative practice statistics \\
+\bottomrule
+\end{tabularx}
+\caption{Practice Gym interaction model}
+\end{table}
+
+\subsubsection{Recommended Practice Structure}
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Session Warm-up (15--20 min)}: solve one easy problem quickly to build momentum.
+\item \textbf{Core Session (45--60 min)}: work on medium problems in a single topic cluster.
+\item \textbf{Review Block (10--15 min)}: inspect failed attempts, edge cases, and missed constraints.
+\item \textbf{Weekly Pattern}: mix one revision day, three targeted topic days, and one free problem day.
+\end{itemize}
+
+\subsubsection{Hint Usage Policy}
+
+Hints are most effective when used as checkpoints, not immediate shortcuts. A practical approach is to spend a defined attempt window before requesting hint level 1, and only escalate to higher levels when the same logical blocker persists.
+
+\subsubsection{Quality Indicators}
+
+Practice quality improves when accepted solutions satisfy three criteria simultaneously: correctness, robustness on edge cases, and readability for future revision. Tracking these dimensions leads to more stable battle performance later.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.82\textwidth]{practice_dashboard.png}
+\caption{Practice Gym dashboard with problem filtering and selection}
+\label{fig:ff_practice}
+\end{figure}
+
+\FloatBarrier
+
+% ==================================================
+\subsection{Clan System}
+
+The clan system transforms individual coding into organized team competition. It supports member management, role-driven control, and synchronized clan-war participation.
+
+\subsubsection{Purpose and Team Dynamics}
+
+Clan functionality is intended to:
+\begin{itemize}[leftmargin=*]
+\item Build long-term communities around competitive programming.
+\item Enable coordinated battles where team outcome depends on collective contributions.
+\item Create leadership workflows for member approval and warrior selection.
+\item Maintain persistent team statistics and ranking visibility.
+\end{itemize}
+
+\subsubsection{Core Operations}
+
+\begin{itemize}[leftmargin=*]
+\item Create clans or request to join existing clans.
+\item Leaders manage requests and member participation.
+\item Clan Battle mode allows selected warriors to solve problems for team points.
+\item Final clan result updates clan statistics, rankings, and member XP.
+\end{itemize}
+
+\subsubsection{Role Responsibilities}
+
+\begin{table}[ht]
+\centering
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Role} & \textbf{Main Responsibilities} & \textbf{Typical Actions} \\
+\midrule
+Leader & Clan direction, request approval, battle lineup decisions & Accept/reject joins, configure selections, initiate matchmaking \\
+Member & Active participation and contribution to clan goals & Request join, participate when selected, contribute solved points \\
+Non-selected Member & Monitoring and preparation for future battles & Track status, review outcomes, stay available for next lineup \\
+\bottomrule
+\end{tabularx}
+\caption{Role-based behavior within Clan System}
+\end{table}
+
+\subsubsection{Clan Battle Workflow}
+
+\begin{enumerate}
+\item Leader selects warriors based on availability, rating, and recent form.
+\item System finds an opponent clan with compatible battle parameters.
+\item Selected members enter synchronized battle arena.
+\item Warriors solve assigned or self-selected problems for team points.
+\item Live score updates determine momentum and tactical priority.
+\item At end condition, team result is finalized and statistics are updated.
+\end{enumerate}
+
+\subsubsection{Inputs and Outputs}
+
+\begin{table}[ht]
+\centering
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Stage} & \textbf{Inputs} & \textbf{Outputs} \\
+\midrule
+Clan Setup & Name, tag, type, membership constraints & Created clan identity and base member structure \\
+Membership & Join requests and leader decisions & Accepted/rejected membership status \\
+Battle Setup & Warrior lineup and matchmaking request & Opponent clan assignment and battle session start \\
+Battle Execution & Team code submissions and solve events & Score increments and solved-problem state updates \\
+Battle Closure & Final score and completion condition & Clan points, XP distribution, history and ranking updates \\
+\bottomrule
+\end{tabularx}
+\caption{Clan system operational flow and outcomes}
+\end{table}
+
+\subsubsection{Coordination Best Practices}
+
+\begin{itemize}[leftmargin=*]
+\item Assign at least one fallback warrior for difficult problems.
+\item Avoid duplicate effort on low-yield problems when score is close.
+\item Share quick status updates to reduce overlap and wasted time.
+\item Review battle logs after each war to improve lineup quality.
+\end{itemize}
+
+\subsubsection{Governance and Fair Participation}
+
+Healthy clans maintain transparent acceptance criteria, clear battle selection logic, and regular communication. This reduces member churn and improves long-term competitive consistency.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.82\textwidth]{clan_war_battle_arena.png}
+\caption{Clan Battle interface showing team score, problem list, and warrior activity}
+\label{fig:ff_clan}
+\end{figure}
+
+\FloatBarrier
+
+% ==================================================
+\subsection{Social Features (ClashConnect)}
+
+ClashConnect provides the social interaction layer of the platform. It centralizes friendship management, profile discovery, and clan-request actions in one workflow.
+
+\subsubsection{Purpose and Scope}
+
+The module improves collaboration and engagement by enabling users to discover peers, build competitive circles, and coordinate challenges without leaving the platform context.
+
+\subsubsection{Available Actions}
+
+\begin{itemize}[leftmargin=*]
+\item Find users and send/receive friend requests.
+\item View profiles, ratings, and recent activity.
+\item Send local battle challenges from friend connections.
+\item For clan leaders, approve or reject incoming clan join requests.
+\end{itemize}
+
+\subsubsection{User Interaction Flow}
+
+\begin{enumerate}
+\item Open ClashConnect from the main dashboard.
+\item Search users by name/handle and inspect short profile cards.
+\item Send friend requests and track pending request states.
+\item Process incoming requests with accept/reject decisions.
+\item Use friend connections for quick local battle invitation.
+\item If leader, process clan-join requests from the same hub.
+\end{enumerate}
+
+\subsubsection{Inputs and Outputs}
+
+\begin{table}[ht]
+\centering
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Process} & \textbf{Inputs} & \textbf{Outputs} \\
+\midrule
+User Discovery & Username fragment or direct handle search & Matching users with profile context \\
+Friend Actions & Request send/cancel/accept/reject actions & Relationship status transition and notifications \\
+Challenge Actions & Friend selection and invitation action & Local-battle request status and response update \\
+Leader Actions & Clan request approval/rejection decision & Membership update and applicant notification \\
+\bottomrule
+\end{tabularx}
+\caption{ClashConnect input-output mapping}
+\end{table}
+
+\subsubsection{Social Reliability and Etiquette}
+
+\begin{itemize}[leftmargin=*]
+\item Send battle invites with clear context (practice/ranked intent).
+\item Keep request lists clean by canceling stale outgoing requests.
+\item Review profile stats before sending high-difficulty challenges.
+\item Clan leaders should process join requests regularly to avoid queue buildup.
+\end{itemize}
+
+\subsubsection{Profile Utility}
+
+Player profile views are valuable for both competition and planning. They provide indicators such as activity trend, rating range, and battle history, which help users choose suitable opponents and teammates.
+
+\subsubsection{Feature Summary}
+
+Across all four feature groups, CodeClash Arena combines competition, training, teamwork, and social coordination into a single continuous workflow. Users can move from practice to battle, from individual growth to clan contribution, and from isolated play to connected competitive communities without switching platforms.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.82\textwidth]{clash_connect_dashboard.png}
+\caption{ClashConnect social hub for friend and clan request management}
+\label{fig:ff_social}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Feature Integration Scenarios}
+
+This subsection describes how users combine modules in practical workflows.
+
+\textbf{Common progression path:}
+\begin{enumerate}
+\item Build baseline consistency in Practice Gym through filtered problem sets.
+\item Enter Local PvP for controlled pressure and rapid feedback.
+\item Move to Global PvP for rating-based competition.
+\item Join or build a clan for team-oriented strategy and coordinated growth.
+\item Use ClashConnect continuously for friend network and challenge management.
+\end{enumerate}
+
+\textbf{Cross-feature indicators:}
+\begin{itemize}[leftmargin=*]
+\item \textbf{Practice Accuracy}: accepted ratio after local validation.
+\item \textbf{Battle Stability}: reduced submission and timeout failures.
+\item \textbf{Team Impact}: consistent contribution in clan events.
+\item \textbf{Engagement Quality}: active and timely request/challenge handling.
+\end{itemize}
+
+\textbf{Recommendation:} treat practice, battle, team play, and social coordination as one loop. Users who review battle history and then feed that insight back into targeted practice generally improve faster than users who use features in isolation.
+
+\subsubsection{Operational Checklist Before Competitive Sessions}
+
+\begin{table}[ht]
+\centering
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{3cm}}
+\toprule
+\textbf{Area} & \textbf{Checklist Item} & \textbf{Expected Benefit} \\
+\midrule
+Environment & Stable internet, browser refreshed, unnecessary tabs closed & Reduced disconnect and lag risk \\
+Problem Solving & Recent practice on target difficulty bracket completed & Higher correctness under timer pressure \\
+Submission Safety & Language/runtime selected correctly before first submit & Fewer avoidable technical failures \\
+Team Readiness & Clan communication channel checked before lineup lock & Better role coordination and lower overlap \\
+Social Queue & Pending requests and invitations reviewed & Faster challenge acceptance and smoother scheduling \\
+Post-Session Review & Battle history checked and weak topics recorded & Continuous, measurable improvement loop \\
+\bottomrule
+\end{tabularx}
+\caption{Cross-feature readiness checklist for consistent performance}
+\end{table}
+
+\subsubsection{Common Multi-Feature Mistakes}
+
+A frequent mistake is entering ranked PvP directly after long inactivity without warm-up. Another common issue is relying on social challenges without structured practice, which often leads to unstable outcomes even against similar-rated opponents. In clan settings, delayed request processing and poor role communication can reduce overall team efficiency despite strong individual members.
+
+A practical correction pattern is: short warm-up in Practice Gym, clear pre-battle checklist, focused PvP sessions, then quick review and social follow-up. Repeating this cycle creates steady gains in both personal and team metrics.
+
+\FloatBarrier
+
 \clearpage
 \section{Navigation Guide}
 \subsection{Menu Structure}
@@ -758,15 +1163,15 @@ At the bottom of the menu, there is a \textbf{Log Out} button which allows the u
 \begin{figure}[H]
 \centering
 \begin{subfigure}{0.38\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{menu_button.pdf}
-    \caption{Main Menu Buttons}
+  \centering
+  \includegraphics[width=\textwidth]{menu_button.pdf}
+  \caption{Main Menu Buttons}
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.38\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{card.pdf}
-    \caption{Card Interface}
+  \centering
+  \includegraphics[width=\textwidth]{card.pdf}
+  \caption{Card Interface}
 \end{subfigure}
 \caption{Two Interfaces in Landing Page}
 \end{figure}
@@ -829,6 +1234,7 @@ your account security.
 \caption{Functions of Different Buttons and Icons}
 \end{table}
 \newpage
+
 \section{Error Handling and Messages}
 \subsection{Authentication Errors}
 \begin{table}[h]
